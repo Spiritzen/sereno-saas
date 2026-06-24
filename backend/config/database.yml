@@ -1,0 +1,54 @@
+# PostgreSQL configuration for Sereno
+#
+# Development / Test:
+# Rails se connecte à PostgreSQL local avec :
+# host     : localhost
+# port     : 5432
+# username : postgres
+# password : root
+#
+# Production:
+# On utilisera plus tard des variables d'environnement.
+
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  port: 5432
+  username: postgres
+  password: root
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: sereno_development
+
+test:
+  <<: *default
+  database: sereno_test
+
+production:
+  primary: &primary_production
+    adapter: postgresql
+    encoding: unicode
+    host: <%= ENV.fetch("SERENO_DATABASE_HOST") { "localhost" } %>
+    port: <%= ENV.fetch("SERENO_DATABASE_PORT") { 5432 } %>
+    database: sereno_production
+    username: <%= ENV.fetch("SERENO_DATABASE_USERNAME") { "sereno" } %>
+    password: <%= ENV["SERENO_DATABASE_PASSWORD"] %>
+    max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+  cache:
+    <<: *primary_production
+    database: sereno_production_cache
+    migrations_paths: db/cache_migrate
+
+  queue:
+    <<: *primary_production
+    database: sereno_production_queue
+    migrations_paths: db/queue_migrate
+
+  cable:
+    <<: *primary_production
+    database: sereno_production_cable
+    migrations_paths: db/cable_migrate

@@ -1,0 +1,21 @@
+=> 
+[32m#<Organisation:0x000001efc4f3c3d8[0m
+ [36mid[0m: [31m[1m"[0m[31m34171185-f15d-47c7-8005-ee66593c3c29[0m[31m[1m"[0m,
+ [36mraison_sociale[0m: [31m[1m"[0m[31mStudio Démo[0m[31m[1m"[0m,
+ [36mforme_juridique[0m: [31m[1m"[0m[31mEI[0m[31m[1m"[0m,
+ [36msiret[0m: [31m[1m"[0m[31m12345678901234[0m[31m[1m"[0m,
+ [36mnumero_tva[0m: [36m[1mnil[0m,
+ [36mregime_tva[0m: [31m[1m"[0m[31mfranchise[0m[31m[1m"[0m,
+ [36madresse_ligne1[0m: [31m[1m"[0m[31m1 rue de la Paix[0m[31m[1m"[0m,
+ [36madresse_ligne2[0m: [36m[1mnil[0m,
+ [36mcode_postal[0m: [31m[1m"[0m[31m80000[0m[31m[1m"[0m,
+ [36mville[0m: [31m[1m"[0m[31mAmiens[0m[31m[1m"[0m,
+ [36mpays[0m: [31m[1m"[0m[31mFR[0m[31m[1m"[0m,
+ [36memail[0m: [31m[1m"[0m[31m[FILTERED][0m[31m[1m"[0m,
+ [36mtelephone[0m: [36m[1mnil[0m,
+ [36miban[0m: [36m[1mnil[0m,
+ [36mmentions_legales[0m: [36m[1mnil[0m,
+ [36midentifiant_pa[0m: [36m[1mnil[0m,
+ [36mlogo_url[0m: [36m[1mnil[0m,
+ [36mcreated_at[0m: [31m[1m"[0m[31m2026-06-23 17:22:01.759156000 +0000[0m[31m[1m"[0m,
+ [36mupdated_at[0m: [31m[1m"[0m[31m2026-06-23 17:22:01.759156000 +0000[0m[31m[1m"[0m[32m>[0m
