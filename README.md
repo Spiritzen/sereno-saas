@@ -361,7 +361,7 @@ Org       : Studio Démo
 <div align="center">
 
 ### Sébastien Cantrelle
-**Développeur Full Stack · Artiste 2D/3D · Strasbourg, France**
+**Développeur Full Stack · Artiste 2D/3D · Amiens, France**
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-spiritzen.github.io-7c3aed?style=flat-square)](https://spiritzen.github.io/portfolio/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Sébastien_Cantrelle-0077B5?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/sebastien-cantrelle-26b695106/)
