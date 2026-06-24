@@ -1,6 +1,7 @@
 class AuthTokenService
   ALGORITHM = "HS256".freeze
   ACCESS_TOKEN_EXPIRATION = 15.minutes
+  REFRESH_TOKEN_EXPIRATION = 7.days
 
   class DecodeError < StandardError; end
   class ExpiredTokenError < DecodeError; end
@@ -45,7 +46,7 @@ class AuthTokenService
   end
 
   def self.secret_key
-    Rails.application.secret_key_base
+    Rails.application.credentials.jwt_secret_key!
   end
 
   private_class_method :secret_key

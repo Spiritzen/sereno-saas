@@ -1,6 +1,5 @@
 class Api::V1::BaseController < ApplicationController
   before_action :authenticate_request!
-  after_action :reset_current
 
   private
 
@@ -52,7 +51,4 @@ class Api::V1::BaseController < ApplicationController
     render json: { error: message }, status: :unauthorized
   end
 
-  def reset_current
-    Current.reset
-  end
 end

@@ -17,7 +17,7 @@ class Api::V1::AuthController < Api::V1::BaseController
       refresh_token_hash: Digest::SHA256.hexdigest(SecureRandom.hex(64)),
       user_agent: request.user_agent,
       ip_adresse: request.remote_ip,
-      expire_at: 30.days.from_now
+      expire_at: AuthTokenService::REFRESH_TOKEN_EXPIRATION.from_now
     )
 
     access_token = AuthTokenService.encode(
