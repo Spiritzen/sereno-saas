@@ -1,6 +1,14 @@
 class Paiement < ApplicationRecord
   METHODES = %w[virement carte cheque especes prelevement].freeze
 
+  STATUTS_FACTURE_PAYABLES = %w[
+  emise
+  deposee
+  recue
+  mise_a_disposition
+  approuvee
+].freeze
+
   belongs_to :organisation
   belongs_to :facture
 
@@ -33,12 +41,12 @@ class Paiement < ApplicationRecord
   end
 
   def facture_doit_etre_emise
-    return if facture.blank?
+  return if facture.blank?
 
-    unless facture.emise?
-      errors.add(:facture, "doit être émise pour recevoir un paiement")
-    end
+  unless STATUTS_FACTURE_PAYABLES.include?(facture.statut)
+    errors.add(:facture, "doit avoir un statut payable pour recevoir un paiement")
   end
+end
 
   def montant_total_paye_ne_depasse_pas_total_ttc
     return if facture.blank? || montant.blank?

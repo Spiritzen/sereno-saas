@@ -1,4 +1,11 @@
 class Relance < ApplicationRecord
+    STATUTS_FACTURE_RELANCABLES = %w[
+  emise
+  deposee
+  recue
+  mise_a_disposition
+  approuvee
+].freeze
   CANAUX = %w[email courrier].freeze
   STATUTS = %w[planifiee envoyee echec].freeze
 
@@ -45,21 +52,22 @@ class Relance < ApplicationRecord
   end
 
   def facture_doit_etre_emise
-    return if facture.blank?
+  return if facture.blank?
 
-    unless facture.emise?
-      errors.add(:facture, "doit être émise pour pouvoir être relancée")
-    end
+  unless STATUTS_FACTURE_RELANCABLES.include?(facture.statut)
+    errors.add(:facture, "doit avoir un statut relançable")
   end
+end
 
   def facture_doit_etre_impayee
-    return if facture.blank?
-    return if facture.total_ttc.blank? || facture.montant_paye.blank?
+  return if facture.blank?
+  return if facture.total_ttc.blank? || facture.montant_paye.blank?
+  return if facture.total_ttc.to_d.zero?
 
-    if facture.montant_paye >= facture.total_ttc
-      errors.add(:facture, "est déjà totalement payée")
-    end
+  if facture.montant_paye >= facture.total_ttc
+    errors.add(:facture, "est déjà totalement payée")
   end
+end
 
   def envoyee_at_requis_si_envoyee
     return unless statut == "envoyee"

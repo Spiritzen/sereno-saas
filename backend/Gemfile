@@ -50,3 +50,13 @@ group :development, :test do
 end
 
 gem "fiddle", "~> 1.1"
+
+gem "jwt", "~> 3.2"
+
+gem "bcrypt", "~> 3.1.7"
+
+gem "rack-cors", "~> 3.0"
+
+gem "pundit", "~> 2.5"
+
+gem "blueprinter", "~> 1.3"

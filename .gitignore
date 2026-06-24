@@ -26,3 +26,7 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea
+
+# Claude local files / audits temporaires
+.claude/
+audit*.txt
