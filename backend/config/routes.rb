@@ -14,7 +14,7 @@ Rails.application.routes.draw do
 
       resources :factures do
   post :emettre, on: :member
-
+  get :conformite, on: :member
   resources :lignes_facture, path: "lignes", only: [:index, :create]
 end
 

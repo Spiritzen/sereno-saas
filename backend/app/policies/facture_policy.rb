@@ -9,6 +9,10 @@ class FacturePolicy < ApplicationPolicy
     peut_lire? && meme_organisation?
   end
 
+  def conformite?
+  peut_lire? && meme_organisation?
+end
+
   def create?
     peut_modifier?
   end

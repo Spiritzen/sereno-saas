@@ -49,8 +49,8 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 | Backend — CRUD Clients + Contacts | ✅ **Complet**  | Destinataires, SIRET, TVA, routage PA |
 | Backend — Création de facture + lignes | ✅ **Complet**  | Brouillon → émise, totaux HT/TVA/TTC |
 | Backend — Générateur Factur-X | ⏳ **V1** | PDF/A-3 + CII XML embarqué |
-| Backend — Numérotation séquentielle | ⏳ **V1** | Sans trou, protégée contre la concurrence |
-| Backend — Moteur de conformité | ⏳ **V1** | Service de contrôle pré-émission |
+| Backend — Numérotation séquentielle | ✅ | Sans trou, protégée contre la concurrence |
+| Backend — Moteur de conformité | ✅ | Service de contrôle pré-émission |
 | Frontend — Auth + Landing | ⏳ **V1** | Inscription, landing premium |
 | Frontend — Dashboard conformité | ⏳ **V1** | KPIs + bandeau « vous êtes conforme » |
 | Frontend — Facture en 2 clics | ⏳ **V1** | Écran de création + panneau conformité |
@@ -282,7 +282,7 @@ Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »
 - ✅ Création de facture + lignes + totaux
 - [ ] Générateur Factur-X (PDF/A-3 + CII)
 - ✅ Numérotation séquentielle protégée
-- [ ] Moteur de conformité pré-émission
+- ✅ Moteur de conformité pré-émission
 - [ ] Dashboard conformité + écran « facture en 2 clics »
 
 ### ⏳ V1.1 — Transmission & cycle de vie

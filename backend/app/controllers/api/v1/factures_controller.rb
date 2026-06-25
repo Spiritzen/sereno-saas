@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Api::V1::FacturesController < Api::V1::BaseController
-  before_action :set_facture, only: [:show, :update, :destroy, :emettre]
+  before_action :set_facture, only: [:show, :update, :destroy, :emettre, :conformite]
 
   def index
     factures = policy_scope(Facture)
@@ -19,6 +19,14 @@ class Api::V1::FacturesController < Api::V1::BaseController
 
     render json: FactureBlueprint.render(@facture, view: :with_details), status: :ok
   end
+
+  def conformite
+  authorize @facture, :conformite?
+
+  resultat = FactureConformiteService.new(facture: @facture).call
+
+  render json: resultat.to_h, status: :ok
+end
 
   def create
     attributes = facture_params.to_h.symbolize_keys
