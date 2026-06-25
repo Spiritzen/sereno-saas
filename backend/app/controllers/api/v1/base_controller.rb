@@ -1,7 +1,16 @@
 class Api::V1::BaseController < ApplicationController
+  include Pundit::Authorization
+
   before_action :authenticate_request!
 
+  rescue_from Pundit::NotAuthorizedError, with: :render_forbidden
+  rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+
   private
+
+  def render_forbidden
+  render json: { error: "Accès refusé" }, status: :forbidden
+  end
 
   def authenticate_request!
     token = token_from_request
@@ -49,6 +58,21 @@ class Api::V1::BaseController < ApplicationController
 
   def render_unauthorized(message)
     render json: { error: message }, status: :unauthorized
+  end
+
+  def pundit_user
+  Current.utilisateur
+  end
+
+  def render_not_found
+  render json: { error: "Ressource introuvable" }, status: :not_found
+  end
+
+  def render_validation_errors(record)
+  render json: {
+    error: "Validation échouée",
+    details: record.errors.full_messages
+  }, status: :unprocessable_entity
   end
 
 end

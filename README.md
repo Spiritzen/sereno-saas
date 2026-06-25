@@ -45,9 +45,9 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 | Direction artistique + maquettes UX | ✅ **Complet** | Dashboard conformité + écran « facture en 2 clics » validés |
 | Modèle de données (22 entités) | ✅ **Complet** | Schéma + invariants légaux (immutabilité, numérotation) |
 | Architecture Rails 8 (API) | ✅ **Complet** | Arborescence, services, adapters, jobs définis |
-| Backend — Auth JWT multi-tenant | ⏳ **V1** | Login / Refresh / Logout + `id_organisation` dans le token |
-| Backend — CRUD Clients + Contacts | ⏳ **V1** | Destinataires, SIRET, TVA, routage PA |
-| Backend — Création de facture + lignes | ⏳ **V1** | Brouillon → émise, totaux HT/TVA/TTC |
+| Backend — Auth JWT multi-tenant | ✅ **Complet**  | Login / Refresh / Logout + `id_organisation` dans le token |
+| Backend — CRUD Clients + Contacts | ✅ **Complet**  | Destinataires, SIRET, TVA, routage PA |
+| Backend — Création de facture + lignes | ✅ **Complet**  | Brouillon → émise, totaux HT/TVA/TTC |
 | Backend — Générateur Factur-X | ⏳ **V1** | PDF/A-3 + CII XML embarqué |
 | Backend — Numérotation séquentielle | ⏳ **V1** | Sans trou, protégée contre la concurrence |
 | Backend — Moteur de conformité | ⏳ **V1** | Service de contrôle pré-émission |
