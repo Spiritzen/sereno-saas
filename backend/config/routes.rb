@@ -13,8 +13,10 @@ Rails.application.routes.draw do
       resources :contacts, only: [:show, :update, :destroy]
 
       resources :factures do
-        resources :lignes_facture, path: "lignes", only: [:index, :create]
-      end
+  post :emettre, on: :member
+
+  resources :lignes_facture, path: "lignes", only: [:index, :create]
+end
 
       resources :lignes_facture, path: "lignes-facture", only: [:show, :update, :destroy]
     end

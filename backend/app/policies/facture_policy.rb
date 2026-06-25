@@ -23,9 +23,9 @@ class FacturePolicy < ApplicationPolicy
 
   # Action prévue pour plus tard :
   # passage d'une facture brouillon vers une facture émise.
-  def emettre?
-    peut_modifier? && meme_organisation? && brouillon?
-  end
+ def emettre?
+  peut_modifier? && meme_organisation?
+end
 
   # Action prévue pour plus tard :
   # archivage administratif, différent de destroy.

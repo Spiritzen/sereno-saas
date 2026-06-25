@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Api::V1::FacturesController < Api::V1::BaseController
-  before_action :set_facture, only: [:show, :update, :destroy]
+  before_action :set_facture, only: [:show, :update, :destroy, :emettre]
 
   def index
     factures = policy_scope(Facture)
@@ -83,6 +83,24 @@ class Api::V1::FacturesController < Api::V1::BaseController
       details: ["Cette facture est liée à des documents métier."]
     }, status: :unprocessable_entity
   end
+
+  def emettre
+  authorize @facture, :emettre?
+
+  facture_emise = FactureEmissionService.new(
+    facture: @facture,
+    utilisateur: Current.utilisateur
+  ).call
+
+  render json: FactureBlueprint.render(facture_emise.reload, view: :with_details), status: :ok
+rescue FactureEmissionService::EmissionImpossibleError => e
+  render json: {
+    error: "Émission impossible",
+    details: [e.message]
+  }, status: :unprocessable_entity
+rescue ActiveRecord::RecordInvalid => e
+  render_validation_errors(e.record)
+end
 
   private
 
