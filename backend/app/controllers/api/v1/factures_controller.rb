@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Api::V1::FacturesController < Api::V1::BaseController
-  before_action :set_facture, only: [:show, :update, :destroy, :emettre, :conformite]
+  before_action :set_facture, only: [:show, :update, :destroy, :emettre, :conformite, :factur_x_xml]
 
   def index
     factures = policy_scope(Facture)
@@ -91,6 +91,23 @@ end
       details: ["Cette facture est liée à des documents métier."]
     }, status: :unprocessable_entity
   end
+
+  def factur_x_xml
+  authorize @facture, :factur_x_xml?
+
+  xml = FacturXXmlService.new(facture: @facture).call
+
+  response.headers["Content-Disposition"] = %(inline; filename="factur-x-#{@facture.numero || @facture.id}.xml")
+
+  render plain: xml,
+         content_type: "application/xml; charset=utf-8",
+         status: :ok
+rescue FacturXXmlService::GenerationImpossibleError => e
+  render json: {
+    error: "Génération XML impossible",
+    details: [e.message]
+  }, status: :unprocessable_entity
+end
 
   def emettre
   authorize @facture, :emettre?

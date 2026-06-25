@@ -11,7 +11,11 @@ class FacturePolicy < ApplicationPolicy
 
   def conformite?
   peut_lire? && meme_organisation?
-end
+  end
+
+  def factur_x_xml?
+    peut_lire? && meme_organisation?
+  end
 
   def create?
     peut_modifier?

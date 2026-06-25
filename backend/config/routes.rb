@@ -12,9 +12,14 @@ Rails.application.routes.draw do
 
       resources :contacts, only: [:show, :update, :destroy]
 
-      resources :factures do
+resources :factures do
   post :emettre, on: :member
   get :conformite, on: :member
+
+  member do
+    get "factur-x/xml", to: "factures#factur_x_xml"
+  end
+
   resources :lignes_facture, path: "lignes", only: [:index, :create]
 end
 
