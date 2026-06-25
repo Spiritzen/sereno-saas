@@ -4,6 +4,13 @@ Rails.application.routes.draw do
       post "auth/login", to: "auth#login"
       get "auth/me", to: "auth#me"
       delete "auth/logout", to: "auth#logout"
+
+      resources :clients do
+        patch :archive, on: :member
+        resources :contacts, only: [:index, :create]
+      end
+
+      resources :contacts, only: [:show, :update, :destroy]
     end
   end
 end
