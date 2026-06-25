@@ -96,7 +96,7 @@ class Api::V1::FacturesController < Api::V1::BaseController
 rescue FactureEmissionService::EmissionImpossibleError => e
   render json: {
     error: "Émission impossible",
-    details: [e.message]
+    details: e.details
   }, status: :unprocessable_entity
 rescue ActiveRecord::RecordInvalid => e
   render_validation_errors(e.record)
