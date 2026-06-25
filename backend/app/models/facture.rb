@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Facture < ApplicationRecord
   STATUTS = %w[
     brouillon
@@ -16,6 +18,12 @@ class Facture < ApplicationRecord
   TYPES_DOCUMENT = %w[facture acompte].freeze
   FORMATS = %w[factur_x ubl cii].freeze
 
+  # Champs de contenu légal bloqués après émission.
+  #
+  # IMPORTANT :
+  # pdf_url et xml_url ne sont pas dans cette liste volontairement.
+  # Ce sont des métadonnées techniques d'archivage : on doit pouvoir les renseigner
+  # après émission, sans modifier le contenu légal de la facture.
   CHAMPS_IMMUABLES_APRES_EMISSION = %w[
     organisation_id
     client_id
@@ -30,8 +38,6 @@ class Facture < ApplicationRecord
     format
     mentions
     conditions_paiement
-    pdf_url
-    xml_url
     emise_at
   ].freeze
 
@@ -44,33 +50,32 @@ class Facture < ApplicationRecord
              optional: true
 
   has_many :lignes_facture,
-         class_name: "LigneFacture",
-         foreign_key: :facture_id,
-         inverse_of: :facture,
-         dependent: :destroy
+           class_name: "LigneFacture",
+           foreign_key: :facture_id,
+           inverse_of: :facture,
+           dependent: :destroy
 
   has_many :acomptes,
-         class_name: "Acompte",
-         foreign_key: :facture_id,
-         dependent: :restrict_with_exception
+           class_name: "Acompte",
+           foreign_key: :facture_id,
+           dependent: :restrict_with_exception
 
   has_many :avoirs,
-         class_name: "Avoir",
-         foreign_key: :facture_id,
-         dependent: :restrict_with_exception
+           class_name: "Avoir",
+           foreign_key: :facture_id,
+           dependent: :restrict_with_exception
 
   has_many :evenements_facture,
-         class_name: "EvenementFacture",
-         foreign_key: :facture_id,
-         dependent: :restrict_with_exception
+           class_name: "EvenementFacture",
+           foreign_key: :facture_id,
+           dependent: :restrict_with_exception
 
   has_many :transmissions_pa,
-         class_name: "TransmissionPa",
-         foreign_key: :facture_id,
-         dependent: :restrict_with_exception
+           class_name: "TransmissionPa",
+           foreign_key: :facture_id,
+           dependent: :restrict_with_exception
 
   has_many :paiements, dependent: :restrict_with_exception
-
   has_many :relances, dependent: :restrict_with_exception
 
   validates :type_document, presence: true, inclusion: { in: TYPES_DOCUMENT }
@@ -91,7 +96,7 @@ class Facture < ApplicationRecord
   validate :montant_paye_ne_depasse_pas_total_ttc
   validate :date_echeance_apres_date_emission
   validate :empecher_modification_document_emis, on: :update
-  
+
   def recalculer_totaux!
     ht = lignes_facture.sum(:total_ht)
     tva = lignes_facture.sum(:montant_tva)

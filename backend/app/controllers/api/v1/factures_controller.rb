@@ -92,17 +92,18 @@ end
     }, status: :unprocessable_entity
   end
 
-  def factur_x_xml
+def factur_x_xml
   authorize @facture, :factur_x_xml?
 
-  xml = FacturXXmlService.new(facture: @facture).call
+  chemin_fichier = FacturXStorageService.new(facture: @facture).call
 
-  response.headers["Content-Disposition"] = %(inline; filename="factur-x-#{@facture.numero || @facture.id}.xml")
+  disposition = params[:download].present? ? "attachment" : "inline"
 
-  render plain: xml,
-         content_type: "application/xml; charset=utf-8",
-         status: :ok
-rescue FacturXXmlService::GenerationImpossibleError => e
+  send_file chemin_fichier,
+            type: "application/xml; charset=utf-8",
+            disposition: disposition,
+            filename: "factur-x-#{@facture.numero}.xml"
+rescue FacturXXmlService::GenerationImpossibleError, FacturXStorageService::StorageImpossibleError => e
   render json: {
     error: "Génération XML impossible",
     details: [e.message]
