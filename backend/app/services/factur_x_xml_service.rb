@@ -3,8 +3,12 @@
 class FacturXXmlService
   class GenerationImpossibleError < StandardError; end
 
-  PROFILE_ID = "urn:factur-x.eu:1p0:en16931"
-  DOCUMENT_TYPE_CODE = "380" # Commercial invoice
+  PROFILE_ID = "urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:en16931"
+  BUSINESS_PROCESS_ID = "A1"
+  DOCUMENT_TYPE_CODE = "380" # 380 = facture commerciale
+  PAYMENT_MEANS_TRANSFER_CODE = "58" # 58 = virement SEPA
+  DEFAULT_UNIT_CODE = "C62" # C62 = unité
+  ZERO_AMOUNT = "0.00"
 
   def initialize(facture:)
     @facture = facture
@@ -31,7 +35,9 @@ class FacturXXmlService
     {
       "xmlns:rsm" => "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
       "xmlns:ram" => "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
-      "xmlns:udt" => "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100"
+      "xmlns:qdt" => "urn:un:unece:uncefact:data:standard:QualifiedDataType:100",
+      "xmlns:udt" => "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100",
+      "xmlns:xs" => "http://www.w3.org/2001/XMLSchema"
     }
   end
 
@@ -46,6 +52,10 @@ class FacturXXmlService
 
   def contexte_document(xml)
     xml["rsm"].ExchangedDocumentContext do
+      xml["ram"].BusinessProcessSpecifiedDocumentContextParameter do
+        xml["ram"].ID BUSINESS_PROCESS_ID
+      end
+
       xml["ram"].GuidelineSpecifiedDocumentContextParameter do
         xml["ram"].ID PROFILE_ID
       end
@@ -58,7 +68,13 @@ class FacturXXmlService
       xml["ram"].TypeCode DOCUMENT_TYPE_CODE
 
       xml["ram"].IssueDateTime do
-        xml["udt"].DateTimeString @facture.date_emission.strftime("%Y%m%d"), format: "102"
+        xml["udt"].DateTimeString format_date(@facture.date_emission), format: "102"
+      end
+
+      notes_document.each do |note|
+        xml["ram"].IncludedNote do
+          xml["ram"].Content note
+        end
       end
     end
   end
@@ -78,7 +94,7 @@ class FacturXXmlService
   def ligne_facture(xml, ligne)
     xml["ram"].IncludedSupplyChainTradeLineItem do
       xml["ram"].AssociatedDocumentLineDocument do
-        xml["ram"].LineID ligne.position.to_s
+        xml["ram"].LineID ligne_id(ligne)
       end
 
       xml["ram"].SpecifiedTradeProduct do
@@ -92,14 +108,18 @@ class FacturXXmlService
       end
 
       xml["ram"].SpecifiedLineTradeDelivery do
-        xml["ram"].BilledQuantity format_quantite(ligne.quantite), unitCode: "C62"
+        xml["ram"].BilledQuantity format_quantite(ligne.quantite), unitCode: DEFAULT_UNIT_CODE
       end
 
       xml["ram"].SpecifiedLineTradeSettlement do
         xml["ram"].ApplicableTradeTax do
           xml["ram"].TypeCode "VAT"
-          xml["ram"].CategoryCode "S"
+          xml["ram"].CategoryCode categorie_tva(ligne)
           xml["ram"].RateApplicablePercent format_montant(ligne.taux_tva)
+
+          if categorie_tva(ligne) == "E"
+            xml["ram"].ExemptionReason mention_exoneration
+          end
         end
 
         xml["ram"].SpecifiedTradeSettlementLineMonetarySummation do
@@ -111,38 +131,65 @@ class FacturXXmlService
 
   def accord_commercial(xml)
     xml["ram"].ApplicableHeaderTradeAgreement do
-      xml["ram"].SellerTradeParty do
-        xml["ram"].Name valeur(@organisation, :raison_sociale)
+      if buyer_reference.present?
+        xml["ram"].BuyerReference buyer_reference
+      end
 
-        xml["ram"].SpecifiedLegalOrganization do
-          xml["ram"].ID valeur(@organisation, :siret)
+      vendeur(xml)
+      acheteur(xml)
+    end
+  end
+
+  def vendeur(xml)
+    xml["ram"].SellerTradeParty do
+      xml["ram"].Name valeur(@organisation, :raison_sociale)
+
+      contact_vendeur(xml)
+
+      xml["ram"].SpecifiedLegalOrganization do
+        xml["ram"].ID valeur(@organisation, :siret),
+                      schemeID: scheme_id_identifiant_legal(valeur(@organisation, :siret))
+      end
+
+      adresse(xml, @organisation)
+
+      if numero_tva_vendeur_a_afficher?
+        xml["ram"].SpecifiedTaxRegistration do
+          xml["ram"].ID valeur(@organisation, :numero_tva), schemeID: "VA"
         end
+      end
+    end
+  end
 
-        adresse(xml, @organisation)
+  def acheteur(xml)
+    xml["ram"].BuyerTradeParty do
+      xml["ram"].Name valeur(@client, :raison_sociale)
 
-        if valeur(@organisation, :numero_tva).present?
-          xml["ram"].SpecifiedTaxRegistration do
-            xml["ram"].ID valeur(@organisation, :numero_tva), schemeID: "VA"
-          end
+      if valeur(@client, :siret).present?
+        xml["ram"].SpecifiedLegalOrganization do
+          xml["ram"].ID valeur(@client, :siret),
+                        schemeID: scheme_id_identifiant_legal(valeur(@client, :siret))
         end
       end
 
-      xml["ram"].BuyerTradeParty do
-        xml["ram"].Name valeur(@client, :raison_sociale)
+      adresse(xml, @client)
 
-        if valeur(@client, :siret).present?
-          xml["ram"].SpecifiedLegalOrganization do
-            xml["ram"].ID valeur(@client, :siret)
-          end
+      if valeur(@client, :numero_tva).present?
+        xml["ram"].SpecifiedTaxRegistration do
+          xml["ram"].ID valeur(@client, :numero_tva), schemeID: "VA"
         end
+      end
+    end
+  end
 
-        adresse(xml, @client)
+  def contact_vendeur(xml)
+    return if valeur(@organisation, :email).blank?
 
-        if valeur(@client, :numero_tva).present?
-          xml["ram"].SpecifiedTaxRegistration do
-            xml["ram"].ID valeur(@client, :numero_tva), schemeID: "VA"
-          end
-        end
+    xml["ram"].DefinedTradeContact do
+      xml["ram"].PersonName "Service Facturation"
+
+      xml["ram"].EmailURIUniversalCommunication do
+        xml["ram"].URIID valeur(@organisation, :email), schemeID: "SMTP"
       end
     end
   end
@@ -151,7 +198,7 @@ class FacturXXmlService
     xml["ram"].ApplicableHeaderTradeDelivery do
       xml["ram"].ActualDeliverySupplyChainEvent do
         xml["ram"].OccurrenceDateTime do
-          xml["udt"].DateTimeString @facture.date_emission.strftime("%Y%m%d"), format: "102"
+          xml["udt"].DateTimeString format_date(@facture.date_emission), format: "102"
         end
       end
     end
@@ -161,26 +208,65 @@ class FacturXXmlService
     xml["ram"].ApplicableHeaderTradeSettlement do
       xml["ram"].InvoiceCurrencyCode @facture.devise
 
-      xml["ram"].ApplicableTradeTax do
-        xml["ram"].CalculatedAmount format_montant(@facture.total_tva)
-        xml["ram"].TypeCode "VAT"
-        xml["ram"].BasisAmount format_montant(@facture.total_ht)
-        xml["ram"].CategoryCode "S"
-        xml["ram"].RateApplicablePercent taux_tva_principal
+      moyen_paiement(xml)
+
+      groupes_tva.each_value do |groupe|
+        taxe_entete(xml, groupe)
       end
 
-      if @facture.conditions_paiement.present?
-        xml["ram"].SpecifiedTradePaymentTerms do
-          xml["ram"].Description @facture.conditions_paiement
-        end
-      end
+      conditions_paiement(xml)
 
       xml["ram"].SpecifiedTradeSettlementHeaderMonetarySummation do
         xml["ram"].LineTotalAmount format_montant(@facture.total_ht)
+        xml["ram"].ChargeTotalAmount ZERO_AMOUNT
+        xml["ram"].AllowanceTotalAmount ZERO_AMOUNT
         xml["ram"].TaxBasisTotalAmount format_montant(@facture.total_ht)
         xml["ram"].TaxTotalAmount format_montant(@facture.total_tva), currencyID: @facture.devise
         xml["ram"].GrandTotalAmount format_montant(@facture.total_ttc)
-        xml["ram"].DuePayableAmount format_montant(@facture.total_ttc)
+        xml["ram"].TotalPrepaidAmount format_montant(@facture.montant_paye || 0)
+        xml["ram"].DuePayableAmount format_montant(montant_restant_a_payer)
+      end
+    end
+  end
+
+  def moyen_paiement(xml)
+    return if valeur(@organisation, :iban).blank?
+
+    xml["ram"].SpecifiedTradeSettlementPaymentMeans do
+      xml["ram"].TypeCode PAYMENT_MEANS_TRANSFER_CODE
+
+      xml["ram"].PayeePartyCreditorFinancialAccount do
+        xml["ram"].IBANID valeur(@organisation, :iban)
+      end
+    end
+  end
+
+  def taxe_entete(xml, groupe)
+    xml["ram"].ApplicableTradeTax do
+      xml["ram"].CalculatedAmount format_montant(groupe[:montant_tva])
+      xml["ram"].TypeCode "VAT"
+      xml["ram"].BasisAmount format_montant(groupe[:base_ht])
+      xml["ram"].CategoryCode groupe[:categorie]
+      xml["ram"].RateApplicablePercent format_montant(groupe[:taux])
+
+      if groupe[:categorie] == "E"
+        xml["ram"].ExemptionReason mention_exoneration
+      end
+    end
+  end
+
+  def conditions_paiement(xml)
+    return if @facture.date_echeance.blank? && @facture.conditions_paiement.blank?
+
+    xml["ram"].SpecifiedTradePaymentTerms do
+      if @facture.conditions_paiement.present?
+        xml["ram"].Description @facture.conditions_paiement
+      end
+
+      if @facture.date_echeance.present?
+        xml["ram"].DueDateDateTime do
+          xml["udt"].DateTimeString format_date(@facture.date_echeance), format: "102"
+        end
       end
     end
   end
@@ -194,9 +280,87 @@ class FacturXXmlService
     end
   end
 
-  def taux_tva_principal
-    taux = @lignes.first&.taux_tva || 20
-    format_montant(taux)
+  def notes_document
+    notes = []
+
+    notes << @facture.mentions if @facture.mentions.present?
+    notes << @organisation.mentions_legales if @organisation.mentions_legales.present?
+    notes << mention_exoneration if franchise_tva?
+    notes << "Facture électronique émise au format Factur-X (profil EN 16931)."
+
+    notes.compact_blank.uniq
+  end
+
+  def mention_exoneration
+    "TVA non applicable, art. 293 B du CGI"
+  end
+
+  def franchise_tva?
+    BigDecimal(@facture.total_tva.to_s).zero?
+  end
+
+  def numero_tva_vendeur_a_afficher?
+    valeur(@organisation, :numero_tva).present? && !franchise_tva?
+  end
+
+  def buyer_reference
+    return "" unless @facture.respond_to?(:reference_acheteur)
+
+    @facture.reference_acheteur.to_s
+  end
+
+  def groupes_tva
+    @lignes.each_with_object({}) do |ligne, groupes|
+      taux = BigDecimal(ligne.taux_tva.to_s)
+      categorie = categorie_tva(ligne)
+      cle = "#{categorie}-#{format_montant(taux)}"
+
+      groupes[cle] ||= {
+        categorie: categorie,
+        taux: taux,
+        base_ht: BigDecimal("0"),
+        montant_tva: BigDecimal("0")
+      }
+
+      groupes[cle][:base_ht] += BigDecimal(ligne.total_ht.to_s)
+      groupes[cle][:montant_tva] += BigDecimal(ligne.montant_tva.to_s)
+    end
+  end
+
+  def categorie_tva(ligne)
+    taux = BigDecimal(ligne.taux_tva.to_s)
+
+    return "E" if taux.zero?
+
+    "S"
+  end
+
+  def montant_restant_a_payer
+    total_ttc = BigDecimal(@facture.total_ttc.to_s)
+    montant_paye = BigDecimal((@facture.montant_paye || 0).to_s)
+
+    total_ttc - montant_paye
+  end
+
+  def ligne_id(ligne)
+    position = ligne.position.to_i
+
+    return position.to_s if position.positive?
+
+    (@lignes.index(ligne) + 1).to_s
+  end
+
+  def scheme_id_identifiant_legal(identifiant)
+    identifiant_normalise = identifiant.to_s.gsub(/\D/, "")
+
+    return "0002" if identifiant_normalise.length == 9
+    return "0009" if identifiant_normalise.length == 14
+
+    "0009"
+  end
+
+  def format_date(date)
+    date.strftime("%Y%m%d")
   end
 
   def format_montant(valeur)

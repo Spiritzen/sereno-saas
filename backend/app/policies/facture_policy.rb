@@ -17,6 +17,10 @@ class FacturePolicy < ApplicationPolicy
     peut_lire? && meme_organisation?
   end
 
+  def pdf?
+  peut_lire? && meme_organisation?
+  end
+
   def create?
     peut_modifier?
   end

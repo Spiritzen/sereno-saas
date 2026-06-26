@@ -15,6 +15,7 @@ Rails.application.routes.draw do
 resources :factures do
   post :emettre, on: :member
   get :conformite, on: :member
+  get "pdf", to: "factures#pdf", on: :member
 
   member do
     get "factur-x/xml", to: "factures#factur_x_xml"

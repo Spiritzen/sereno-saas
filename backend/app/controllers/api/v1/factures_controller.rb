@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Api::V1::FacturesController < Api::V1::BaseController
-  before_action :set_facture, only: [:show, :update, :destroy, :emettre, :conformite, :factur_x_xml]
+  before_action :set_facture, only: [:show, :update, :destroy, :emettre, :conformite, :factur_x_xml, :pdf]
 
   def index
     factures = policy_scope(Facture)
@@ -26,7 +26,25 @@ class Api::V1::FacturesController < Api::V1::BaseController
   resultat = FactureConformiteService.new(facture: @facture).call
 
   render json: resultat.to_h, status: :ok
-end
+  end
+
+  def pdf
+  authorize @facture, :pdf?
+
+  chemin_fichier = FacturePdfService.new(facture: @facture).call
+
+  disposition = params[:download].present? ? "attachment" : "inline"
+
+  send_file chemin_fichier,
+            type: "application/pdf",
+            disposition: disposition,
+            filename: "facture-#{@facture.numero}.pdf"
+  rescue FacturePdfService::PdfGenerationImpossibleError => e
+  render json: {
+    error: "Génération PDF impossible",
+    details: [e.message]
+  }, status: :unprocessable_entity
+  end
 
   def create
     attributes = facture_params.to_h.symbolize_keys
