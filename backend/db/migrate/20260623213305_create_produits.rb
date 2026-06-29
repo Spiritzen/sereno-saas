@@ -13,7 +13,7 @@ class CreateProduits < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :produits, [:organisation_id, :designation]
+    add_index :produits, [ :organisation_id, :designation ]
 
     add_check_constraint :produits,
                          "prix_unitaire_ht >= 0",

@@ -22,15 +22,15 @@ class CreateTransmissionPa < ActiveRecord::Migration[8.1]
     end
 
     add_index :transmission_pa,
-              [:organisation_id, :facture_id],
+              [ :organisation_id, :facture_id ],
               name: "index_transmission_pa_on_org_and_facture"
 
     add_index :transmission_pa,
-              [:organisation_id, :avoir_id],
+              [ :organisation_id, :avoir_id ],
               name: "index_transmission_pa_on_org_and_avoir"
 
     add_index :transmission_pa,
-              [:organisation_id, :statut],
+              [ :organisation_id, :statut ],
               name: "index_transmission_pa_on_org_and_statut"
 
     add_check_constraint :transmission_pa,

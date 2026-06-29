@@ -11,7 +11,7 @@ class CreateTauxTvas < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :taux_tvas, [:organisation_id, :libelle]
+    add_index :taux_tvas, [ :organisation_id, :libelle ]
     add_index :taux_tvas,
               :organisation_id,
               unique: true,

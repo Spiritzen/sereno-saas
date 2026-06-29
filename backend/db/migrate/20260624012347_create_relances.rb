@@ -14,15 +14,15 @@ class CreateRelances < ActiveRecord::Migration[8.1]
     end
 
     add_index :relances,
-              [:organisation_id, :facture_id],
+              [ :organisation_id, :facture_id ],
               name: "index_relances_on_org_and_facture"
 
     add_index :relances,
-              [:organisation_id, :statut],
+              [ :organisation_id, :statut ],
               name: "index_relances_on_org_and_statut"
 
     add_index :relances,
-              [:facture_id, :niveau],
+              [ :facture_id, :niveau ],
               name: "index_relances_on_facture_and_niveau"
 
     add_check_constraint :relances,

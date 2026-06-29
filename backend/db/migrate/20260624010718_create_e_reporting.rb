@@ -18,11 +18,11 @@ class CreateEReporting < ActiveRecord::Migration[8.1]
     end
 
     add_index :e_reporting,
-              [:organisation_id, :type, :periode_debut, :periode_fin],
+              [ :organisation_id, :type, :periode_debut, :periode_fin ],
               name: "index_e_reporting_on_org_type_and_period"
 
     add_index :e_reporting,
-              [:organisation_id, :statut],
+              [ :organisation_id, :statut ],
               name: "index_e_reporting_on_org_and_statut"
 
     add_check_constraint :e_reporting,

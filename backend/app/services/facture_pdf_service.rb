@@ -5,6 +5,7 @@ require "fileutils"
 
 class FacturePdfService
   class PdfGenerationImpossibleError < StandardError; end
+    attr_reader :chemin_archive, :chemin_archive_relatif
 
   PAGE_WIDTH = 595
   PAGE_HEIGHT = 842
@@ -20,15 +21,39 @@ class FacturePdfService
   TABLE_X_TVA = 425
   TABLE_X_TOTAL = 485
 
-  def initialize(facture:)
+    DEFAULT_FONT_PATHS = [
+    ENV["FACTURX_FONT_PATH"],
+    Rails.root.join("config", "facturx", "fonts", "Sereno-Regular.ttf").to_s,
+    "C:/Windows/Fonts/arial.ttf",
+    "C:/Windows/Fonts/calibri.ttf",
+    "C:/Windows/Fonts/segoeui.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf"
+  ].compact.freeze
+
+  DEFAULT_BOLD_FONT_PATHS = [
+    ENV["FACTURX_FONT_BOLD_PATH"],
+    Rails.root.join("config", "facturx", "fonts", "Sereno-Bold.ttf").to_s,
+    "C:/Windows/Fonts/arialbd.ttf",
+    "C:/Windows/Fonts/calibrib.ttf",
+    "C:/Windows/Fonts/segoeuib.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+  ].compact.freeze
+
+    def initialize(facture:, font_path: nil, font_bold_path: nil)
     @facture = facture
     @organisation = facture.organisation
     @client = facture.client
     @lignes = facture.lignes_facture.order(:position)
     @devise = facture.devise.presence || "EUR"
+    @font_path = font_path.presence || chemin_police_par_defaut!
+    @font_bold_path = font_bold_path.presence || chemin_police_gras_par_defaut || @font_path
   end
 
-  def call
+    def call
     verifier_facture_generable!
 
     FileUtils.mkdir_p(dossier_facture)
@@ -44,11 +69,12 @@ class FacturePdfService
     dessiner_mentions
     dessiner_pied_de_page
 
-    document.write(chemin_fichier.to_s)
+    @chemin_archive = chemin_fichier
+    @chemin_archive_relatif = chemin_relatif
 
-    @facture.update!(pdf_url: chemin_relatif)
+    document.write(@chemin_archive.to_s)
 
-    chemin_fichier
+    @chemin_archive
   end
 
   private
@@ -62,10 +88,11 @@ class FacturePdfService
     raise PdfGenerationImpossibleError, "La facture doit avoir au moins une ligne" if @lignes.empty?
   end
 
-  def nouvelle_page(document)
+    def nouvelle_page(document)
     @document = document
     @page = @document.pages.add
     @canvas = @page.canvas
+    charger_polices!
     @y = MARGIN_TOP
   end
 
@@ -193,7 +220,7 @@ class FacturePdfService
 
   def dessiner_pied_de_page
     ecrire_texte(
-      "Document PDF simple — non PDF/A-3 — XML Factur-X non embarqué à cette étape.",
+      "Facture électronique PDF/A-3 avec XML Factur-X embarqué.",
       MARGIN_LEFT,
       35,
       size: 8
@@ -233,9 +260,11 @@ class FacturePdfService
     end
   end
 
-  def ecrire_texte(contenu, x, y, size: 10, bold: false)
-    @canvas.font("Helvetica", variant: (bold ? :bold : :none), size: size)
-    @canvas.text(contenu.to_s, at: [x, y])
+   def ecrire_texte(contenu, x, y, size: 10, bold: false)
+    police = bold ? @font_bold : @font_regular
+
+    @canvas.font(police, size: size)
+    @canvas.text(contenu.to_s, at: [ x, y ])
   end
 
   def ligne_horizontale
@@ -262,6 +291,26 @@ class FacturePdfService
     return texte if texte.length <= max_length
 
     "#{texte[0...max_length]}..."
+  end
+  
+    def charger_polices!
+    return if @font_regular.present? && @font_bold.present?
+
+    @font_regular = @document.fonts.add(@font_path)
+    @font_bold = @document.fonts.add(@font_bold_path)
+  end
+
+  def chemin_police_par_defaut!
+    chemin = DEFAULT_FONT_PATHS.find { |path| path.present? && File.file?(path) }
+
+    return chemin if chemin.present?
+
+    raise PdfGenerationImpossibleError,
+          "Aucune police TTF trouvée. Renseigner FACTURX_FONT_PATH."
+  end
+
+  def chemin_police_gras_par_defaut
+    DEFAULT_BOLD_FONT_PATHS.find { |path| path.present? && File.file?(path) }
   end
 
   def dossier_facture

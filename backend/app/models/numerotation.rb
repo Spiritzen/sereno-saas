@@ -8,7 +8,7 @@ class Numerotation < ApplicationRecord
   validates :dernier_numero, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   validates :type_document, uniqueness: {
-    scope: [:organisation_id, :annee],
+    scope: [ :organisation_id, :annee ],
     message: "a déjà une séquence pour cette organisation et cette année"
   }
 

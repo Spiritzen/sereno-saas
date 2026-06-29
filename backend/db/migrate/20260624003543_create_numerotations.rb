@@ -12,7 +12,7 @@ class CreateNumerotations < ActiveRecord::Migration[8.1]
     end
 
     add_index :numerotations,
-              [:organisation_id, :type_document, :annee],
+              [ :organisation_id, :type_document, :annee ],
               unique: true,
               name: "index_numerotations_unique_sequence"
 

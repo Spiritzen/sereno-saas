@@ -18,12 +18,12 @@ class Facture < ApplicationRecord
   TYPES_DOCUMENT = %w[facture acompte].freeze
   FORMATS = %w[factur_x ubl cii].freeze
 
-  # Champs de contenu légal bloqués après émission.
+  # Champs de contenu légal et d'archivage bloqués après émission.
   #
   # IMPORTANT :
-  # pdf_url et xml_url ne sont pas dans cette liste volontairement.
-  # Ce sont des métadonnées techniques d'archivage : on doit pouvoir les renseigner
-  # après émission, sans modifier le contenu légal de la facture.
+  # pdf_url et xml_url sont bien bloqués après émission.
+  # Ils doivent être renseignés pendant FactureEmissionService, au moment
+  # du passage brouillon -> emise, avant que l'immutabilité ne s'applique.
   CHAMPS_IMMUABLES_APRES_EMISSION = %w[
     organisation_id
     client_id
@@ -31,6 +31,7 @@ class Facture < ApplicationRecord
     numero
     type_document
     date_emission
+    date_echeance
     total_ht
     total_tva
     total_ttc
@@ -38,6 +39,8 @@ class Facture < ApplicationRecord
     format
     mentions
     conditions_paiement
+    pdf_url
+    xml_url
     emise_at
   ].freeze
 
@@ -97,17 +100,15 @@ class Facture < ApplicationRecord
   validate :date_echeance_apres_date_emission
   validate :empecher_modification_document_emis, on: :update
 
-  def recalculer_totaux!
-    ht = lignes_facture.sum(:total_ht)
-    tva = lignes_facture.sum(:montant_tva)
-    ttc = lignes_facture.sum(:total_ttc)
+ def recalculer_totaux!
+  totaux = FactureTotalsService.new(facture: self).call
 
-    update!(
-      total_ht: ht,
-      total_tva: tva,
-      total_ttc: ttc
-    )
-  end
+  update!(
+    total_ht: totaux.total_ht,
+    total_tva: totaux.total_tva,
+    total_ttc: totaux.total_ttc
+  )
+end
 
   def brouillon?
     statut == "brouillon"

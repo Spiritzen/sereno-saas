@@ -74,5 +74,4 @@ class Api::V1::BaseController < ApplicationController
     details: record.errors.full_messages
   }, status: :unprocessable_entity
   end
-
 end

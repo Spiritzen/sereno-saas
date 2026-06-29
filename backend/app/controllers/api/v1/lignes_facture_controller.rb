@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Api::V1::LignesFactureController < Api::V1::BaseController
-  before_action :set_facture, only: [:index, :create]
-  before_action :set_ligne_facture, only: [:show, :update, :destroy]
+  before_action :set_facture, only: [ :index, :create ]
+  before_action :set_ligne_facture, only: [ :show, :update, :destroy ]
 
   def index
     lignes = policy_scope(LigneFacture)
@@ -76,9 +76,9 @@ class Api::V1::LignesFactureController < Api::V1::BaseController
 
     ligne.produit = if produit_id.present?
                       Current.organisation.produits.find(produit_id)
-                    else
+    else
                       nil
-                    end
+    end
   end
 
   def ligne_facture_params

@@ -17,11 +17,11 @@ class CreateAcomptes < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :acomptes, [:organisation_id, :client_id]
-    add_index :acomptes, [:organisation_id, :facture_id]
-    add_index :acomptes, [:organisation_id, :devis_id]
+    add_index :acomptes, [ :organisation_id, :client_id ]
+    add_index :acomptes, [ :organisation_id, :facture_id ]
+    add_index :acomptes, [ :organisation_id, :devis_id ]
 
-    add_index :acomptes, [:organisation_id, :numero],
+    add_index :acomptes, [ :organisation_id, :numero ],
               unique: true,
               where: "numero IS NOT NULL",
               name: "index_acomptes_unique_numero_by_org"

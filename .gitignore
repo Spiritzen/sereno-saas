@@ -30,3 +30,9 @@ Thumbs.db
 # Claude local files / audits temporaires
 .claude/
 audit*.txt
+
+backend/storage/factures/
+backend/storage/**/*.pdf
+backend/storage/**/*.xml
+# Docs / audits locaux
+/docs/

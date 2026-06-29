@@ -56,7 +56,7 @@ class Avoir < ApplicationRecord
   validate :facture_deja_emise
   validate :numero_et_date_requis_si_emis
   validate :empecher_modification_avoir_emis, on: :update
-  
+
   def recalculer_totaux!
   ht = lignes_avoir.sum(:total_ht)
   tva = lignes_avoir.sum("total_ht * taux_tva / 100")

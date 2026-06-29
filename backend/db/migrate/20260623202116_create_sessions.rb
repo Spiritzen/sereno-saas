@@ -14,7 +14,7 @@ class CreateSessions < ActiveRecord::Migration[8.1]
     end
 
     add_index :sessions, :refresh_token_hash, unique: true
-    add_index :sessions, [:utilisateur_id, :organisation_id]
+    add_index :sessions, [ :utilisateur_id, :organisation_id ]
     add_index :sessions, :expire_at
   end
 end

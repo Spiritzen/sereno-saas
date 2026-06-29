@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Api::V1::FacturesController < Api::V1::BaseController
-  before_action :set_facture, only: [:show, :update, :destroy, :emettre, :conformite, :factur_x_xml, :pdf]
+  before_action :set_facture, only: [ :show, :update, :destroy, :emettre, :conformite, :factur_x_xml, :pdf ]
 
   def index
     factures = policy_scope(Facture)
@@ -28,10 +28,17 @@ class Api::V1::FacturesController < Api::V1::BaseController
   render json: resultat.to_h, status: :ok
   end
 
-  def pdf
+def pdf
   authorize @facture, :pdf?
 
-  chemin_fichier = FacturePdfService.new(facture: @facture).call
+  chemin_fichier = chemin_archive(@facture.pdf_url)
+
+  unless chemin_fichier && File.exist?(chemin_fichier)
+    return render json: {
+      error: "PDF indisponible",
+      details: [ "Le PDF archivé n'est pas disponible pour cette facture" ]
+    }, status: :not_found
+  end
 
   disposition = params[:download].present? ? "attachment" : "inline"
 
@@ -39,12 +46,7 @@ class Api::V1::FacturesController < Api::V1::BaseController
             type: "application/pdf",
             disposition: disposition,
             filename: "facture-#{@facture.numero}.pdf"
-  rescue FacturePdfService::PdfGenerationImpossibleError => e
-  render json: {
-    error: "Génération PDF impossible",
-    details: [e.message]
-  }, status: :unprocessable_entity
-  end
+end
 
   def create
     attributes = facture_params.to_h.symbolize_keys
@@ -106,14 +108,21 @@ class Api::V1::FacturesController < Api::V1::BaseController
   rescue ActiveRecord::DeleteRestrictionError, ActiveRecord::InvalidForeignKey
     render json: {
       error: "Suppression impossible",
-      details: ["Cette facture est liée à des documents métier."]
+      details: [ "Cette facture est liée à des documents métier." ]
     }, status: :unprocessable_entity
   end
 
 def factur_x_xml
   authorize @facture, :factur_x_xml?
 
-  chemin_fichier = FacturXStorageService.new(facture: @facture).call
+  chemin_fichier = chemin_archive(@facture.xml_url)
+
+  unless chemin_fichier && File.exist?(chemin_fichier)
+    return render json: {
+      error: "XML indisponible",
+      details: [ "Le XML Factur-X archivé n'est pas disponible pour cette facture" ]
+    }, status: :not_found
+  end
 
   disposition = params[:download].present? ? "attachment" : "inline"
 
@@ -121,11 +130,6 @@ def factur_x_xml
             type: "application/xml; charset=utf-8",
             disposition: disposition,
             filename: "factur-x-#{@facture.numero}.xml"
-rescue FacturXXmlService::GenerationImpossibleError, FacturXStorageService::StorageImpossibleError => e
-  render json: {
-    error: "Génération XML impossible",
-    details: [e.message]
-  }, status: :unprocessable_entity
 end
 
   def emettre
@@ -177,4 +181,10 @@ end
       :conditions_paiement
     )
   end
+
+  def chemin_archive(chemin_relatif)
+  return nil if chemin_relatif.blank?
+
+  Rails.root.join(chemin_relatif)
+end
 end

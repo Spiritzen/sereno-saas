@@ -14,8 +14,8 @@ class CreateContacts < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :contacts, [:organisation_id, :client_id]
-    add_index :contacts, [:client_id, :principal]
+    add_index :contacts, [ :organisation_id, :client_id ]
+    add_index :contacts, [ :client_id, :principal ]
     add_index :contacts, :email
   end
 end

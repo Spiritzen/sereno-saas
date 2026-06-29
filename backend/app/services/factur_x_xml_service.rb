@@ -216,16 +216,18 @@ class FacturXXmlService
 
       conditions_paiement(xml)
 
-      xml["ram"].SpecifiedTradeSettlementHeaderMonetarySummation do
-        xml["ram"].LineTotalAmount format_montant(@facture.total_ht)
-        xml["ram"].ChargeTotalAmount ZERO_AMOUNT
-        xml["ram"].AllowanceTotalAmount ZERO_AMOUNT
-        xml["ram"].TaxBasisTotalAmount format_montant(@facture.total_ht)
-        xml["ram"].TaxTotalAmount format_montant(@facture.total_tva), currencyID: @facture.devise
-        xml["ram"].GrandTotalAmount format_montant(@facture.total_ttc)
-        xml["ram"].TotalPrepaidAmount format_montant(@facture.montant_paye || 0)
-        xml["ram"].DuePayableAmount format_montant(montant_restant_a_payer)
-      end
+      totaux = totaux_calcules
+
+xml["ram"].SpecifiedTradeSettlementHeaderMonetarySummation do
+  xml["ram"].LineTotalAmount format_montant(totaux.total_ht)
+  xml["ram"].ChargeTotalAmount ZERO_AMOUNT
+  xml["ram"].AllowanceTotalAmount ZERO_AMOUNT
+  xml["ram"].TaxBasisTotalAmount format_montant(totaux.total_ht)
+  xml["ram"].TaxTotalAmount format_montant(totaux.total_tva), currencyID: @facture.devise
+  xml["ram"].GrandTotalAmount format_montant(totaux.total_ttc)
+  xml["ram"].TotalPrepaidAmount format_montant(@facture.montant_paye || 0)
+  xml["ram"].DuePayableAmount format_montant(montant_restant_a_payer)
+end
     end
   end
 
@@ -296,8 +298,8 @@ class FacturXXmlService
   end
 
   def franchise_tva?
-    BigDecimal(@facture.total_tva.to_s).zero?
-  end
+  BigDecimal(totaux_calcules.total_tva.to_s).zero?
+end
 
   def numero_tva_vendeur_a_afficher?
     valeur(@organisation, :numero_tva).present? && !franchise_tva?
@@ -309,23 +311,13 @@ class FacturXXmlService
     @facture.reference_acheteur.to_s
   end
 
-  def groupes_tva
-    @lignes.each_with_object({}) do |ligne, groupes|
-      taux = BigDecimal(ligne.taux_tva.to_s)
-      categorie = categorie_tva(ligne)
-      cle = "#{categorie}-#{format_montant(taux)}"
+def groupes_tva
+  totaux_calcules.groupes_tva
+end
 
-      groupes[cle] ||= {
-        categorie: categorie,
-        taux: taux,
-        base_ht: BigDecimal("0"),
-        montant_tva: BigDecimal("0")
-      }
-
-      groupes[cle][:base_ht] += BigDecimal(ligne.total_ht.to_s)
-      groupes[cle][:montant_tva] += BigDecimal(ligne.montant_tva.to_s)
-    end
-  end
+def totaux_calcules
+  @totaux_calcules ||= FactureTotalsService.new(facture: @facture).call
+end
 
   def categorie_tva(ligne)
     taux = BigDecimal(ligne.taux_tva.to_s)
@@ -336,11 +328,11 @@ class FacturXXmlService
   end
 
   def montant_restant_a_payer
-    total_ttc = BigDecimal(@facture.total_ttc.to_s)
-    montant_paye = BigDecimal((@facture.montant_paye || 0).to_s)
+  total_ttc = BigDecimal(totaux_calcules.total_ttc.to_s)
+  montant_paye = BigDecimal((@facture.montant_paye || 0).to_s)
 
-    total_ttc - montant_paye
-  end
+  total_ttc - montant_paye
+end
 
   def ligne_id(ligne)
     position = ligne.position.to_i

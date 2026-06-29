@@ -1,23 +1,29 @@
 # frozen_string_literal: true
 
+require "fileutils"
+
 class FacturXStorageService
   class StorageImpossibleError < StandardError; end
 
-  def initialize(facture:)
+  attr_reader :chemin_archive, :chemin_archive_relatif
+
+    def initialize(facture:, xml_string: nil)
     @facture = facture
+    @xml_string = xml_string
   end
 
   def call
     verifier_facture!
 
-    xml = FacturXXmlService.new(facture: @facture).call
+        xml = @xml_string.presence || FacturXXmlService.new(facture: @facture).call
 
-    FileUtils.mkdir_p(dossier_facture)
-    File.write(chemin_fichier, xml)
+    @chemin_archive_relatif = chemin_relatif
+    @chemin_archive = Rails.root.join(@chemin_archive_relatif)
 
-    @facture.update!(xml_url: chemin_relatif)
+    FileUtils.mkdir_p(@chemin_archive.dirname)
+    File.binwrite(@chemin_archive.to_s, xml)
 
-    chemin_fichier
+    @chemin_archive
   end
 
   private
@@ -28,19 +34,15 @@ class FacturXStorageService
     raise StorageImpossibleError, "La facture doit avoir un numéro" if @facture.numero.blank?
   end
 
-  def dossier_facture
-    Rails.root.join("storage", "factures", @facture.id)
-  end
-
   def nom_fichier
-    "factur-x-#{@facture.numero}.xml"
-  end
-
-  def chemin_fichier
-    dossier_facture.join(nom_fichier)
+    "factur-x-#{nom_fichier_securise(@facture.numero)}.xml"
   end
 
   def chemin_relatif
     "storage/factures/#{@facture.id}/#{nom_fichier}"
+  end
+
+  def nom_fichier_securise(valeur)
+    valeur.to_s.gsub(/[^0-9A-Za-z.\-]/, "_")
   end
 end

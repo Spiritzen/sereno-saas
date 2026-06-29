@@ -23,10 +23,10 @@ class CreateAvoirs < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :avoirs, [:organisation_id, :client_id]
-    add_index :avoirs, [:organisation_id, :facture_id]
+    add_index :avoirs, [ :organisation_id, :client_id ]
+    add_index :avoirs, [ :organisation_id, :facture_id ]
 
-    add_index :avoirs, [:organisation_id, :numero],
+    add_index :avoirs, [ :organisation_id, :numero ],
               unique: true,
               where: "numero IS NOT NULL",
               name: "index_avoirs_unique_numero_by_org"

@@ -19,8 +19,8 @@ class CreateDevis < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :devis, [:organisation_id, :client_id]
-    add_index :devis, [:organisation_id, :numero], unique: true, where: "numero IS NOT NULL"
+    add_index :devis, [ :organisation_id, :client_id ]
+    add_index :devis, [ :organisation_id, :numero ], unique: true, where: "numero IS NOT NULL"
 
     add_check_constraint :devis,
                          "statut IN ('brouillon', 'envoye', 'accepte', 'refuse', 'expire')",

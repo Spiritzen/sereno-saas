@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Api::V1::ClientsController < Api::V1::BaseController
-  before_action :set_client, only: [:show, :update, :archive, :destroy]
+  before_action :set_client, only: [ :show, :update, :archive, :destroy ]
 
   def index
     clients = policy_scope(Client)
@@ -59,7 +59,7 @@ class Api::V1::ClientsController < Api::V1::BaseController
   rescue ActiveRecord::DeleteRestrictionError, ActiveRecord::InvalidForeignKey
     render json: {
       error: "Suppression impossible",
-      details: ["Ce client est lié à des documents métier. Utilisez l'archivage."]
+      details: [ "Ce client est lié à des documents métier. Utilisez l'archivage." ]
     }, status: :unprocessable_entity
   end
 

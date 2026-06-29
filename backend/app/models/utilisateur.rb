@@ -13,7 +13,7 @@ class Utilisateur < ApplicationRecord
   validates :nom, presence: true
   validates :prenom, presence: true
   validates :role, presence: true
-  validates :actif, inclusion: { in: [true, false] }
+  validates :actif, inclusion: { in: [ true, false ] }
 
   validates :role, inclusion: {
     in: %w[super_admin owner comptable membre]

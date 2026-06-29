@@ -13,11 +13,11 @@ class CreatePaiements < ActiveRecord::Migration[8.1]
     end
 
     add_index :paiements,
-              [:organisation_id, :facture_id],
+              [ :organisation_id, :facture_id ],
               name: "index_paiements_on_org_and_facture"
 
     add_index :paiements,
-              [:organisation_id, :date_paiement],
+              [ :organisation_id, :date_paiement ],
               name: "index_paiements_on_org_and_date"
 
     add_check_constraint :paiements,

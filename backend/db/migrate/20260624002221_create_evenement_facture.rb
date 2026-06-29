@@ -14,15 +14,15 @@ class CreateEvenementFacture < ActiveRecord::Migration[8.1]
     end
 
     add_index :evenement_facture,
-              [:organisation_id, :facture_id],
+              [ :organisation_id, :facture_id ],
               name: "index_evenement_facture_on_org_and_facture"
 
     add_index :evenement_facture,
-              [:facture_id, :created_at],
+              [ :facture_id, :created_at ],
               name: "index_evenement_facture_on_facture_and_created_at"
 
     add_index :evenement_facture,
-              [:organisation_id, :created_at],
+              [ :organisation_id, :created_at ],
               name: "index_evenement_facture_on_org_and_created_at"
 
     add_check_constraint :evenement_facture,

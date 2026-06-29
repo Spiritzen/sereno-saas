@@ -30,9 +30,9 @@ class CreateFactures < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :factures, [:organisation_id, :client_id]
+    add_index :factures, [ :organisation_id, :client_id ]
     # add_index :factures, :devis_id
-    add_index :factures, [:organisation_id, :numero],
+    add_index :factures, [ :organisation_id, :numero ],
               unique: true,
               where: "numero IS NOT NULL",
               name: "index_factures_unique_numero_by_org"

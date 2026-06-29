@@ -18,11 +18,11 @@ class CreateLigneFacture < ActiveRecord::Migration[8.1]
     end
 
     add_index :ligne_facture,
-              [:organisation_id, :facture_id],
+              [ :organisation_id, :facture_id ],
               name: "index_ligne_facture_on_org_and_facture"
 
     add_index :ligne_facture,
-              [:facture_id, :position],
+              [ :facture_id, :position ],
               name: "index_ligne_facture_on_facture_and_position"
 
     add_check_constraint :ligne_facture,

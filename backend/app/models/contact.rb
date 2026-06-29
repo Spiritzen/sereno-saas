@@ -3,7 +3,7 @@ class Contact < ApplicationRecord
   belongs_to :client
 
   validates :nom, presence: true
-  validates :principal, inclusion: { in: [true, false] }
+  validates :principal, inclusion: { in: [ true, false ] }
   validates :telephone, length: { maximum: 20 }, allow_blank: true
 
   validate :organisation_coherente_avec_client

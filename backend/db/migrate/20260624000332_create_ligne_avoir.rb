@@ -15,11 +15,11 @@ class CreateLigneAvoir < ActiveRecord::Migration[8.1]
     end
 
     add_index :ligne_avoir,
-              [:organisation_id, :avoir_id],
+              [ :organisation_id, :avoir_id ],
               name: "index_ligne_avoir_on_org_and_avoir"
 
     add_index :ligne_avoir,
-              [:avoir_id, :position],
+              [ :avoir_id, :position ],
               name: "index_ligne_avoir_on_avoir_and_position"
 
     add_check_constraint :ligne_avoir,

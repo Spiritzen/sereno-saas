@@ -1,26 +1,23 @@
-# Be sure to restart your server when you modify this file.
+# frozen_string_literal: true
 
-# Avoid CORS issues when API is called from the frontend app.
-# Handle Cross-Origin Resource Sharing (CORS) in order to accept cross-origin Ajax requests.
+allowed_origins = ENV.fetch(
+  "CORS_ALLOWED_ORIGINS",
+  Rails.env.production? ? "" : "http://localhost:5173"
+).split(",").map(&:strip).reject(&:blank?)
 
-# Read more: https://github.com/cyu/rack-cors
+if allowed_origins.any?
+  Rails.application.config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins(*allowed_origins)
 
-# Rails.application.config.middleware.insert_before 0, Rack::Cors do
-#   allow do
-#     origins "example.com"
-#
-#     resource "*",
-#       headers: :any,
-#       methods: [:get, :post, :put, :patch, :delete, :options, :head]
-#   end
-# end
-Rails.application.config.middleware.insert_before 0, Rack::Cors do
-  allow do
-    origins "http://localhost:5173"
-
-    resource "*",
-             headers: :any,
-             methods: [:get, :post, :put, :patch, :delete, :options, :head],
-             credentials: true
+      resource "*",
+               headers: :any,
+               methods: [ :get, :post, :put, :patch, :delete, :options, :head ],
+               credentials: true
+    end
   end
 end
+
+# CORS_ALLOWED_ORIGINS=https://app.sereno.fr,https://sereno.fr
+# AUTH_COOKIE_SECURE=true
+# AUTH_COOKIE_SAME_SITE=none

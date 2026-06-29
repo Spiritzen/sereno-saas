@@ -13,10 +13,10 @@ class Produit < ApplicationRecord
 
   validates :designation, presence: true
   validates :prix_unitaire_ht, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :actif, inclusion: { in: [true, false] }
+  validates :actif, inclusion: { in: [ true, false ] }
 
   validates :unite, inclusion: {
-    in: ["unité", "heure", "jour", "forfait"]
+    in: [ "unité", "heure", "jour", "forfait" ]
   }, allow_blank: true
 
   validate :organisation_coherente_avec_taux_tva

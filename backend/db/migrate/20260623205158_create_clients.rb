@@ -23,8 +23,8 @@ class CreateClients < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :clients, [:organisation_id, :raison_sociale]
-    add_index :clients, [:organisation_id, :siret]
+    add_index :clients, [ :organisation_id, :raison_sociale ]
+    add_index :clients, [ :organisation_id, :siret ]
     add_index :clients, :identifiant_routage_pa
 
     add_check_constraint :clients,

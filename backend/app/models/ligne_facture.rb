@@ -31,13 +31,19 @@ class LigneFacture < ApplicationRecord
 
   private
 
-  def calculer_montants
-    return if quantite.blank? || prix_unitaire_ht.blank? || taux_tva.blank?
+def calculer_montants
+  return if quantite.blank? || prix_unitaire_ht.blank? || taux_tva.blank?
 
-    self.total_ht = quantite * prix_unitaire_ht
-    self.montant_tva = total_ht * taux_tva / 100
-    self.total_ttc = total_ht + montant_tva
-  end
+  montants = FactureTotalsService.calculer_ligne(
+    quantite: quantite,
+    prix_unitaire_ht: prix_unitaire_ht,
+    taux_tva: taux_tva
+  )
+
+  self.total_ht = montants[:total_ht]
+  self.montant_tva = montants[:montant_tva]
+  self.total_ttc = montants[:total_ttc]
+end
 
   def facture_appartient_a_la_meme_organisation
     return if organisation.blank? || facture.blank?

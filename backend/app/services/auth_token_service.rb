@@ -19,13 +19,14 @@ class AuthTokenService
       raise ArgumentError, "la session ne correspond pas à l'utilisateur et à l'organisation"
     end
 
-    payload = {
-      utilisateur_id: utilisateur.id,
-      organisation_id: organisation.id,
-      session_id: session.id,
-      iat: Time.current.to_i,
-      exp: expires_at.to_i
-    }
+   payload = {
+  utilisateur_id: utilisateur.id,
+  organisation_id: organisation.id,
+  session_id: session.id,
+  jti: SecureRandom.uuid,
+  iat: Time.current.to_i,
+  exp: expires_at.to_i
+}
 
     JWT.encode(payload, secret_key, ALGORITHM)
   end

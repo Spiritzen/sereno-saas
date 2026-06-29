@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Api::V1::ContactsController < Api::V1::BaseController
-  before_action :set_client, only: [:index, :create]
-  before_action :set_contact, only: [:show, :update, :destroy]
+  before_action :set_client, only: [ :index, :create ]
+  before_action :set_contact, only: [ :show, :update, :destroy ]
 
   def index
     contacts = policy_scope(Contact)
