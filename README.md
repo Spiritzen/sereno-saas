@@ -280,7 +280,7 @@ Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »
 - ✅ Auth JWT multi-tenant + rôles
 - ✅ CRUD Clients / Contacts (routage PA)
 - ✅ Création de facture + lignes + totaux
-- [ ] Générateur Factur-X (PDF/A-3 + CII)
+- ✅ Générateur Factur-X (PDF/A-3 + CII)
 - ✅ Numérotation séquentielle protégée
 - ✅ Moteur de conformité pré-émission
 - [ ] Dashboard conformité + écran « facture en 2 clics »
