@@ -33,6 +33,38 @@ RSpec.describe FactureConformiteService, type: :service do
   expect(resultat.erreurs).to include("L'organisation émettrice doit avoir un SIRET")
 end
 
+        it "bloque une facture avec une ligne sans montant positif" do
+      facture = create(:facture, :avec_ligne)
+      ligne = facture.lignes_facture.first
+
+      ligne.update_columns(
+        quantite: 1,
+        prix_unitaire_ht: 0,
+        total_ht: 0,
+        montant_tva: 0,
+        total_ttc: 0
+      )
+
+      facture.update_columns(
+        total_ht: 0,
+        total_tva: 0,
+        total_ttc: 0
+      )
+
+      resultat = described_class.new(facture: facture.reload).call
+
+      expect(resultat).not_to be_conforme
+      expect(resultat.erreurs).to include(
+        "La facture doit contenir au moins une ligne avec un montant HT positif"
+      )
+      expect(resultat.erreurs).to include(
+        "Le total HT de la facture doit être supérieur à 0"
+      )
+      expect(resultat.erreurs).to include(
+        "Le total TTC doit être supérieur à 0"
+      )
+    end
+
     it "bloque un client public sans SIRET ni routage PA" do
       facture = create(:facture, :avec_ligne)
 

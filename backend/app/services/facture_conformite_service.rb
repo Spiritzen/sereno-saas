@@ -34,6 +34,7 @@ class FactureConformiteService
     verifier_client_public
     verifier_lignes
     verifier_totaux
+    verifier_montant_facture_positif
     verifier_coherence_franchise_tva
     verifier_informations_generales
 
@@ -156,43 +157,65 @@ class FactureConformiteService
     end
   end
 
-def verifier_totaux_ligne(ligne, numero_ligne)
-  montants_attendus = FactureTotalsService.calculer_ligne(
-    quantite: ligne.quantite,
-    prix_unitaire_ht: ligne.prix_unitaire_ht,
-    taux_tva: ligne.taux_tva
-  )
+  def verifier_totaux_ligne(ligne, numero_ligne)
+    montants_attendus = FactureTotalsService.calculer_ligne(
+      quantite: ligne.quantite,
+      prix_unitaire_ht: ligne.prix_unitaire_ht,
+      taux_tva: ligne.taux_tva
+    )
 
-  unless proche?(ligne.total_ht, montants_attendus[:total_ht])
-    @erreurs << "Ligne #{numero_ligne} : le total HT est incohérent"
-  end
+    unless proche?(ligne.total_ht, montants_attendus[:total_ht])
+      @erreurs << "Ligne #{numero_ligne} : le total HT est incohérent"
+    end
 
-  unless proche?(ligne.montant_tva, montants_attendus[:montant_tva])
-    @erreurs << "Ligne #{numero_ligne} : le montant de TVA est incohérent"
-  end
+    unless proche?(ligne.montant_tva, montants_attendus[:montant_tva])
+      @erreurs << "Ligne #{numero_ligne} : le montant de TVA est incohérent"
+    end
 
-  unless proche?(ligne.total_ttc, montants_attendus[:total_ttc])
-    @erreurs << "Ligne #{numero_ligne} : le total TTC est incohérent"
+    unless proche?(ligne.total_ttc, montants_attendus[:total_ttc])
+      @erreurs << "Ligne #{numero_ligne} : le total TTC est incohérent"
+    end
   end
-end
 
   def verifier_totaux
-  totaux_attendus = FactureTotalsService.new(facture: @facture).call
+    totaux_attendus = FactureTotalsService.new(facture: @facture).call
 
-  unless proche?(@facture.total_ht, totaux_attendus.total_ht)
-    @erreurs << "Le total HT de la facture est incohérent"
+    unless proche?(@facture.total_ht, totaux_attendus.total_ht)
+      @erreurs << "Le total HT de la facture est incohérent"
+    end
+
+    unless proche?(@facture.total_tva, totaux_attendus.total_tva)
+      @erreurs << "Le total TVA de la facture est incohérent"
+    end
+
+    unless proche?(@facture.total_ttc, totaux_attendus.total_ttc)
+      @erreurs << "Le total TTC de la facture est incohérent"
+    end
+
+    @erreurs << "Le total TTC doit être supérieur à 0" unless decimal(@facture.total_ttc).positive?
   end
 
-  unless proche?(@facture.total_tva, totaux_attendus.total_tva)
-    @erreurs << "Le total TVA de la facture est incohérent"
-  end
+  def verifier_montant_facture_positif
+    lignes = lignes_facture
 
-  unless proche?(@facture.total_ttc, totaux_attendus.total_ttc)
-    @erreurs << "Le total TTC de la facture est incohérent"
-  end
+    return if lignes.empty?
 
-  @erreurs << "Le total TTC doit être supérieur à 0" unless decimal(@facture.total_ttc).positive?
-end
+    total_ht = decimal(@facture.total_ht)
+
+    ligne_positive = lignes.any? do |ligne|
+      decimal(ligne.total_ht).positive? &&
+        decimal(ligne.quantite).positive? &&
+        decimal(ligne.prix_unitaire_ht).positive?
+    end
+
+    unless ligne_positive
+      @erreurs << "La facture doit contenir au moins une ligne avec un montant HT positif"
+    end
+
+    unless total_ht.positive?
+      @erreurs << "Le total HT de la facture doit être supérieur à 0"
+    end
+  end
 
   def verifier_coherence_franchise_tva
     organisation = @facture.organisation
