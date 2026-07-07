@@ -20,6 +20,7 @@ class Api::V1::ClientsController < Api::V1::BaseController
 
   def create
     client = Current.organisation.clients.new(client_params)
+    client.statut = "actif"
 
     authorize client
 
@@ -83,7 +84,6 @@ class Api::V1::ClientsController < Api::V1::BaseController
       :email,
       :telephone,
       :identifiant_routage_pa,
-      :statut,
       :notes
     )
   end
