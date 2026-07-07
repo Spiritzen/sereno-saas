@@ -48,6 +48,11 @@ export function FactureDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   const isDraft = facture?.statut === "brouillon";
+
+  // B2 : on n'affiche les liens PDF/XML que si le backend confirme leur présence.
+  const hasPdf = Boolean(facture?.pdf_url);
+  const hasXml = Boolean(facture?.xml_url);
+
   const canEmit =
     Boolean(facture) &&
     isDraft &&
@@ -158,52 +163,52 @@ export function FactureDetailPage() {
     }
   };
 
-function handleAskDeleteLine(ligne: LigneFacture) {
-  if (!facture || !isDraft) {
-    setError("Seules les lignes d’un brouillon peuvent être supprimées.");
-    return;
+  function handleAskDeleteLine(ligne: LigneFacture) {
+    if (!facture || !isDraft) {
+      setError("Seules les lignes d’un brouillon peuvent être supprimées.");
+      return;
+    }
+
+    setLineToDelete(ligne);
   }
 
-  setLineToDelete(ligne);
-}
+  function handleCancelDeleteLine() {
+    if (deletingLineId) {
+      return;
+    }
 
-function handleCancelDeleteLine() {
-  if (deletingLineId) {
-    return;
-  }
-
-  setLineToDelete(null);
-}
-
-async function handleConfirmDeleteLine() {
-  if (!facture || !lineToDelete) {
-    return;
-  }
-
-  if (!isDraft) {
-    setError("Seules les lignes d’un brouillon peuvent être supprimées.");
     setLineToDelete(null);
-    return;
   }
 
-  setDeletingLineId(lineToDelete.id);
-  setError(null);
+  async function handleConfirmDeleteLine() {
+    if (!facture || !lineToDelete) {
+      return;
+    }
 
-  try {
-    const updatedFacture = await deleteLigneFacture(lineToDelete.id);
-    const updatedLignes = await listLignesFacture(facture.id);
+    if (!isDraft) {
+      setError("Seules les lignes d’un brouillon peuvent être supprimées.");
+      setLineToDelete(null);
+      return;
+    }
 
-    setFacture(updatedFacture);
-    setLignes(updatedLignes);
-    setConformite(null);
-    setLineToDelete(null);
-  } catch (apiError) {
-    setError(getApiErrorMessage(apiError));
-    setLineToDelete(null);
-  } finally {
-    setDeletingLineId(null);
+    setDeletingLineId(lineToDelete.id);
+    setError(null);
+
+    try {
+      const updatedFacture = await deleteLigneFacture(lineToDelete.id);
+      const updatedLignes = await listLignesFacture(facture.id);
+
+      setFacture(updatedFacture);
+      setLignes(updatedLignes);
+      setConformite(null);
+      setLineToDelete(null);
+    } catch (apiError) {
+      setError(getApiErrorMessage(apiError));
+      setLineToDelete(null);
+    } finally {
+      setDeletingLineId(null);
+    }
   }
-}
 
   async function handleCheckConformite() {
     if (!facture) {
@@ -258,7 +263,7 @@ async function handleConfirmDeleteLine() {
   }
 
   function handleOpenPdf() {
-    if (!facture) {
+    if (!facture || !hasPdf) {
       return;
     }
 
@@ -266,7 +271,7 @@ async function handleConfirmDeleteLine() {
   }
 
   function handleOpenXml() {
-    if (!facture) {
+    if (!facture || !hasXml) {
       return;
     }
 
@@ -492,23 +497,34 @@ async function handleConfirmDeleteLine() {
 
             {!isDraft && (
               <>
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={handleOpenPdf}
-                >
-                  <ExternalLink size={16} />
-                  Ouvrir PDF
-                </button>
+                {hasPdf && (
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={handleOpenPdf}
+                  >
+                    <ExternalLink size={16} />
+                    Ouvrir PDF
+                  </button>
+                )}
 
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={handleOpenXml}
-                >
-                  <ExternalLink size={16} />
-                  Ouvrir XML
-                </button>
+                {hasXml && (
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={handleOpenXml}
+                  >
+                    <ExternalLink size={16} />
+                    Ouvrir XML
+                  </button>
+                )}
+
+                {!hasPdf && !hasXml && (
+                  <div className="state-card">
+                    Les fichiers PDF/XML ne sont pas encore disponibles pour
+                    cette facture.
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -550,21 +566,21 @@ async function handleConfirmDeleteLine() {
           )}
         </div>
       )}
-<ConfirmModal
-  open={Boolean(lineToDelete)}
-  title="Supprimer cette ligne ?"
-  message={
-    lineToDelete
-      ? `La ligne "${lineToDelete.designation}" sera supprimée du brouillon. Les totaux de la facture seront recalculés.`
-      : ""
-  }
-  confirmLabel={deletingLineId ? "Suppression..." : "Supprimer la ligne"}
-  destructive
-  isLoading={Boolean(deletingLineId)}
-  onCancel={handleCancelDeleteLine}
-  onConfirm={handleConfirmDeleteLine}
-/>
 
+      <ConfirmModal
+        open={Boolean(lineToDelete)}
+        title="Supprimer cette ligne ?"
+        message={
+          lineToDelete
+            ? `La ligne "${lineToDelete.designation}" sera supprimée du brouillon. Les totaux de la facture seront recalculés.`
+            : ""
+        }
+        confirmLabel={deletingLineId ? "Suppression..." : "Supprimer la ligne"}
+        destructive
+        isLoading={Boolean(deletingLineId)}
+        onCancel={handleCancelDeleteLine}
+        onConfirm={handleConfirmDeleteLine}
+      />
     </section>
   );
 }
