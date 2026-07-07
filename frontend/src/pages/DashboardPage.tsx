@@ -100,7 +100,7 @@ export function DashboardPage() {
           </div>
 
           <div>
-            <strong>Vous êtes conforme</strong>
+            <strong>Pré-contrôles activés</strong>
             <p className="eyebrow">
               Réception électronique active · émission prête au format Factur-X
             </p>
