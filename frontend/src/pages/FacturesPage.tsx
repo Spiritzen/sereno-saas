@@ -16,6 +16,7 @@ import {
   listFactures,
 } from "../api/facturesApi";
 import { getApiErrorMessage } from "../api/http";
+import { ConfirmModal } from "../components/ConfirmModal";
 import type { Client } from "../types/client";
 import type { Facture, FactureStatut } from "../types/facture";
 
@@ -75,6 +76,7 @@ export function FacturesPage() {
   const [deletingFactureId, setDeletingFactureId] = useState<string | null>(
     null,
   );
+  const [factureToDelete, setFactureToDelete] = useState<Facture | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -184,32 +186,50 @@ export function FacturesPage() {
     window.open(getFactureXmlUrl(facture.id), "_blank", "noopener,noreferrer");
   }
 
-  async function handleDeleteDraft(facture: Facture) {
+  function handleAskDeleteDraft(facture: Facture) {
     if (facture.statut !== "brouillon") {
       setError("Seuls les brouillons peuvent être supprimés.");
       return;
     }
 
-    const confirmed = window.confirm(
-      "Supprimer ce brouillon ? Cette action est définitive.",
-    );
+    setFactureToDelete(facture);
+  }
 
-    if (!confirmed) {
+  function handleCancelDeleteDraft() {
+    if (deletingFactureId) {
       return;
     }
 
-    setDeletingFactureId(facture.id);
+    setFactureToDelete(null);
+  }
+
+  async function handleConfirmDeleteDraft() {
+    if (!factureToDelete) {
+      return;
+    }
+
+    if (factureToDelete.statut !== "brouillon") {
+      setError("Seuls les brouillons peuvent être supprimés.");
+      setFactureToDelete(null);
+      return;
+    }
+
+    setDeletingFactureId(factureToDelete.id);
     setError(null);
 
     try {
-      await deleteFacture(facture.id);
+      await deleteFacture(factureToDelete.id);
+
       setFactures((currentFactures) =>
         currentFactures.filter(
-          (currentFacture) => currentFacture.id !== facture.id,
+          (currentFacture) => currentFacture.id !== factureToDelete.id,
         ),
       );
+
+      setFactureToDelete(null);
     } catch (apiError) {
       setError(getApiErrorMessage(apiError));
+      setFactureToDelete(null);
     } finally {
       setDeletingFactureId(null);
     }
@@ -363,7 +383,7 @@ export function FacturesPage() {
                         type="button"
                         className="table-action-btn danger"
                         disabled={deletingFactureId === facture.id}
-                        onClick={() => handleDeleteDraft(facture)}
+                        onClick={() => handleAskDeleteDraft(facture)}
                       >
                         <Trash2 size={14} />
                         {deletingFactureId === facture.id
@@ -408,6 +428,23 @@ export function FacturesPage() {
           </div>
         </>
       )}
+
+      <ConfirmModal
+        open={Boolean(factureToDelete)}
+        title="Supprimer ce brouillon ?"
+        message={
+          factureToDelete
+            ? `Le brouillon ${factureToDelete.numero ?? "sans numéro"} sera supprimé définitivement. Cette action ne pourra pas être annulée.`
+            : ""
+        }
+        confirmLabel={
+          deletingFactureId ? "Suppression..." : "Supprimer le brouillon"
+        }
+        destructive
+        isLoading={Boolean(deletingFactureId)}
+        onCancel={handleCancelDeleteDraft}
+        onConfirm={handleConfirmDeleteDraft}
+      />
     </section>
   );
 }

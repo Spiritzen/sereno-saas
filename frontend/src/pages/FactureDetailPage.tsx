@@ -22,6 +22,7 @@ import {
   deleteLigneFacture,
   listLignesFacture,
 } from "../api/lignesFactureApi";
+import { ConfirmModal } from "../components/ConfirmModal";
 import type { ConformiteResult } from "../types/conformite";
 import type { Facture } from "../types/facture";
 import type { LigneFacture } from "../types/ligneFacture";
@@ -41,6 +42,7 @@ export function FactureDetailPage() {
   const [isLoading, setIsLoading] = useState(Boolean(id));
   const [isAddingLine, setIsAddingLine] = useState(false);
   const [deletingLineId, setDeletingLineId] = useState<string | null>(null);
+  const [lineToDelete, setLineToDelete] = useState<LigneFacture | null>(null);
   const [isCheckingConformite, setIsCheckingConformite] = useState(false);
   const [isEmitting, setIsEmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -156,34 +158,52 @@ export function FactureDetailPage() {
     }
   };
 
-  async function handleDeleteLine(ligne: LigneFacture) {
-    if (!facture || !isDraft) {
-      setError("Seules les lignes d’un brouillon peuvent être supprimées.");
-      return;
-    }
-
-    const confirmed = window.confirm("Supprimer cette ligne de facture ?");
-
-    if (!confirmed) {
-      return;
-    }
-
-    setDeletingLineId(ligne.id);
-    setError(null);
-
-    try {
-      const updatedFacture = await deleteLigneFacture(ligne.id);
-      const updatedLignes = await listLignesFacture(facture.id);
-
-      setFacture(updatedFacture);
-      setLignes(updatedLignes);
-      setConformite(null);
-    } catch (apiError) {
-      setError(getApiErrorMessage(apiError));
-    } finally {
-      setDeletingLineId(null);
-    }
+function handleAskDeleteLine(ligne: LigneFacture) {
+  if (!facture || !isDraft) {
+    setError("Seules les lignes d’un brouillon peuvent être supprimées.");
+    return;
   }
+
+  setLineToDelete(ligne);
+}
+
+function handleCancelDeleteLine() {
+  if (deletingLineId) {
+    return;
+  }
+
+  setLineToDelete(null);
+}
+
+async function handleConfirmDeleteLine() {
+  if (!facture || !lineToDelete) {
+    return;
+  }
+
+  if (!isDraft) {
+    setError("Seules les lignes d’un brouillon peuvent être supprimées.");
+    setLineToDelete(null);
+    return;
+  }
+
+  setDeletingLineId(lineToDelete.id);
+  setError(null);
+
+  try {
+    const updatedFacture = await deleteLigneFacture(lineToDelete.id);
+    const updatedLignes = await listLignesFacture(facture.id);
+
+    setFacture(updatedFacture);
+    setLignes(updatedLignes);
+    setConformite(null);
+    setLineToDelete(null);
+  } catch (apiError) {
+    setError(getApiErrorMessage(apiError));
+    setLineToDelete(null);
+  } finally {
+    setDeletingLineId(null);
+  }
+}
 
   async function handleCheckConformite() {
     if (!facture) {
@@ -413,7 +433,7 @@ export function FactureDetailPage() {
                       type="button"
                       className="table-action-btn danger"
                       disabled={deletingLineId === ligne.id}
-                      onClick={() => handleDeleteLine(ligne)}
+                      onClick={() => handleAskDeleteLine(ligne)}
                     >
                       <Trash2 size={14} />
                       {deletingLineId === ligne.id
@@ -530,6 +550,21 @@ export function FactureDetailPage() {
           )}
         </div>
       )}
+<ConfirmModal
+  open={Boolean(lineToDelete)}
+  title="Supprimer cette ligne ?"
+  message={
+    lineToDelete
+      ? `La ligne "${lineToDelete.designation}" sera supprimée du brouillon. Les totaux de la facture seront recalculés.`
+      : ""
+  }
+  confirmLabel={deletingLineId ? "Suppression..." : "Supprimer la ligne"}
+  destructive
+  isLoading={Boolean(deletingLineId)}
+  onCancel={handleCancelDeleteLine}
+  onConfirm={handleConfirmDeleteLine}
+/>
+
     </section>
   );
 }
