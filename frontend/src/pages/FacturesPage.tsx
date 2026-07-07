@@ -1,13 +1,27 @@
-import { FileText, Plus, Search } from "lucide-react";
+import {
+  ExternalLink,
+  FileText,
+  PencilLine,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { getApiErrorMessage } from "../api/http";
+import { Link, useNavigate } from "react-router-dom";
 import { listClients } from "../api/clientsApi";
-import { listFactures } from "../api/facturesApi";
+import {
+  deleteFacture,
+  getFacturePdfUrl,
+  getFactureXmlUrl,
+  listFactures,
+} from "../api/facturesApi";
+import { getApiErrorMessage } from "../api/http";
 import type { Client } from "../types/client";
 import type { Facture, FactureStatut } from "../types/facture";
 
 type StatutFilter = "all" | FactureStatut;
+
+const PAGE_SIZE = 10;
 
 const STATUS_LABELS: Record<FactureStatut, string> = {
   brouillon: "Brouillon",
@@ -50,16 +64,28 @@ const STATUS_OPTIONS: Array<{ value: StatutFilter; label: string }> = [
 ];
 
 export function FacturesPage() {
+  const navigate = useNavigate();
+
   const [factures, setFactures] = useState<Facture[]>([]);
   const [clientsById, setClientsById] = useState<Record<string, Client>>({});
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<StatutFilter>("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [deletingFactureId, setDeletingFactureId] = useState<string | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([listFactures(), listClients()])
+    let ignore = false;
+
+    void Promise.all([listFactures(), listClients()])
       .then(([facturesData, clientsData]) => {
+        if (ignore) {
+          return;
+        }
+
         const clientsMap = clientsData.reduce<Record<string, Client>>(
           (accumulator, client) => {
             accumulator[client.id] = client;
@@ -73,11 +99,23 @@ export function FacturesPage() {
         setError(null);
       })
       .catch((apiError) => {
+        if (ignore) {
+          return;
+        }
+
         setError(getApiErrorMessage(apiError));
       })
       .finally(() => {
+        if (ignore) {
+          return;
+        }
+
         setIsLoading(false);
       });
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const filteredFactures = useMemo(() => {
@@ -101,6 +139,20 @@ export function FacturesPage() {
     });
   }, [factures, clientsById, search, statutFilter]);
 
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredFactures.length / PAGE_SIZE),
+  );
+
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  const paginatedFactures = useMemo(() => {
+    const startIndex = (safeCurrentPage - 1) * PAGE_SIZE;
+    const endIndex = startIndex + PAGE_SIZE;
+
+    return filteredFactures.slice(startIndex, endIndex);
+  }, [filteredFactures, safeCurrentPage]);
+
   const totalTtc = useMemo(
     () =>
       filteredFactures.reduce(
@@ -109,6 +161,59 @@ export function FacturesPage() {
       ),
     [filteredFactures],
   );
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    setCurrentPage(1);
+  }
+
+  function handleStatusFilterChange(value: StatutFilter) {
+    setStatutFilter(value);
+    setCurrentPage(1);
+  }
+
+  function handleOpenFacture(facture: Facture) {
+    navigate(`/app/factures/${facture.id}`);
+  }
+
+  function handleOpenPdf(facture: Facture) {
+    window.open(getFacturePdfUrl(facture.id), "_blank", "noopener,noreferrer");
+  }
+
+  function handleOpenXml(facture: Facture) {
+    window.open(getFactureXmlUrl(facture.id), "_blank", "noopener,noreferrer");
+  }
+
+  async function handleDeleteDraft(facture: Facture) {
+    if (facture.statut !== "brouillon") {
+      setError("Seuls les brouillons peuvent être supprimés.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Supprimer ce brouillon ? Cette action est définitive.",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingFactureId(facture.id);
+    setError(null);
+
+    try {
+      await deleteFacture(facture.id);
+      setFactures((currentFactures) =>
+        currentFactures.filter(
+          (currentFacture) => currentFacture.id !== facture.id,
+        ),
+      );
+    } catch (apiError) {
+      setError(getApiErrorMessage(apiError));
+    } finally {
+      setDeletingFactureId(null);
+    }
+  }
 
   return (
     <section className="factures-page">
@@ -134,7 +239,7 @@ export function FacturesPage() {
             type="search"
             value={search}
             placeholder="Rechercher par client, numéro ou statut..."
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => handleSearchChange(event.target.value)}
           />
         </label>
 
@@ -142,7 +247,7 @@ export function FacturesPage() {
           className="filter-select"
           value={statutFilter}
           onChange={(event) =>
-            setStatutFilter(event.target.value as StatutFilter)
+            handleStatusFilterChange(event.target.value as StatutFilter)
           }
         >
           {STATUS_OPTIONS.map((option) => (
@@ -156,7 +261,8 @@ export function FacturesPage() {
       <div className="list-summary">
         <span>
           {filteredFactures.length} facture
-          {filteredFactures.length > 1 ? "s" : ""}
+          {filteredFactures.length > 1 ? "s" : ""} · page {safeCurrentPage}/
+          {totalPages}
         </span>
 
         <strong>{formatCurrency(totalTtc)}</strong>
@@ -175,46 +281,132 @@ export function FacturesPage() {
       )}
 
       {!isLoading && !error && filteredFactures.length > 0 && (
-        <div className="factures-table">
-          <div className="factures-table-header">
-            <span>Document</span>
-            <span>Client</span>
-            <span>Échéance</span>
-            <span>Montant TTC</span>
-            <span>Statut</span>
+        <>
+          <div className="factures-table">
+            <div className="factures-table-header">
+              <span>Document</span>
+              <span>Client</span>
+              <span>Échéance</span>
+              <span>Montant TTC</span>
+              <span>Statut</span>
+              <span>Actions</span>
+            </div>
+
+            {paginatedFactures.map((facture) => {
+              const isDraft = facture.statut === "brouillon";
+              const hasPdf = Boolean(facture.pdf_url);
+              const hasXml = Boolean(facture.xml_url);
+
+              return (
+                <article className="factures-table-row" key={facture.id}>
+                  <div className="document-cell">
+                    <div className="document-icon">
+                      <FileText size={16} />
+                    </div>
+
+                    <div>
+                      <strong>{facture.numero ?? "Brouillon"}</strong>
+                      <span>{formatFactureFormat(facture.format)}</span>
+                    </div>
+                  </div>
+
+                  <div className="muted-cell">
+                    {getClientName(facture, clientsById)}
+                  </div>
+
+                  <div className="muted-cell">
+                    {formatDate(facture.date_echeance)}
+                  </div>
+
+                  <div className="amount-cell">
+                    {formatCurrency(getFactureTotalTtc(facture))}
+                  </div>
+
+                  <div className={`status ${STATUS_VARIANTS[facture.statut]}`}>
+                    {STATUS_LABELS[facture.statut]}
+                  </div>
+
+                  <div className="table-actions">
+                    <button
+                      type="button"
+                      className="table-action-btn"
+                      onClick={() => handleOpenFacture(facture)}
+                    >
+                      <PencilLine size={14} />
+                      {isDraft ? "Reprendre" : "Ouvrir"}
+                    </button>
+
+                    {hasPdf && (
+                      <button
+                        type="button"
+                        className="table-action-btn"
+                        onClick={() => handleOpenPdf(facture)}
+                      >
+                        <ExternalLink size={14} />
+                        PDF
+                      </button>
+                    )}
+
+                    {hasXml && (
+                      <button
+                        type="button"
+                        className="table-action-btn"
+                        onClick={() => handleOpenXml(facture)}
+                      >
+                        <ExternalLink size={14} />
+                        XML
+                      </button>
+                    )}
+
+                    {isDraft && (
+                      <button
+                        type="button"
+                        className="table-action-btn danger"
+                        disabled={deletingFactureId === facture.id}
+                        onClick={() => handleDeleteDraft(facture)}
+                      >
+                        <Trash2 size={14} />
+                        {deletingFactureId === facture.id
+                          ? "Suppression..."
+                          : "Supprimer"}
+                      </button>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
 
-          {filteredFactures.map((facture) => (
-            <article className="factures-table-row" key={facture.id}>
-              <div className="document-cell">
-                <div className="document-icon">
-                  <FileText size={16} />
-                </div>
+          <div className="pagination-row">
+            <button
+              type="button"
+              className="secondary-btn"
+              disabled={safeCurrentPage <= 1}
+              onClick={() =>
+                setCurrentPage((page) => Math.max(1, page - 1))
+              }
+            >
+              Précédent
+            </button>
 
-                <div>
-                  <strong>{facture.numero ?? "Brouillon"}</strong>
-                  <span>{formatFactureFormat(facture.format)}</span>
-                </div>
-              </div>
+            <span>
+              {paginatedFactures.length} affichée
+              {paginatedFactures.length > 1 ? "s" : ""} sur{" "}
+              {filteredFactures.length}
+            </span>
 
-              <div className="muted-cell">
-                {getClientName(facture, clientsById)}
-              </div>
-
-              <div className="muted-cell">
-                {formatDate(facture.date_echeance)}
-              </div>
-
-              <div className="amount-cell">
-                {formatCurrency(getFactureTotalTtc(facture))}
-              </div>
-
-              <div className={`status ${STATUS_VARIANTS[facture.statut]}`}>
-                {STATUS_LABELS[facture.statut]}
-              </div>
-            </article>
-          ))}
-        </div>
+            <button
+              type="button"
+              className="secondary-btn"
+              disabled={safeCurrentPage >= totalPages}
+              onClick={() =>
+                setCurrentPage((page) => Math.min(totalPages, page + 1))
+              }
+            >
+              Suivant
+            </button>
+          </div>
+        </>
       )}
     </section>
   );

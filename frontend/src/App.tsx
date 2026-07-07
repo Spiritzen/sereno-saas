@@ -1,11 +1,12 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AppShell } from "./components/layout/AppShell";
+import { ClientsPage } from "./pages/ClientsPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { FactureDetailPage } from "./pages/FactureDetailPage";
 import { FacturesPage } from "./pages/FacturesPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NewInvoicePage } from "./pages/NewInvoicePage";
-import { ClientsPage } from "./pages/ClientsPage";
 
 export default function App() {
   return (
@@ -46,17 +47,28 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      
+
       <Route
-  path="/app/clients"
-  element={
-    <ProtectedRoute>
-      <AppShell>
-        <ClientsPage />
-      </AppShell>
-    </ProtectedRoute>
-  }
-/>
+        path="/app/factures/:id"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <FactureDetailPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/clients"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <ClientsPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

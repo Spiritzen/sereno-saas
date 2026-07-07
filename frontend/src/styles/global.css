@@ -1637,3 +1637,111 @@ h1 {
   background: var(--color-danger-soft);
   border-color: rgba(239, 68, 68, 0.24);
 }
+
+/* =========================
+   FACTURES ACTIONS + PAGINATION
+========================= */
+
+.factures-table-header,
+.factures-table-row {
+  grid-template-columns: 1.25fr 1.05fr 0.75fr 0.75fr 0.75fr 1.35fr;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.table-action-btn {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--color-text-primary);
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 800;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.table-action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--color-border-strong);
+}
+
+.table-action-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.table-action-btn.danger {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.table-action-btn.danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+.pagination-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  padding-top: 6px;
+}
+
+.pagination-row .secondary-btn {
+  min-height: 38px;
+  padding-inline: 14px;
+}
+/* =========================
+   FACTURE DETAIL
+========================= */
+
+.detail-lines-table .invoice-lines-header,
+.detail-lines-table .invoice-lines-row {
+  grid-template-columns: minmax(0, 2fr) 80px 120px 90px 120px 130px;
+}
+
+@media (max-width: 1000px) {
+  .factures-table-header {
+    display: none;
+  }
+
+  .factures-table-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .table-actions {
+    justify-content: flex-start;
+  }
+
+  .pagination-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .detail-lines-table .invoice-lines-header {
+    display: none;
+  }
+
+  .detail-lines-table .invoice-lines-row {
+    grid-template-columns: 1fr;
+  }
+}
