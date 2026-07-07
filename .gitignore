@@ -36,3 +36,7 @@ backend/storage/**/*.pdf
 backend/storage/**/*.xml
 # Docs / audits locaux
 /docs/
+
+# Notes personnelles / prompts
+/docs/
+/audit_fix_files/
