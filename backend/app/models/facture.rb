@@ -115,7 +115,15 @@ class Facture < ApplicationRecord
     statut == "brouillon"
   end
 
+  # Strict : uniquement le statut exact "emise".
+  # Les autres statuts post-émission sont gérés par non_brouillon?.
   def emise?
+    statut == "emise"
+  end
+
+  # Utilisé quand la règle métier veut dire :
+  # "la facture n'est plus un brouillon".
+  def non_brouillon?
     statut != "brouillon"
   end
 

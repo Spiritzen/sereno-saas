@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Avoir < ApplicationRecord
   STATUTS = %w[
     brouillon
@@ -33,15 +35,15 @@ class Avoir < ApplicationRecord
   belongs_to :client
 
   has_many :lignes_avoir,
-         class_name: "LigneAvoir",
-         foreign_key: :avoir_id,
-         inverse_of: :avoir,
-         dependent: :destroy
+           class_name: "LigneAvoir",
+           foreign_key: :avoir_id,
+           inverse_of: :avoir,
+           dependent: :destroy
 
   has_many :transmissions_pa,
-         class_name: "TransmissionPa",
-         foreign_key: :avoir_id,
-         dependent: :restrict_with_exception
+           class_name: "TransmissionPa",
+           foreign_key: :avoir_id,
+           dependent: :restrict_with_exception
 
   validates :motif, presence: true
   validates :statut, presence: true, inclusion: { in: STATUTS }
@@ -58,16 +60,16 @@ class Avoir < ApplicationRecord
   validate :empecher_modification_avoir_emis, on: :update
 
   def recalculer_totaux!
-  ht = lignes_avoir.sum(:total_ht)
-  tva = lignes_avoir.sum("total_ht * taux_tva / 100")
-  ttc = ht + tva
+    ht = lignes_avoir.sum(:total_ht)
+    tva = lignes_avoir.sum("total_ht * taux_tva / 100")
+    ttc = ht + tva
 
-  update!(
-    total_ht: ht,
-    total_tva: tva,
-    total_ttc: ttc
-  )
-end
+    update!(
+      total_ht: ht,
+      total_tva: tva,
+      total_ttc: ttc
+    )
+  end
 
   def brouillon?
     statut == "brouillon"
@@ -106,7 +108,7 @@ end
   def facture_deja_emise
     return if facture.blank?
 
-    unless facture.emise?
+    unless facture.non_brouillon?
       errors.add(:facture, "doit être émise pour pouvoir créer un avoir")
     end
   end
