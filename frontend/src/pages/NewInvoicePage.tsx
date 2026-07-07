@@ -56,17 +56,23 @@ export function NewInvoicePage() {
     !isEmitted;
 
   useEffect(() => {
-    listClients()
+    let ignore = false;
+    void listClients()
       .then((clientsData) => {
-        setClients(clientsData);
-        setError(null);
+        if (!ignore) {
+          setClients(clientsData);
+          setError(null);
+        }
       })
       .catch((apiError) => {
-        setError(getApiErrorMessage(apiError));
+        if (!ignore) setError(getApiErrorMessage(apiError));
       })
       .finally(() => {
-        setIsLoadingClients(false);
+        if (!ignore) setIsLoadingClients(false);
       });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const activeClients = useMemo(
