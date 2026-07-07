@@ -15,7 +15,9 @@ export async function getClient(id: string): Promise<Client> {
 }
 
 export async function createClient(input: ClientInput): Promise<Client> {
-  const response = await http.post<unknown>("/clients", input);
+  const response = await http.post<unknown>("/clients", {
+    client: input,
+  });
 
   return normalizeResource<Client>(response.data, "client");
 }
@@ -24,7 +26,9 @@ export async function updateClient(
   id: string,
   input: Partial<ClientInput>,
 ): Promise<Client> {
-  const response = await http.patch<unknown>(`/clients/${id}`, input);
+  const response = await http.patch<unknown>(`/clients/${id}`, {
+    client: input,
+  });
 
   return normalizeResource<Client>(response.data, "client");
 }
