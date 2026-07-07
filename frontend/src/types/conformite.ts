@@ -9,6 +9,7 @@ export type ConformiteItem = {
 export type ConformiteResult = {
   conforme: boolean;
   erreurs?: string[];
+  avertissements?: string[];
   warnings?: string[];
   controles?: ConformiteItem[];
 };

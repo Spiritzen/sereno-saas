@@ -15,26 +15,31 @@ const menuItems = [
     to: "/app/dashboard",
     label: "Dashboard",
     icon: BarChart3,
+    end: true,
   },
   {
     to: "/app/factures/new",
     label: "Nouvelle facture",
     icon: FileText,
+    end: true,
   },
   {
     to: "/app/clients",
     label: "Clients",
     icon: Users,
+    end: true,
   },
   {
     to: "/app/factures",
     label: "Factures",
     icon: WalletCards,
+    end: true,
   },
   {
     to: "/app/parametres",
     label: "Paramètres",
     icon: Settings,
+    end: true,
   },
 ];
 
@@ -61,6 +66,7 @@ export function Sidebar() {
             <NavLink
               key={item.to}
               to={item.to}
+              end={item.end}
               data-label={item.label}
               className={({ isActive }) =>
                 `nav-item ${isActive ? "active" : ""}`

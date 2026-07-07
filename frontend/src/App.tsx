@@ -2,8 +2,10 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AppShell } from "./components/layout/AppShell";
 import { DashboardPage } from "./pages/DashboardPage";
+import { FacturesPage } from "./pages/FacturesPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NewInvoicePage } from "./pages/NewInvoicePage";
+import { ClientsPage } from "./pages/ClientsPage";
 
 export default function App() {
   return (
@@ -24,6 +26,17 @@ export default function App() {
       />
 
       <Route
+        path="/app/factures"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <FacturesPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/app/factures/new"
         element={
           <ProtectedRoute>
@@ -33,6 +46,17 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      
+      <Route
+  path="/app/clients"
+  element={
+    <ProtectedRoute>
+      <AppShell>
+        <ClientsPage />
+      </AppShell>
+    </ProtectedRoute>
+  }
+/>
     </Routes>
   );
 }

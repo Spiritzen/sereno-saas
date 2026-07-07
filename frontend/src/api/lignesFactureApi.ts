@@ -1,9 +1,9 @@
+import type { Facture } from "../types/facture";
 import type {
   LigneFacture,
   LigneFactureInput,
   LigneFactureUpdateInput,
 } from "../types/ligneFacture";
-import type { Facture } from "../types/facture";
 import { http } from "./http";
 import { normalizeCollection, normalizeResource } from "./normalize";
 
@@ -21,7 +21,9 @@ export async function createLigneFacture(
 ): Promise<Facture> {
   const response = await http.post<unknown>(
     `/factures/${factureId}/lignes`,
-    input,
+    {
+      ligne_facture: input,
+    },
   );
 
   return normalizeResource<Facture>(response.data, "facture");
@@ -31,7 +33,9 @@ export async function updateLigneFacture(
   id: string,
   input: LigneFactureUpdateInput,
 ): Promise<Facture> {
-  const response = await http.patch<unknown>(`/lignes-facture/${id}`, input);
+  const response = await http.patch<unknown>(`/lignes-facture/${id}`, {
+    ligne_facture: input,
+  });
 
   return normalizeResource<Facture>(response.data, "facture");
 }

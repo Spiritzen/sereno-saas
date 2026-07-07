@@ -1,11 +1,14 @@
+import type { ConformiteResult } from "../types/conformite";
 import type {
   Facture,
   FactureInput,
   FactureUpdateInput,
 } from "../types/facture";
-import type { ConformiteResult } from "../types/conformite";
 import { http } from "./http";
 import { normalizeCollection, normalizeResource } from "./normalize";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
 
 export async function listFactures(): Promise<Facture[]> {
   const response = await http.get<unknown>("/factures");
@@ -50,4 +53,12 @@ export async function getConformiteFacture(
   const response = await http.get<unknown>(`/factures/${id}/conformite`);
 
   return normalizeResource<ConformiteResult>(response.data, "conformite");
+}
+
+export function getFacturePdfUrl(id: string) {
+  return `${API_BASE_URL}/factures/${id}/pdf`;
+}
+
+export function getFactureXmlUrl(id: string) {
+  return `${API_BASE_URL}/factures/${id}/factur-x/xml`;
 }

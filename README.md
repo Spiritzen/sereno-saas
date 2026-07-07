@@ -283,7 +283,7 @@ Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »
 - ✅ Générateur Factur-X (PDF/A-3 + CII)
 - ✅ Numérotation séquentielle protégée
 - ✅ Moteur de conformité pré-émission
-- [ ] Dashboard conformité + écran « facture en 2 clics »
+- ✅ Dashboard conformité + écran « facture en 2 clics »
 
 ### ⏳ V1.1 — Transmission & cycle de vie
 - [ ] Intégration Plateforme Agréée (adapter)

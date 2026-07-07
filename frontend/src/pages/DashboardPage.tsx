@@ -6,6 +6,8 @@ import { listFactures } from "../api/facturesApi";
 import type { Client } from "../types/client";
 import type { Facture, FactureStatut } from "../types/facture";
 
+const RECENT_FACTURES_LIMIT = 5;
+
 const STATUS_LABELS: Record<FactureStatut, string> = {
   brouillon: "Brouillon",
   emise: "Émise",
@@ -20,7 +22,10 @@ const STATUS_LABELS: Record<FactureStatut, string> = {
   annulee: "Annulée",
 };
 
-const STATUS_VARIANTS: Record<FactureStatut, "success" | "info" | "warning" | "danger"> = {
+const STATUS_VARIANTS: Record<
+  FactureStatut,
+  "success" | "info" | "warning" | "danger"
+> = {
   brouillon: "warning",
   emise: "warning",
   deposee: "info",
@@ -35,42 +40,42 @@ const STATUS_VARIANTS: Record<FactureStatut, "success" | "info" | "warning" | "d
 };
 
 export function DashboardPage() {
-const [factures, setFactures] = useState<Facture[]>([]);
-const [clientsById, setClientsById] = useState<Record<string, Client>>({});
-const [isLoading, setIsLoading] = useState(true);
-const [error, setError] = useState<string | null>(null);
+  const [factures, setFactures] = useState<Facture[]>([]);
+  const [clientsById, setClientsById] = useState<Record<string, Client>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-useEffect(() => {
-  Promise.all([listFactures(), listClients()])
-    .then(([facturesData, clientsData]) => {
-      const clientsMap = clientsData.reduce<Record<string, Client>>(
-        (accumulator, client) => {
-          accumulator[client.id] = client;
-          return accumulator;
-        },
-        {},
-      );
+  useEffect(() => {
+    Promise.all([listFactures(), listClients()])
+      .then(([facturesData, clientsData]) => {
+        const clientsMap = clientsData.reduce<Record<string, Client>>(
+          (accumulator, client) => {
+            accumulator[client.id] = client;
+            return accumulator;
+          },
+          {},
+        );
 
-      setFactures(facturesData);
-      setClientsById(clientsMap);
-      setError(null);
-    })
-    .catch((apiError) => {
-      setError(
-        apiError instanceof Error
-          ? apiError.message
-          : "Impossible de charger le dashboard",
-      );
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
-}, []);
+        setFactures(facturesData);
+        setClientsById(clientsMap);
+        setError(null);
+      })
+      .catch((apiError) => {
+        setError(
+          apiError instanceof Error
+            ? apiError.message
+            : "Impossible de charger le dashboard",
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   const kpis = useMemo(() => buildDashboardKpis(factures), [factures]);
 
   const recentFactures = useMemo(
-    () => factures.slice(0, 5),
+    () => factures.slice(0, RECENT_FACTURES_LIMIT),
     [factures],
   );
 
@@ -93,6 +98,7 @@ useEffect(() => {
           <div className="compliance-icon">
             <CheckCircle2 size={20} />
           </div>
+
           <div>
             <strong>Vous êtes conforme</strong>
             <p className="eyebrow">
@@ -137,43 +143,39 @@ useEffect(() => {
         </div>
 
         {isLoading && (
-          <div className="state-card">
-            Chargement des factures...
-          </div>
+          <div className="state-card">Chargement des factures...</div>
         )}
 
-        {error && (
-          <div className="state-card error">
-            {error}
-          </div>
-        )}
+        {error && <div className="state-card error">{error}</div>}
 
         {!isLoading && !error && recentFactures.length === 0 && (
-          <div className="state-card">
-            Aucune facture pour le moment.
-          </div>
+          <div className="state-card">Aucune facture pour le moment.</div>
         )}
 
         {!isLoading && !error && recentFactures.length > 0 && (
           <div className="invoice-list">
-            {recentFactures.map((facture) => (
-              <div className="invoice-row" key={facture.id}>
-                <div>
-                  <strong>{getClientName(facture, clientsById)}</strong>
-                  <span className="invoice-meta">
-                    {facture.numero ?? "Brouillon"} · {formatFactureFormat(facture.format)}
-                  </span>
-                </div>
+            {recentFactures.map((facture) => {
+              const totalTtc = getFactureTotalTtc(facture);
 
-                <div className="amount">
-                  {formatCurrency(toNumber(facture.total_ttc))}
-                </div>
+              return (
+                <div className="invoice-row" key={facture.id}>
+                  <div>
+                    <strong>{getClientName(facture, clientsById)}</strong>
 
-                <div className={`status ${STATUS_VARIANTS[facture.statut]}`}>
-                  {STATUS_LABELS[facture.statut]}
+                    <span className="invoice-meta">
+                      {facture.numero ?? "Brouillon"} ·{" "}
+                      {formatFactureFormat(facture.format)}
+                    </span>
+                  </div>
+
+                  <div className="amount">{formatCurrency(totalTtc)}</div>
+
+                  <div className={`status ${STATUS_VARIANTS[facture.statut]}`}>
+                    {STATUS_LABELS[facture.statut]}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
@@ -182,26 +184,26 @@ useEffect(() => {
 }
 
 function buildDashboardKpis(factures: Facture[]) {
-  const encaisse = factures
+  const facturesMetier = factures.filter(isFactureMetier);
+
+  const encaisse = facturesMetier
     .filter((facture) => facture.statut === "encaissee")
-    .reduce((sum, facture) => sum + toNumber(facture.total_ttc), 0);
+    .reduce((sum, facture) => sum + getFactureTotalTtc(facture), 0);
 
-  const enAttente = factures
-    .filter((facture) =>
-      ["emise", "deposee", "recue", "mise_a_disposition", "approuvee"].includes(
-        facture.statut,
-      ),
+  const enRetard = facturesMetier
+    .filter(isFactureEnRetard)
+    .reduce((sum, facture) => sum + getFactureTotalTtc(facture), 0);
+
+  const enAttente = facturesMetier
+    .filter(
+      (facture) => isFactureEnAttente(facture) && !isFactureEnRetard(facture),
     )
-    .reduce((sum, facture) => sum + toNumber(facture.total_ttc), 0);
+    .reduce((sum, facture) => sum + getFactureTotalTtc(facture), 0);
 
-  const enRetard = factures
-    .filter((facture) => isFactureEnRetard(facture))
-    .reduce((sum, facture) => sum + toNumber(facture.total_ttc), 0);
-
-  const facturesEmises = factures.filter((facture) => facture.statut !== "brouillon");
+  const facturesEmises = facturesMetier.filter(isFactureEmise);
 
   const facturesAvecArchives = facturesEmises.filter(
-    (facture) => facture.pdf_url && facture.xml_url,
+    (facture) => Boolean(facture.pdf_url) && Boolean(facture.xml_url),
   );
 
   const conformite =
@@ -217,25 +219,52 @@ function buildDashboardKpis(factures: Facture[]) {
   };
 }
 
+function isFactureMetier(facture: Facture) {
+  return getFactureTotalTtc(facture) > 0;
+}
+
+function isFactureEmise(facture: Facture) {
+  return facture.statut !== "brouillon";
+}
+
+function isFactureEnAttente(facture: Facture) {
+  return [
+    "emise",
+    "deposee",
+    "recue",
+    "mise_a_disposition",
+    "approuvee",
+    "en_litige",
+  ].includes(facture.statut);
+}
+
 function isFactureEnRetard(facture: Facture) {
+  if (!isFactureMetier(facture)) {
+    return false;
+  }
+
+  if (!isFactureEnAttente(facture)) {
+    return false;
+  }
+
   if (!facture.date_echeance) {
     return false;
   }
 
-  if (["encaissee", "archivee", "annulee"].includes(facture.statut)) {
-    return false;
-  }
-
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const dateEcheance = new Date(facture.date_echeance);
+  dateEcheance.setHours(0, 0, 0, 0);
 
   return dateEcheance < today;
 }
 
-function getClientName(
-  facture: Facture,
-  clientsById: Record<string, Client>,
-) {
+function getFactureTotalTtc(facture: Facture) {
+  return toNumber(facture.total_ttc);
+}
+
+function getClientName(facture: Facture, clientsById: Record<string, Client>) {
   if (facture.client?.raison_sociale) {
     return facture.client.raison_sociale;
   }
@@ -260,14 +289,19 @@ function formatFactureFormat(format: Facture["format"]) {
 }
 
 function toNumber(value: string | number | null | undefined) {
-  return Number(value ?? 0);
+  const parsed = Number(value ?? 0);
+
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function formatCurrency(value: number) {
+  const hasCents = Math.abs(value % 1) > 0;
+
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "EUR",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: hasCents ? 2 : 0,
+    maximumFractionDigits: hasCents ? 2 : 0,
   }).format(value);
 }
 
