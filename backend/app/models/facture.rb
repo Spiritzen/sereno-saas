@@ -92,6 +92,7 @@ class Facture < ApplicationRecord
             numericality: { greater_than_or_equal_to: 0 }
 
   validate :client_appartient_a_la_meme_organisation
+  validate :client_non_archive_si_brouillon
   validate :devis_appartient_a_la_meme_organisation
   validate :devis_appartient_au_meme_client
   validate :numero_requis_si_facture_emise
@@ -100,15 +101,15 @@ class Facture < ApplicationRecord
   validate :date_echeance_apres_date_emission
   validate :empecher_modification_document_emis, on: :update
 
- def recalculer_totaux!
-  totaux = FactureTotalsService.new(facture: self).call
+  def recalculer_totaux!
+    totaux = FactureTotalsService.new(facture: self).call
 
-  update!(
-    total_ht: totaux.total_ht,
-    total_tva: totaux.total_tva,
-    total_ttc: totaux.total_ttc
-  )
-end
+    update!(
+      total_ht: totaux.total_ht,
+      total_tva: totaux.total_tva,
+      total_ttc: totaux.total_ttc
+    )
+  end
 
   def brouillon?
     statut == "brouillon"
@@ -126,6 +127,14 @@ end
     if client.organisation_id != organisation_id
       errors.add(:client, "doit appartenir à la même organisation que la facture")
     end
+  end
+
+  def client_non_archive_si_brouillon
+    return unless brouillon?
+    return if client.blank?
+    return unless client.archive?
+
+    errors.add(:client, "est archivé et ne peut pas recevoir de nouvelle facture")
   end
 
   def devis_appartient_a_la_meme_organisation

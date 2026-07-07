@@ -108,7 +108,7 @@ class FactureConformiteService
       @avertissements << "Le client n'a pas d'identifiant de routage PA"
     end
 
-    @avertissements << "Le client est archivé" if client.respond_to?(:archive?) && client.archive?
+    @erreurs << "Le client est archivé : impossible d'émettre une facture" if client.archive?
   end
 
   def verifier_siret_client_entreprise(client)

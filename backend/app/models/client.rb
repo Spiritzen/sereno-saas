@@ -1,16 +1,21 @@
+# frozen_string_literal: true
+
 class Client < ApplicationRecord
   self.inheritance_column = :_type_disabled
 
   belongs_to :organisation
+
   has_many :contacts, dependent: :destroy
-has_many :devis,
-         class_name: "Devis",
-         foreign_key: :client_id,
-         inverse_of: :client,
-         dependent: :restrict_with_exception
-has_many :factures, dependent: :restrict_with_exception
-has_many :acomptes, dependent: :restrict_with_exception
-has_many :avoirs, dependent: :restrict_with_exception
+
+  has_many :devis,
+           class_name: "Devis",
+           foreign_key: :client_id,
+           inverse_of: :client,
+           dependent: :restrict_with_exception
+
+  has_many :factures, dependent: :restrict_with_exception
+  has_many :acomptes, dependent: :restrict_with_exception
+  has_many :avoirs, dependent: :restrict_with_exception
 
   validates :type, presence: true, inclusion: {
     in: %w[entreprise particulier public]
@@ -29,6 +34,14 @@ has_many :avoirs, dependent: :restrict_with_exception
   validates :siret, length: { is: 14 }, allow_blank: true
 
   validate :siret_requis_pour_entreprise_ou_public
+
+  def actif?
+    statut == "actif"
+  end
+
+  def archive?
+    statut == "archive"
+  end
 
   private
 

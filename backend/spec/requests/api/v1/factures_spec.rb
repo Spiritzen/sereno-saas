@@ -59,6 +59,33 @@ RSpec.describe "Api::V1::Factures", type: :request do
       authenticate_as(utilisateur, organisation)
     end
 
+    it "autorise la création d'une facture brouillon pour un client actif" do
+      client = create(:client, organisation: organisation, statut: "actif")
+
+      post "/api/v1/factures", params: {
+        facture: {
+          client_id: client.id
+        }
+      }
+
+      expect(response).to have_http_status(:created)
+      expect(Facture.last.client_id).to eq(client.id)
+      expect(Facture.last.statut).to eq("brouillon")
+    end
+
+    it "refuse la création d'une facture brouillon pour un client archivé" do
+      client = create(:client, organisation: organisation, statut: "archive")
+
+      post "/api/v1/factures", params: {
+        facture: {
+          client_id: client.id
+        }
+      }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to match(/archiv/i)
+    end
+
     it "autorise la modification d'une facture brouillon" do
       facture = create(:facture, organisation: organisation)
       nouvelle_echeance = 45.days.from_now.to_date
@@ -84,6 +111,31 @@ RSpec.describe "Api::V1::Factures", type: :request do
 
       expect(response).to have_http_status(:no_content)
       expect(Facture.exists?(facture.id)).to be(false)
+    end
+  end
+
+  describe "émission" do
+    let(:organisation) { create(:organisation) }
+    let(:utilisateur) { create(:utilisateur, organisation: organisation, role: "owner") }
+
+    before do
+      authenticate_as(utilisateur, organisation)
+    end
+
+    it "refuse d'émettre une facture pour un client archivé via API directe" do
+      facture = create(:facture, :avec_ligne, organisation: organisation)
+      client_archive = create(:client, organisation: organisation, statut: "archive")
+
+      facture.update_columns(client_id: client_archive.id)
+
+      post "/api/v1/factures/#{facture.id}/emettre"
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to match(/archiv/i)
+
+      facture.reload
+      expect(facture.statut).to eq("brouillon")
+      expect(facture.numero).to be_nil
     end
   end
 
