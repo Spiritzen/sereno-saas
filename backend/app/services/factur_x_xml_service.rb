@@ -166,6 +166,12 @@ class FacturXXmlService
 
       adresse(xml, @organisation)
 
+      if valeur(@organisation, :email).present?
+        xml["ram"].URIUniversalCommunication do
+          xml["ram"].URIID valeur(@organisation, :email), schemeID: "EM"
+        end
+      end
+
       if numero_tva_vendeur_a_afficher?
         xml["ram"].SpecifiedTaxRegistration do
           xml["ram"].ID valeur(@organisation, :numero_tva), schemeID: "VA"
@@ -186,6 +192,12 @@ class FacturXXmlService
       end
 
       adresse(xml, @client)
+
+      if valeur(@client, :email).present?
+        xml["ram"].URIUniversalCommunication do
+          xml["ram"].URIID valeur(@client, :email), schemeID: "EM"
+        end
+      end
 
       if valeur(@client, :numero_tva).present?
         xml["ram"].SpecifiedTaxRegistration do

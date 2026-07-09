@@ -112,6 +112,51 @@ RSpec.describe "Génération Factur-X — garde-fou interne", type: :integration
       end
     end
 
+    it "adresses électroniques BT-34 (vendeur) et BT-49 (acheteur) France CTC : URIUniversalCommunication présent, schemeID EM, ordre XSD respecté (BR-FR-12/BR-FR-13)" do
+      facture_emise = FactureEmissionService.new(facture: facture, utilisateur: utilisateur).call
+
+      doc = Nokogiri::XML(File.read(Rails.root.join(facture_emise.xml_url)))
+      doc.remove_namespaces!
+
+      vendeur = doc.at_xpath("//SellerTradeParty")
+      acheteur = doc.at_xpath("//BuyerTradeParty")
+
+      uri_vendeur = vendeur.at_xpath("URIUniversalCommunication/URIID")
+      uri_acheteur = acheteur.at_xpath("URIUniversalCommunication/URIID")
+
+      expect(uri_vendeur).to be_present
+      expect(uri_vendeur.text).to eq(organisation.email)
+      expect(uri_vendeur["schemeID"]).to eq("EM")
+
+      expect(uri_acheteur).to be_present
+      expect(uri_acheteur.text).to eq(client.email)
+      expect(uri_acheteur["schemeID"]).to eq("EM")
+
+      enfants_vendeur = vendeur.elements.map(&:name)
+      expect(enfants_vendeur.index("URIUniversalCommunication")).to be > enfants_vendeur.index("PostalTradeAddress")
+      expect(enfants_vendeur.index("URIUniversalCommunication")).to be < enfants_vendeur.index("SpecifiedTaxRegistration")
+
+      enfants_acheteur = acheteur.elements.map(&:name)
+      expect(enfants_acheteur.index("URIUniversalCommunication")).to be > enfants_acheteur.index("PostalTradeAddress")
+      expect(enfants_acheteur.index("URIUniversalCommunication")).to be < enfants_acheteur.index("SpecifiedTaxRegistration")
+    end
+
+    it "n'émet pas URIUniversalCommunication acheteur si le client n'a pas d'email (donnée absente, pas de comportement inventé)" do
+      client_sans_email = create(:client, organisation: organisation, email: nil)
+      facture_sans_email_acheteur = create(:facture, :avec_ligne, organisation: organisation, client: client_sans_email)
+
+      facture_emise = FactureEmissionService.new(facture: facture_sans_email_acheteur, utilisateur: utilisateur).call
+
+      doc = Nokogiri::XML(File.read(Rails.root.join(facture_emise.xml_url)))
+      doc.remove_namespaces!
+
+      acheteur = doc.at_xpath("//BuyerTradeParty")
+
+      expect(acheteur.at_xpath("URIUniversalCommunication")).to be_nil
+    ensure
+      FileUtils.rm_rf(Rails.root.join("storage", "factures", facture_sans_email_acheteur.id.to_s)) if facture_sans_email_acheteur
+    end
+
     it "round-trip : le XML embarqué dans le PDF/A-3 est non vide, parseable, et identique au XML de référence sur disque" do
       facture_emise = FactureEmissionService.new(facture: facture, utilisateur: utilisateur).call
 
