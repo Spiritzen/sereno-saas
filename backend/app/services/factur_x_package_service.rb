@@ -45,7 +45,7 @@ end
 
     if @icc_profile_path.present? && !File.file?(@icc_profile_path)
   raise PackagingImpossibleError, "Le profil ICC est introuvable"
-end
+    end
   end
 
   def emballer_pdf
@@ -63,7 +63,7 @@ ecrire_pdf_package(document)
   end
 
   def avec_pdf_source_temporaire
-    fichier = Tempfile.new(["sereno-pdf-source", ".pdf"])
+    fichier = Tempfile.new([ "sereno-pdf-source", ".pdf" ])
     fichier.binmode
     fichier.write(@pdf_bytes)
     fichier.flush
@@ -72,7 +72,7 @@ ecrire_pdf_package(document)
   ensure
     fichier&.close!
   end
-  
+
  def forcer_version_pdf_17(document)
   appliquer_version = lambda do
     document.version = "1.7"
@@ -106,10 +106,10 @@ end
   end
 
   def configurer_catalogue_factur_x(document, file_spec)
-    document.catalog[:AF] = [file_spec]
+    document.catalog[:AF] = [ file_spec ]
     document.catalog[:PageMode] = :UseAttachments
   end
-  
+
   def ajouter_metadata_xmp(document)
   metadata_stream = document.add(
     {
@@ -229,11 +229,11 @@ end
     }
   )
 
-  document.catalog[:OutputIntents] = [output_intent]
+  document.catalog[:OutputIntents] = [ output_intent ]
 end
 
   def ecrire_pdf_package(document)
-    fichier = Tempfile.new(["sereno-facturx-package", ".pdf"])
+    fichier = Tempfile.new([ "sereno-facturx-package", ".pdf" ])
     fichier.binmode
     chemin = fichier.path
     fichier.close

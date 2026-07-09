@@ -292,7 +292,7 @@ class FacturePdfService
 
     "#{texte[0...max_length]}..."
   end
-  
+
     def charger_polices!
     return if @font_regular.present? && @font_bold.present?
 

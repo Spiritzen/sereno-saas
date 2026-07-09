@@ -17,9 +17,9 @@ RSpec.describe FacturXPackageService do
     page = document.pages.add
     canvas = page.canvas
     canvas.font("Helvetica", size: 12)
-    canvas.text("PDF source Sereno", at: [50, 750])
+    canvas.text("PDF source Sereno", at: [ 50, 750 ])
 
-    fichier = Tempfile.new(["sereno-source", ".pdf"])
+    fichier = Tempfile.new([ "sereno-source", ".pdf" ])
     fichier.binmode
     chemin = fichier.path
     fichier.close
@@ -32,7 +32,7 @@ RSpec.describe FacturXPackageService do
   end
 
   def ouvrir_pdf(bytes)
-    fichier = Tempfile.new(["sereno-package", ".pdf"])
+    fichier = Tempfile.new([ "sereno-package", ".pdf" ])
     fichier.binmode
     fichier.write(bytes)
     fichier.flush
@@ -99,7 +99,7 @@ RSpec.describe FacturXPackageService do
       end.not_to raise_error
     end
   end
-  
+
   it "ajoute les métadonnées XMP PDF/A-3 et Factur-X" do
   pdf_package = described_class.new(
     pdf_bytes: pdf_source_bytes,
