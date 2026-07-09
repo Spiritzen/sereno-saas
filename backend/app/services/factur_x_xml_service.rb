@@ -142,11 +142,12 @@ class FacturXXmlService
 
   def vendeur(xml)
     xml["ram"].SellerTradeParty do
+      xml["ram"].GlobalID valeur(@organisation, :siret), schemeID: "0009"
+
       xml["ram"].Name valeur(@organisation, :raison_sociale)
 
       xml["ram"].SpecifiedLegalOrganization do
-        xml["ram"].ID valeur(@organisation, :siret),
-                      schemeID: scheme_id_identifiant_legal(valeur(@organisation, :siret))
+        xml["ram"].ID siren_vendeur, schemeID: "0002"
       end
 
       contact_vendeur(xml)
@@ -349,6 +350,10 @@ end
     return "0009" if identifiant_normalise.length == 14
 
     "0009"
+  end
+
+  def siren_vendeur
+    valeur(@organisation, :siret).to_s.first(9)
   end
 
   def format_date(date)

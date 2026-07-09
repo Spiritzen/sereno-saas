@@ -72,6 +72,29 @@ RSpec.describe "Génération Factur-X — garde-fou interne", type: :integration
       expect(doc.at_xpath("//SpecifiedTradeSettlementHeaderMonetarySummation/TaxTotalAmount")).to be_present
     end
 
+    it "SellerTradeParty : GlobalID (SIRET) et SpecifiedLegalOrganization/ID (SIREN) conformes France CTC (BR-FR-09/BR-FR-10)" do
+      facture_emise = FactureEmissionService.new(facture: facture, utilisateur: utilisateur).call
+
+      doc = Nokogiri::XML(File.read(Rails.root.join(facture_emise.xml_url)))
+      doc.remove_namespaces!
+
+      vendeur = doc.at_xpath("//SellerTradeParty")
+      global_id = vendeur.at_xpath("GlobalID")
+      siren = vendeur.at_xpath("SpecifiedLegalOrganization/ID")
+
+      expect(global_id).to be_present
+      expect(global_id.text).to eq(organisation.siret)
+      expect(global_id["schemeID"]).to eq("0009")
+
+      expect(siren).to be_present
+      expect(siren.text).to match(/\A\d{9}\z/)
+      expect(siren["schemeID"]).to eq("0002")
+      expect(siren.text).to eq(organisation.siret.first(9))
+
+      enfants_ordonnes = vendeur.elements.map(&:name)
+      expect(enfants_ordonnes.index("GlobalID")).to be < enfants_ordonnes.index("Name")
+    end
+
     it "round-trip : le XML embarqué dans le PDF/A-3 est non vide, parseable, et identique au XML de référence sur disque" do
       facture_emise = FactureEmissionService.new(facture: facture, utilisateur: utilisateur).call
 
