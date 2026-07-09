@@ -3,7 +3,7 @@
 class FacturXXmlService
   class GenerationImpossibleError < StandardError; end
 
-  PROFILE_ID = "urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:en16931"
+  PROFILE_ID = "urn:cen.eu:en16931:2017"
   BUSINESS_PROCESS_ID = "A1"
   DOCUMENT_TYPE_CODE = "380" # 380 = facture commerciale
   PAYMENT_MEANS_TRANSFER_CODE = "58" # 58 = virement SEPA
