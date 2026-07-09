@@ -27,8 +27,15 @@ Le pack contient également le schéma CII générique D22B
 CII générique.
 
 ### `schematron/`
-Règles **Schematron EN16931 / CIUS-FR**, selon ce que fournit le pack officiel
-FNFE-MPE (validation des règles métier BR-*, au-delà de la simple structure XSD).
+Règles **Schematron** de validation des règles métier BR-*/BR-CO-* EN16931,
+au-delà de la simple structure XSD.
+
+`schematron/en16931/` : `Factur-X_1.09_EN16931.sch` — Schematron officiel du
+**profil Factur-X 1.09 EN16931** (queryBinding `xslt2`, titre *"Schema for
+Factur-X; 1.09; EN16931-COMPLIANT (FULLY)"*). **Importé** (voir provenance
+ci-dessous). Validation non encore branchée — le choix du moteur Schematron
+(Mustang, XSLT2 direct, etc.) et son exécution sont prévus aux Sprints 1D-B /
+1D-C.
 
 ## Source attendue
 
@@ -65,9 +72,12 @@ ou approximé.
   - `Factur-X_1.09_EN16931_urn_un_unece_uncefact_data_standard_QualifiedDataType_100.xsd`
   - `Factur-X_1.09_EN16931_urn_un_unece_uncefact_data_standard_ReusableAggregateBusinessInformationEntity_100.xsd`
   - `Factur-X_1.09_EN16931_urn_un_unece_uncefact_data_standard_UnqualifiedDataType_100.xsd`
-- **Non importé à ce stade** : le Schematron `Factur-X_1.09_EN16931.sch` (présent
-  dans le pack, même dossier) — import prévu au Sprint 1D dans
-  `backend/vendor/facturx/schematron/en16931/`.
-- **Règle** : ces fichiers sont des artefacts tiers vendored tels quels. Ne pas
-  les modifier à la main — toute mise à jour doit venir d'une nouvelle version
-  du pack officiel FeRD.
+- **Schematron importé** (dans `schematron/en16931/`, Sprint 1D-A) :
+  - `Factur-X_1.09_EN16931.sch`
+  - **Profil** : EN16931
+  - **Source dans le pack** : `Schema/3_Factur-X_1.09_EN16931/Factur-X_1.09_EN16931.sch`
+  - **Note** : validation Schematron non encore branchée à ce stade — prévue
+    aux Sprints 1D-B (choix du moteur/validateur) et 1D-C (exécution réelle).
+- **Règle** : ces fichiers (XSD et Schematron) sont des artefacts tiers vendored
+  tels quels. Ne pas les modifier à la main — toute mise à jour doit venir
+  d'une nouvelle version du pack officiel FeRD.
