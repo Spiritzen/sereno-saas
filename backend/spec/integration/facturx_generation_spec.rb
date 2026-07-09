@@ -18,7 +18,7 @@ RSpec.describe "Génération Factur-X — garde-fou interne", type: :integration
   DATE_EMISSION_FIGEE = Date.new(2026, 1, 15)
 
   def extraire_xml_embarque(pdf_bytes)
-    fichier = Tempfile.new(["sereno-facturx-roundtrip", ".pdf"])
+    fichier = Tempfile.new([ "sereno-facturx-roundtrip", ".pdf" ])
     fichier.binmode
     fichier.write(pdf_bytes)
     fichier.flush
