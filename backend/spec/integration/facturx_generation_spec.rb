@@ -65,6 +65,7 @@ RSpec.describe "Génération Factur-X — garde-fou interne", type: :integration
       doc.remove_namespaces!
 
       expect(xml_disque).to include("CrossIndustryInvoice")
+      expect(doc.at_xpath("//BusinessProcessSpecifiedDocumentContextParameter/ID")&.text).to eq("S1")
       expect(doc.at_xpath("//GuidelineSpecifiedDocumentContextParameter/ID")&.text).to eq("urn:cen.eu:en16931:2017")
       expect(doc.at_xpath("//ExchangedDocument/TypeCode")&.text).to eq("380")
       expect(doc.xpath("//IncludedSupplyChainTradeLineItem").size).to be >= 1

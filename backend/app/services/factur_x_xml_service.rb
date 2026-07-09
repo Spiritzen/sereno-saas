@@ -4,7 +4,10 @@ class FacturXXmlService
   class GenerationImpossibleError < StandardError; end
 
   PROFILE_ID = "urn:cen.eu:en16931:2017"
-  BUSINESS_PROCESS_ID = "A1"
+  # Cadre de facturation France CTC (BT-23, BR-FR-08) : "S1" = dépôt d'une
+  # facture de prestation de service standard (AFNOR XP Z12-012). Sereno
+  # cible les prestataires de services indépendants (pas de vente de biens).
+  BUSINESS_PROCESS_ID = "S1"
   DOCUMENT_TYPE_CODE = "380" # 380 = facture commerciale
   PAYMENT_MEANS_TRANSFER_CODE = "58" # 58 = virement SEPA
   DEFAULT_UNIT_CODE = "C62" # C62 = unité
