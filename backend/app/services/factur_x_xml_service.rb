@@ -10,6 +10,11 @@ class FacturXXmlService
   DEFAULT_UNIT_CODE = "C62" # C62 = unité
   ZERO_AMOUNT = "0.00"
 
+  # Mentions BT-22 obligatoires (France CTC / Flux2, BR-FR-05).
+  MENTION_FRAIS_RECOUVREMENT = "Indemnité forfaitaire pour frais de recouvrement : 40 €."
+  MENTION_PENALITES_RETARD = "Pénalités de retard exigibles en cas de paiement après échéance, selon les conditions de paiement applicables."
+  MENTION_ESCOMPTE = "Aucun escompte accordé pour paiement anticipé."
+
   def initialize(facture:)
     @facture = facture
     @organisation = facture.organisation
@@ -74,6 +79,13 @@ class FacturXXmlService
       notes_document.each do |note|
         xml["ram"].IncludedNote do
           xml["ram"].Content note
+        end
+      end
+
+      notes_document_ctc.each do |note|
+        xml["ram"].IncludedNote do
+          xml["ram"].Content note[:content]
+          xml["ram"].SubjectCode note[:subject_code]
         end
       end
     end
@@ -296,6 +308,14 @@ end
 
   def mention_exoneration
     "TVA non applicable, art. 293 B du CGI"
+  end
+
+  def notes_document_ctc
+    [
+      { content: MENTION_FRAIS_RECOUVREMENT, subject_code: "PMT" },
+      { content: MENTION_PENALITES_RETARD, subject_code: "PMD" },
+      { content: MENTION_ESCOMPTE, subject_code: "AAB" }
+    ]
   end
 
   def franchise_tva?

@@ -95,6 +95,23 @@ RSpec.describe "Génération Factur-X — garde-fou interne", type: :integration
       expect(enfants_ordonnes.index("GlobalID")).to be < enfants_ordonnes.index("Name")
     end
 
+    it "mentions BT-22 structurées France CTC : PMT, PMD, AAB présentes avec Content et ordre XSD respecté (BR-FR-05)" do
+      facture_emise = FactureEmissionService.new(facture: facture, utilisateur: utilisateur).call
+
+      doc = Nokogiri::XML(File.read(Rails.root.join(facture_emise.xml_url)))
+      doc.remove_namespaces!
+
+      %w[PMT PMD AAB].each do |code|
+        note = doc.xpath("//ExchangedDocument/IncludedNote[SubjectCode = '#{code}']").first
+
+        expect(note).to be_present, "IncludedNote avec SubjectCode=#{code} introuvable"
+        expect(note.at_xpath("Content").text).to be_present
+
+        enfants = note.elements.map(&:name)
+        expect(enfants).to eq(%w[Content SubjectCode])
+      end
+    end
+
     it "round-trip : le XML embarqué dans le PDF/A-3 est non vide, parseable, et identique au XML de référence sur disque" do
       facture_emise = FactureEmissionService.new(facture: facture, utilisateur: utilisateur).call
 
