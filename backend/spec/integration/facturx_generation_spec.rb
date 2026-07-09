@@ -103,6 +103,35 @@ RSpec.describe "Génération Factur-X — garde-fou interne", type: :integration
       expect(facture_emise.total_tva).to eq(BigDecimal("40.00"))
       expect(facture_emise.total_ttc).to eq(BigDecimal("240.00"))
     end
+
+    it "valide contre le XSD officiel Factur-X 1.09 EN16931 vendoré (Sprint 1C-E)" do
+      facture_emise = FactureEmissionService.new(facture: facture, utilisateur: utilisateur).call
+
+      xsd_path = Rails.root.join("vendor", "facturx", "xsd", "en16931", "Factur-X_1.09_EN16931.xsd")
+      schema = Nokogiri::XML::Schema.new(File.open(xsd_path))
+      document = Nokogiri::XML(File.read(Rails.root.join(facture_emise.xml_url)))
+
+      erreurs = schema.validate(document)
+
+      expect(erreurs.map(&:message)).to eq([])
+    end
+
+    it "SellerTradeParty : SpecifiedLegalOrganization apparaît avant DefinedTradeContact (ordre XSD TradePartyType)" do
+      facture_emise = FactureEmissionService.new(facture: facture, utilisateur: utilisateur).call
+
+      doc = Nokogiri::XML(File.read(Rails.root.join(facture_emise.xml_url)))
+      doc.remove_namespaces!
+
+      vendeur = doc.at_xpath("//SellerTradeParty")
+      enfants_ordonnes = vendeur.elements.map(&:name)
+
+      index_legal_organization = enfants_ordonnes.index("SpecifiedLegalOrganization")
+      index_contact = enfants_ordonnes.index("DefinedTradeContact")
+
+      expect(index_legal_organization).not_to be_nil
+      expect(index_contact).not_to be_nil
+      expect(index_legal_organization).to be < index_contact
+    end
   end
 
   describe "chemin refusé — facture non conforme" do

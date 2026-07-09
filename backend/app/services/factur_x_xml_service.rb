@@ -144,12 +144,12 @@ class FacturXXmlService
     xml["ram"].SellerTradeParty do
       xml["ram"].Name valeur(@organisation, :raison_sociale)
 
-      contact_vendeur(xml)
-
       xml["ram"].SpecifiedLegalOrganization do
         xml["ram"].ID valeur(@organisation, :siret),
                       schemeID: scheme_id_identifiant_legal(valeur(@organisation, :siret))
       end
+
+      contact_vendeur(xml)
 
       adresse(xml, @organisation)
 
