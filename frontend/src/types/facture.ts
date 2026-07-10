@@ -36,6 +36,7 @@ export type Facture = {
   pdf_url: string | null;
   xml_url: string | null;
   emise_at: string | null;
+  created_at?: string | null;
   lignes_facture?: LigneFacture[];
 };
 

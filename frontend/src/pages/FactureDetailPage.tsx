@@ -23,6 +23,7 @@ import {
   listLignesFacture,
 } from "../api/lignesFactureApi";
 import { ConfirmModal } from "../components/ConfirmModal";
+import { InvoiceLifecycleTimeline } from "../components/InvoiceLifecycleTimeline";
 import type { ConformiteResult } from "../types/conformite";
 import type { Facture } from "../types/facture";
 import type { LigneFacture } from "../types/ligneFacture";
@@ -310,6 +311,15 @@ export function FactureDetailPage() {
 
       {!isLoading && !facture && !error && (
         <div className="state-card">Facture introuvable.</div>
+      )}
+
+      {!isLoading && facture && (
+        <InvoiceLifecycleTimeline
+          status={facture.statut}
+          createdAt={facture.created_at}
+          emittedAt={facture.emise_at}
+          invoiceNumber={facture.numero}
+        />
       )}
 
       {!isLoading && facture && (
