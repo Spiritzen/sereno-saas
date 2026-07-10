@@ -3,10 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listClients } from "../api/clientsApi";
 import { listFactures } from "../api/facturesApi";
+import { useAuth } from "../context/useAuth";
 import type { Client } from "../types/client";
 import type { Facture, FactureStatut } from "../types/facture";
 
 const RECENT_FACTURES_LIMIT = 5;
+const ECHEANCE_RECEPTION_ELECTRONIQUE = new Date("2026-09-01T00:00:00");
 
 const STATUS_LABELS: Record<FactureStatut, string> = {
   brouillon: "Brouillon",
@@ -40,6 +42,8 @@ const STATUS_VARIANTS: Record<
 };
 
 export function DashboardPage() {
+  const { utilisateur } = useAuth();
+
   const [factures, setFactures] = useState<Facture[]>([]);
   const [clientsById, setClientsById] = useState<Record<string, Client>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -79,12 +83,17 @@ export function DashboardPage() {
     [factures],
   );
 
+  const joursAvantEcheance = useMemo(
+    () => computeJoursRestants(ECHEANCE_RECEPTION_ELECTRONIQUE),
+    [],
+  );
+
   return (
     <>
       <section className="hero-row">
         <div>
           <p className="eyebrow">{formatToday()}</p>
-          <h1>Bonjour Sébastien</h1>
+          <h1>{buildGreeting(utilisateur?.prenom)}</h1>
           <p className="eyebrow">Votre cockpit conformité est prêt.</p>
         </div>
 
@@ -108,7 +117,7 @@ export function DashboardPage() {
         </div>
 
         <div className="deadline">
-          J-70
+          {joursAvantEcheance > 0 ? `J-${joursAvantEcheance}` : "Échéance atteinte"}
           <br />
           <small>1er sept. 2026</small>
         </div>
@@ -312,4 +321,17 @@ function formatToday() {
     month: "long",
     year: "numeric",
   }).format(new Date());
+}
+
+function buildGreeting(prenom: string | undefined) {
+  return prenom ? `Bonjour ${prenom}` : "Bonjour";
+}
+
+function computeJoursRestants(echeance: Date) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const diffMs = echeance.getTime() - today.getTime();
+
+  return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 }
