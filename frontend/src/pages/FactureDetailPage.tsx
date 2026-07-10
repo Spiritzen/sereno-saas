@@ -45,6 +45,7 @@ export function FactureDetailPage() {
   const [lineToDelete, setLineToDelete] = useState<LigneFacture | null>(null);
   const [isCheckingConformite, setIsCheckingConformite] = useState(false);
   const [isEmitting, setIsEmitting] = useState(false);
+  const [isEmitConfirmOpen, setIsEmitConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isDraft = facture?.statut === "brouillon";
@@ -261,6 +262,11 @@ export function FactureDetailPage() {
       setIsEmitting(false);
     }
   }
+
+  const handleConfirmEmitFacture = async () => {
+    await handleEmitFacture();
+    setIsEmitConfirmOpen(false);
+  };
 
   function handleOpenPdf() {
     if (!facture || !hasPdf) {
@@ -487,7 +493,7 @@ export function FactureDetailPage() {
                   type="button"
                   className="primary-btn"
                   disabled={!canEmit || isEmitting}
-                  onClick={handleEmitFacture}
+                  onClick={() => setIsEmitConfirmOpen(true)}
                 >
                   <Send size={16} />
                   {isEmitting ? "Émission..." : "Émettre"}
@@ -580,6 +586,19 @@ export function FactureDetailPage() {
         isLoading={Boolean(deletingLineId)}
         onCancel={handleCancelDeleteLine}
         onConfirm={handleConfirmDeleteLine}
+      />
+
+      <ConfirmModal
+        open={isEmitConfirmOpen}
+        title="Émettre définitivement cette facture ?"
+        message="Une fois émise, cette facture sera numérotée et ne pourra plus être modifiée ni supprimée. Vérifiez les informations avant de continuer."
+        cancelLabel="Annuler"
+        confirmLabel={isEmitting ? "Émission en cours…" : "Émettre définitivement"}
+        isLoading={isEmitting}
+        onCancel={() => setIsEmitConfirmOpen(false)}
+        onConfirm={() => {
+          void handleConfirmEmitFacture();
+        }}
       />
     </section>
   );
