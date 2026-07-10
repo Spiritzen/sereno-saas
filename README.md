@@ -9,6 +9,15 @@
 [![GitHub](https://img.shields.io/badge/GitHub-Spiritzen-181717?style=for-the-badge&logo=github)](https://github.com/Spiritzen)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/sebastien-cantrelle-26b695106/)
 
+<br>
+
+![Statut](https://img.shields.io/badge/MVP-conforme_validé-10b981?style=flat-square)
+![Conformité](https://img.shields.io/badge/Factur--X-EN16931_+_France_CTC-7c3aed?style=flat-square)
+![Audit](https://img.shields.io/badge/audit-96%2F100_GREEN-10b981?style=flat-square)
+![Rails](https://img.shields.io/badge/Rails-8_API-CC0000?style=flat-square&logo=rubyonrails)
+![React](https://img.shields.io/badge/React-18_+_TS-61DAFB?style=flat-square&logo=react)
+![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
+
 </div>
 
 ---
@@ -35,9 +44,11 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 
 ---
 
-## ✅ Statut du projet — Juin 2026
+## ✅ Statut du projet — Juillet 2026
 
-> Phase actuelle : **Conception terminée → développement du MVP (V1)**
+> Phase actuelle : **MVP émission conforme validé** — socle légal gelé, cycle de conformité prouvé par validateurs officiels. Développement de la couche transmission & cycle de vie en cours.
+
+Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé conforme**. La note d'audit du socle est de **96/100 (GREEN)** après quatre passages d'audit successifs et un delta conformité France CTC (voir [Conformité prouvée](#-conformité-prouvée)).
 
 | Couche | Statut | Détail |
 |--------|--------|--------|
@@ -45,24 +56,48 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 | Direction artistique + maquettes UX | ✅ **Complet** | Dashboard conformité + écran « facture en 2 clics » validés |
 | Modèle de données (22 entités) | ✅ **Complet** | Schéma + invariants légaux (immutabilité, numérotation) |
 | Architecture Rails 8 (API) | ✅ **Complet** | Arborescence, services, adapters, jobs définis |
-| Backend — Auth JWT multi-tenant | ✅ **Complet**  | Login / Refresh / Logout + `id_organisation` dans le token |
-| Backend — CRUD Clients + Contacts | ✅ **Complet**  | Destinataires, SIRET, TVA, routage PA |
-| Backend — Création de facture + lignes | ✅ **Complet**  | Brouillon → émise, totaux HT/TVA/TTC |
-| Backend — Générateur Factur-X | ⏳ **V1** | PDF/A-3 + CII XML embarqué |
-| Backend — Numérotation séquentielle | ✅ | Sans trou, protégée contre la concurrence |
-| Backend — Moteur de conformité | ✅ | Service de contrôle pré-émission |
-| Frontend — Auth + Landing | ⏳ **V1** | Inscription, landing premium |
-| Frontend — Dashboard conformité | ⏳ **V1** | KPIs + bandeau « vous êtes conforme » |
-| Frontend — Facture en 2 clics | ⏳ **V1** | Écran de création + panneau conformité |
-| Intégration Plateforme Agréée (PA) | ⏳ **V1.1** | Adapter API + suivi des statuts |
+| Backend — Auth JWT multi-tenant | ✅ **Complet** | Login / Refresh / Logout + `id_organisation` dans le token |
+| Backend — CRUD Clients + Contacts | ✅ **Complet** | Destinataires, SIRET, TVA, routage PA |
+| Backend — Création de facture + lignes | ✅ **Complet** | Brouillon → émise, totaux HT/TVA/TTC (TVA agrégée par taux) |
+| Backend — Générateur Factur-X | ✅ **Complet** | PDF/A-3 + CII XML embarqué — **validé veraPDF / XSD / Schematron** |
+| Backend — Numérotation séquentielle | ✅ **Complet** | Sans trou, protégée par advisory lock (concurrence) |
+| Backend — Moteur de conformité | ✅ **Complet** | Contrôle pré-émission bloquant |
+| Backend — Mentions France CTC (Flux 2) | ✅ **Complet** | BT-30/34/49, notes PMT/PMD/AAB, ProfileID, BusinessProcessID — **0 BR-FR restante (Mustang)** |
+| Frontend — Auth + Landing | ✅ **Complet** | Inscription, landing premium |
+| Frontend — Dashboard conformité | ✅ **Complet** | KPIs + greeting & échéance dynamiques |
+| Frontend — Facture en 2 clics | ✅ **Complet** | Écran de création + panneau conformité |
+| Frontend — Page Paramètres | ✅ **Complet** | Placeholder honnête (domaines à venir) |
+| CI/CD — GitHub Actions (RSpec, RuboCop, build) | ✅ **Complet** | Pipeline vert sur `main` |
+| Validateurs de conformité en CI (veraPDF/Schematron) | ⏳ **En cours** | Preuve de conformité automatisée à chaque push |
+| Intégration Plateforme Agréée (PA) | ⏳ **V1.1** | Adapter API + suivi des statuts (sandbox) |
 | Cycle de vie temps réel (14 statuts) | ⏳ **V1.1** | Journal d'événements + polling |
+| Avoirs (notes de crédit) | ⏳ **V1.2** | Rectification légale d'une facture émise |
 | Relances automatiques | ⏳ **V1.2** | Jobs Solid Queue + e-mails |
 | E-reporting (B2C / international) | ⏳ **V1.2** | Lots de transmission |
-| Devis + Avoirs (notes de crédit) | ⏳ **V1.3** | Conversion devis → facture, rectification légale |
-| Portail destinataire | ⏳ **V1.3** | Le client reçoit et suit sa facture |
-| Chorus Pro (secteur public B2G) | ⏳ **V1.4** | Adapter dédié |
-| Facturation SaaS (abonnements) | ⏳ **V1.4** | Plans Gratuit / Pro |
+| Devis → facture · Portail destinataire | ⏳ **V1.3** | Conversion, suivi côté client |
+| Chorus Pro (B2G) · Abonnements SaaS | ⏳ **V1.4** | Adapter dédié · Plans Gratuit / Pro |
 | Déploiement production (Kamal 2) | ⏳ **V1.5** | VPS OVH/Hetzner + HTTPS + CI/CD |
+
+---
+
+## 🏅 Conformité prouvée
+
+> Chez Sereno, la conformité n'est pas *affirmée*, elle est **prouvée par les validateurs officiels** — les mêmes que ceux utilisés par les Plateformes Agréées. Un « PDF qui s'ouvre » ne suffit pas : chaque facture générée franchit quatre niveaux de validation.
+
+| Niveau | Outil | Résultat |
+|--------|-------|----------|
+| **PDF/A-3b** (ISO 19005-3) | veraPDF | ✅ **VALID** — 146/146 règles |
+| **Structure XML** (CII D22B) | xmllint + XSD Factur-X 1.09 officiel | ✅ **VALID** |
+| **Règles métier EN 16931** | Schematron officiel vendoré (Saxon/SchXslt) | ✅ **0 failed-assert** |
+| **Profil France CTC / Flux 2** | Mustang CLI | ✅ **0 BR-FR restante** |
+
+**Garanties vérifiées automatiquement :**
+- **Round-trip** — le XML embarqué dans le PDF/A-3 est byte-identique au XML de référence (pas de pièce jointe vide ou divergente).
+- **Cohérence PDF ↔ XML** — les totaux HT/TVA/TTC du PDF correspondent au centime au `GrandTotalAmount` du XML (règles BR-CO), calcul en `BigDecimal` avec arrondi `ROUND_HALF_UP`.
+- **Assertion négative** — une facture non conforme (sans ligne, client archivé…) est **refusée** à l'émission : le pipeline sait aussi dire non.
+- **Artefacts vendorés** — profil ICC sRGB et schémas officiels versionnés dans le dépôt, pour une image de production reproductible et indépendante de l'hôte.
+
+> Le socle de conformité est **gelé** (`tag v0.2.0-conformite-fr`) : aucune modification du moteur légal sans re-validation par les quatre niveaux ci-dessus.
 
 ---
 
@@ -91,11 +126,12 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 | | React Router | v7 |
 | | Recharts | Graphes dashboard |
 | **Conformité** | Format e-facture | Factur-X (PDF/A-3 + CII), UBL, CII |
+| | Validation | veraPDF · XSD Factur-X 1.09 · Schematron EN 16931 · Mustang |
 | | Transmission | Plateforme Agréée (PA) via adapter |
 | | Secteur public | Chorus Pro (B2G) |
 | **Tests** | Backend | RSpec + FactoryBot + Faker |
 | | Frontend | Vitest + Testing Library |
-| **DevOps** | Conteneurs | Docker + docker-compose |
+| **DevOps** | Conteneurs | Docker (multi-stage, Debian slim) |
 | | Déploiement | Kamal 2 |
 | | CI/CD | GitHub Actions |
 | | Reverse proxy | Traefik / Caddy (HTTPS auto) |
@@ -163,17 +199,19 @@ BROUILLON → ÉMISE → DÉPOSÉE (PA) → REÇUE → MISE À DISPOSITION
 - Chaque changement d'état génère un `EVENEMENT_FACTURE` (journal d'audit inaltérable).
 - Les statuts remontent de la PA via webhook ou polling (job Solid Queue).
 
+> **État actuel** : les statuts `BROUILLON → ÉMISE` sont implémentés et testés (immutabilité garantie à l'émission). Les statuts de transmission (dépôt PA → encaissement) arrivent en **V1.1**.
+
 ---
 
 ## 🔐 Sécurité, multi-tenant & conformité
 
-- **JWT HttpOnly Cookies** — access token 15 min + refresh 7 j
+- **JWT HttpOnly Cookies** — access token 15 min + refresh 7 j (rotation)
 - **BCrypt** — zéro mot de passe en clair
-- **`Current.organisation`** — `id_organisation` extrait du JWT, injecté dans chaque requête ; **tous les scopes filtrent par organisation**
+- **`Current.organisation`** — `id_organisation` extrait du JWT, injecté dans chaque requête ; **tous les scopes filtrent par organisation** (isolation explicite, pas de `default_scope` global — choix assumé pour une isolation testable et lisible)
 - **Pundit** — autorisation fine par rôle
 - **RGPD** — aucune fuite de données entre organisations possible
-- **Immutabilité légale** — une facture émise ne peut **jamais** être modifiée ni supprimée ; toute correction passe par un `AVOIR`
-- **Numérotation sans trou** — séquence PostgreSQL dédiée + advisory lock (jamais de `count + 1`)
+- **Immutabilité légale** — une facture émise ne peut **jamais** être modifiée ni supprimée ; toute correction passe par un `AVOIR` (garde au niveau modèle via `statut_in_database`)
+- **Numérotation sans trou** — advisory lock PostgreSQL + verrou de ligne sur un compteur dédié, dans la transaction d'émission (jamais de `count + 1`)
 - **Archivage 10 ans** — chaque facture émise (PDF/A-3 + XML) est archivée et horodatée
 
 ### 4 rôles
@@ -197,19 +235,20 @@ app/
 │   └── api/v1/    Auth · Clients · Contacts · Produits · Devis
 │                  Factures · Avoirs · Transmissions · Paiements
 │                  Dashboard · Webhooks (PA)
-├── models/        22 modèles ActiveRecord + concerns (Tenantable, Auditable)
-├── services/      FactureComplianceCheck · FacturXGenerator · NumerotationService
-│                  EmissionService · PaTransmissionService · EReportingService
+├── models/        22 modèles ActiveRecord + concerns
+├── services/      FactureConformiteService · FactureEmissionService
+│                  FacturXXmlService · FacturePdfService · FacturXPackageService
+│                  NumerotationService · FactureTotalsService
 ├── serializers/   Blueprinter — sérialisation JSON
 ├── policies/      Pundit — une policy par ressource
 ├── jobs/          RelanceJob · PaStatusPollJob · EReportingBatchJob · ArchivageJob
 ├── adapters/
 │   └── pa/        BaseAdapter · <Provider>Adapter · ChorusProAdapter
-├── lib/
-│   └── factur_x/  CiiBuilder (Nokogiri) · PdfA3Embedder (HexaPDF)
+├── vendor/
+│   └── facturx/   XSD 1.09 · Schematron EN16931 · profil ICC sRGB (vendorés)
 └── current.rb     ActiveSupport::CurrentAttributes (organisation, utilisateur)
 config/
-├── initializers/  cors · jwt · pundit · current_tenant
+├── initializers/  cors · jwt · pundit
 └── routes.rb      namespace api/v1
 ```
 
@@ -228,14 +267,15 @@ src/
 ├── components/
 │   ├── landing/   Navbar · Hero · ProblemeSection · ConformiteSection · CtaFinal
 │   ├── facture/   FactureForm · LigneFactureRow · ConformitePanel · TotauxBlock
-│   ├── modals/    LoginModal · RegisterModal · ClientModal
-│   └── layout/    Sidebar · TopBar · Layout
+│   ├── modals/    LoginModal · RegisterModal · ClientModal · ConfirmModal
+│   └── layout/    Sidebar · TopBar · AppShell
 ├── pages/
 │   ├── HomePage.tsx           (route "/")
 │   ├── DashboardPage.tsx      (route "/app")
 │   ├── ClientsPage.tsx        (route "/app/clients")
 │   ├── FacturesPage.tsx       (route "/app/factures")
-│   ├── NouvelleFacturePage.tsx(route "/app/factures/new")
+│   ├── NewInvoicePage.tsx     (route "/app/factures/new")
+│   ├── FactureDetailPage.tsx  (route "/app/factures/:id")
 │   ├── DevisPage.tsx          (route "/app/devis")
 │   └── ParametresPage.tsx     (route "/app/parametres")
 └── index.css
@@ -261,7 +301,7 @@ src/
 
 ## ⚙️ Moteur de conformité
 
-Avant toute émission, le service `FactureComplianceCheck` valide la facture et renvoie la liste des contrôles (affichés en vert dans l'UI) :
+Avant toute émission, le service `FactureConformiteService` valide la facture et renvoie la liste des contrôles (affichés en vert dans l'UI) :
 
 - ✅ Numéro séquentiel attribué, sans trou
 - ✅ Mentions obligatoires 2026 présentes (SIRET, TVA, identité émetteur/destinataire…)
@@ -269,35 +309,39 @@ Avant toute émission, le service `FactureComplianceCheck` valide la facture et 
 - ✅ Destinataire identifié et routable sur la PA
 - ✅ Cohérence TVA (taux, totaux, exonérations)
 - ✅ Données du destinataire complètes
+- ✅ Blocage des cas invalides (facture sans ligne, client archivé)
 
-Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »** reste désactivé.
+Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »** reste désactivé. Le contrôle est **bloquant côté service** — pas seulement dans l'UI.
 
 ---
 
 ## 📋 Roadmap
 
-### ⏳ V1 — MVP émission conforme
-- ✅ Auth JWT multi-tenant + rôles
-- ✅ CRUD Clients / Contacts (routage PA)
-- ✅ Création de facture + lignes + totaux
-- ✅ Générateur Factur-X (PDF/A-3 + CII)
-- ✅ Numérotation séquentielle protégée
-- ✅ Moteur de conformité pré-émission
-- ✅ Dashboard conformité + écran « facture en 2 clics »
+### ✅ V1 — MVP émission conforme *(terminé, audité 96/100)*
+- [x] Auth JWT multi-tenant + rôles
+- [x] CRUD Clients / Contacts (routage PA)
+- [x] Création de facture + lignes + totaux (TVA agrégée)
+- [x] Générateur Factur-X (PDF/A-3 + CII) — **validé veraPDF / XSD / Schematron**
+- [x] Mentions France CTC / Flux 2 — **0 BR-FR restante (Mustang)**
+- [x] Numérotation séquentielle protégée
+- [x] Moteur de conformité pré-émission (bloquant)
+- [x] Dashboard conformité + écran « facture en 2 clics »
+- [x] CI/CD GitHub Actions (RSpec + RuboCop + build) verte sur `main`
 
-### ⏳ V1.1 — Transmission & cycle de vie
-- [ ] Intégration Plateforme Agréée (adapter)
+### ⏳ V1.1 — Preuve automatisée, transmission & cycle de vie
+- [ ] Validateurs de conformité (veraPDF + Schematron) **bloquants en CI**
+- [ ] Intégration Plateforme Agréée (adapter, sandbox)
 - [ ] Suivi temps réel des 14 statuts (webhook + polling)
-- [ ] Journal d'événements (audit)
+- [ ] Journal d'événements exposé (timeline UI)
 
-### ⏳ V1.2 — Automatisation
+### ⏳ V1.2 — Correction légale & automatisation
+- [ ] Avoirs (notes de crédit / rectification, type 381)
 - [ ] Relances automatiques (jobs + e-mails)
 - [ ] E-reporting B2C / international
 - [ ] Exports comptables (FEC)
 
 ### ⏳ V1.3 — Cycle commercial complet
 - [ ] Devis → conversion en facture
-- [ ] Avoirs (notes de crédit / rectification)
 - [ ] Portail destinataire
 
 ### ⏳ V1.4 — Secteur public & monétisation
@@ -307,7 +351,6 @@ Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »
 ### ⏳ V1.5 — Production
 - [ ] Dockerfile + docker-compose prod
 - [ ] Déploiement Kamal 2 + HTTPS
-- [ ] CI/CD GitHub Actions
 - [ ] Sauvegardes PostgreSQL + archivage légal
 
 ---
@@ -335,21 +378,39 @@ npm run dev                      # http://localhost:5173
 docker compose up --build
 ```
 
+> ⚙️ **Configuration** — copiez `.env.example` vers `.env` et renseignez vos variables locales. Les secrets (clé maître Rails, identifiants) ne sont **jamais** versionnés.
+
 ### Compte de démo
 ```
 Email    : demo@sereno.fr
 Password : password
 Rôle     : OWNER
-Org       : Studio Démo
+Org      : Studio Démo
 ```
+
+---
+
+## 🧪 Qualité & conformité (résumé)
+
+| Contrôle | Statut |
+|----------|--------|
+| Tests backend (RSpec) | ✅ verts |
+| Lint backend (RuboCop) | ✅ no offenses |
+| Audit dépendances (bundler-audit) | ✅ clean |
+| Lint + build frontend | ✅ verts |
+| PDF/A-3b (veraPDF) | ✅ VALID (146/146) |
+| XML CII (XSD 1.09) | ✅ VALID |
+| Schematron EN 16931 | ✅ 0 failed-assert |
+| France CTC / Flux 2 (Mustang) | ✅ 0 BR-FR restante |
+| **Audit du socle** | ✅ **96/100 — GREEN** |
 
 ---
 
 ## 📦 Déploiement (DevOps)
 
-- **Build** — image Docker multi-stage (Ruby slim + assets précompilés)
+- **Build** — image Docker multi-stage (Ruby slim + assets précompilés + police & profil ICC vendorés)
 - **Deploy** — `kamal deploy` (zero-downtime, rollback intégré)
-- **CI/CD** — GitHub Actions : `rspec` + `vitest` + `rubocop` + build → déploiement sur tag
+- **CI/CD** — GitHub Actions : `rspec` + `rubocop` + build front → déploiement sur tag
 - **HTTPS** — Traefik (Let's Encrypt automatique)
 - **Données** — PostgreSQL 16 + sauvegardes chiffrées quotidiennes
 - **Archivage légal** — bucket dédié (factures conservées 10 ans)
