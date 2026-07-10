@@ -7,6 +7,7 @@ import { FactureDetailPage } from "./pages/FactureDetailPage";
 import { FacturesPage } from "./pages/FacturesPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NewInvoicePage } from "./pages/NewInvoicePage";
+import { ParametresPage } from "./pages/ParametresPage";
 
 export default function App() {
   return (
@@ -65,6 +66,17 @@ export default function App() {
           <ProtectedRoute>
             <AppShell>
               <ClientsPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/parametres"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <ParametresPage />
             </AppShell>
           </ProtectedRoute>
         }
