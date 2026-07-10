@@ -47,7 +47,8 @@ class Organisation < ApplicationRecord
   has_many :relances, dependent: :restrict_with_exception
 
   validates :raison_sociale, presence: true
-  validates :siret, presence: true, uniqueness: true, length: { is: 14 }
+  validates :siret, presence: true, uniqueness: true, length: { is: 14 },
+                     format: { with: /\A\d{14}\z/, message: "doit être composé de 14 chiffres" }
   validates :regime_tva, presence: true
   validates :adresse_ligne1, presence: true
   validates :code_postal, presence: true

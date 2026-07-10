@@ -39,8 +39,8 @@ ci-dessous). Validation non encore branchée — le choix du moteur Schematron
 
 ## Source attendue
 
-Pack officiel **FNFE-MPE Factur-X** (Forum National de la Facture Électronique),
-compatible ZUGFeRD, profil EN16931. Ne pas substituer par un schéma reconstruit
+Pack officiel **FeRD (Forum elektronische Rechnung Deutschland) ZUGFeRD 2.5 /
+Factur-X 1.09**, profil EN16931. Ne pas substituer par un schéma reconstruit
 ou approximé.
 
 ## Règles d'usage

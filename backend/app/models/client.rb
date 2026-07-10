@@ -31,7 +31,9 @@ class Client < ApplicationRecord
     in: %w[actif archive]
   }
 
-  validates :siret, length: { is: 14 }, allow_blank: true
+  validates :siret, length: { is: 14 },
+                     format: { with: /\A\d{14}\z/, message: "doit être composé de 14 chiffres" },
+                     allow_blank: true
 
   validate :siret_requis_pour_entreprise_ou_public
 
