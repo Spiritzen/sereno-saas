@@ -21,6 +21,10 @@ class FacturePolicy < ApplicationPolicy
   peut_lire? && meme_organisation?
   end
 
+  def evenements?
+    peut_lire? && meme_organisation?
+  end
+
   def create?
     peut_modifier?
   end

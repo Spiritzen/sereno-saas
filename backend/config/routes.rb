@@ -23,6 +23,7 @@ resources :factures do
   end
 
   resources :lignes_facture, path: "lignes", only: [ :index, :create ]
+  resources :evenements_facture, path: "evenements", only: [ :index ]
 end
 
       resources :lignes_facture, path: "lignes-facture", only: [ :show, :update, :destroy ]

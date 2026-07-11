@@ -2447,3 +2447,131 @@ h1 {
   }
 }
 
+/* =========================
+   INVOICE EVENT HISTORY
+========================= */
+
+.invoice-event-history {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  padding: 22px 24px;
+  margin-bottom: 18px;
+}
+
+.invoice-event-history__header {
+  margin-bottom: 16px;
+}
+
+.invoice-event-history__title {
+  margin: 0 0 4px;
+  color: var(--color-text-primary);
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+.invoice-event-history__subtitle {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.invoice-event-history__loading,
+.invoice-event-history__empty,
+.invoice-event-history__error {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.invoice-event-history__error {
+  color: #fca5a5;
+}
+
+.invoice-event-history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.invoice-event-history__item {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 0 0 20px 0;
+}
+
+.invoice-event-history__item:last-child {
+  padding-bottom: 0;
+}
+
+.invoice-event-history__item::before {
+  content: "";
+  position: absolute;
+  top: 28px;
+  left: 13px;
+  width: 2px;
+  bottom: 4px;
+  background: var(--color-border);
+}
+
+.invoice-event-history__item:last-child::before {
+  display: none;
+}
+
+.invoice-event-history__marker {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--color-brand-light);
+  background: var(--color-bg-elevated);
+  color: var(--color-brand-light);
+  z-index: 1;
+}
+
+.invoice-event-history__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 3px;
+}
+
+.invoice-event-history__label {
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.invoice-event-history__meta {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.invoice-event-history__actor {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.invoice-event-history__source {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 900px) {
+  .invoice-event-history {
+    padding: 18px;
+  }
+
+  .invoice-event-history__actor,
+  .invoice-event-history__meta {
+    word-break: break-word;
+  }
+}
+

@@ -14,6 +14,7 @@ import {
   getFacturePdfUrl,
   getFactureXmlUrl,
 } from "../api/facturesApi";
+import { listEvenementsFacture } from "../api/evenementsFactureApi";
 import { getApiErrorMessage } from "../api/http";
 import {
   createLigneFacture,
@@ -22,8 +23,10 @@ import {
 } from "../api/lignesFactureApi";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { InvoiceDetailHeader } from "../components/InvoiceDetailHeader";
+import { InvoiceEventHistory } from "../components/InvoiceEventHistory";
 import { InvoiceLifecycleTimeline } from "../components/InvoiceLifecycleTimeline";
 import type { ConformiteResult } from "../types/conformite";
+import type { EvenementFacture } from "../types/evenementFacture";
 import type { Facture } from "../types/facture";
 import type { LigneFacture } from "../types/ligneFacture";
 
@@ -82,6 +85,10 @@ export function FactureDetailPage() {
   const [isEmitConfirmOpen, setIsEmitConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [events, setEvents] = useState<EvenementFacture[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(Boolean(id));
+  const [eventsError, setEventsError] = useState<string | null>(null);
+
   const isDraft = facture?.statut === "brouillon";
 
   // B2 : on n'affiche les liens PDF/XML que si le backend confirme leur présence.
@@ -125,6 +132,42 @@ export function FactureDetailPage() {
         }
 
         setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let ignore = false;
+
+    void listEvenementsFacture(id)
+      .then((eventsData) => {
+        if (ignore) {
+          return;
+        }
+
+        setEvents(eventsData);
+        setEventsError(null);
+      })
+      .catch((apiError) => {
+        if (ignore) {
+          return;
+        }
+
+        setEventsError(getApiErrorMessage(apiError));
+      })
+      .finally(() => {
+        if (ignore) {
+          return;
+        }
+
+        setIsLoadingEvents(false);
       });
 
     return () => {
@@ -375,6 +418,14 @@ export function FactureDetailPage() {
           createdAt={facture.created_at}
           emittedAt={facture.emise_at}
           invoiceNumber={facture.numero}
+        />
+      )}
+
+      {!isLoading && facture && (
+        <InvoiceEventHistory
+          events={events}
+          isLoading={isLoadingEvents}
+          error={eventsError}
         />
       )}
 

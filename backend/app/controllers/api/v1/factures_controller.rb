@@ -67,11 +67,16 @@ end
 
     authorize facture
 
-    if facture.save
-      render json: FactureBlueprint.render(facture, view: :with_details), status: :created
-    else
-      render_validation_errors(facture)
+    return render_validation_errors(facture) unless facture.valid?
+
+    ActiveRecord::Base.transaction do
+      facture.save!
+      creer_evenement_creation!(facture)
     end
+
+    render json: FactureBlueprint.render(facture, view: :with_details), status: :created
+  rescue ActiveRecord::RecordInvalid => e
+    render_validation_errors(e.record)
   end
 
   def update
@@ -154,6 +159,19 @@ end
 
   def set_facture
     @facture = policy_scope(Facture).find(params[:id])
+  end
+
+  def creer_evenement_creation!(facture)
+    EvenementFacture.create!(
+      organisation_id: facture.organisation_id,
+      facture_id: facture.id,
+      utilisateur_id: Current.utilisateur.id,
+      statut: "brouillon",
+      source: "interne",
+      payload: {
+        action: "facture_creee"
+      }
+    )
   end
 
   def default_facture_attributes
