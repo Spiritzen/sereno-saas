@@ -1686,21 +1686,8 @@ h1 {
   grid-template-columns: 1.25fr 1.1fr 1.2fr 1.2fr 0.7fr 1fr;
 }
 
-.client-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: rgba(5, 5, 10, 0.72);
-  backdrop-filter: blur(8px);
-}
-
 .client-modal {
-  width: min(880px, 100%);
-  max-height: min(92vh, 920px);
-  overflow: auto;
+  --modal-shell-max-width: 880px;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-xl);
   background: rgba(18, 18, 26, 0.96);
@@ -1873,10 +1860,7 @@ h1 {
 ========================= */
 
 .confirmation-modal {
-  width: min(460px, 100%);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  --modal-shell-max-width: 460px;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-xl);
   background: rgba(18, 18, 26, 0.97);
@@ -1968,10 +1952,6 @@ h1 {
 }
 
 @media (max-width: 720px) {
-  .client-modal-backdrop {
-    padding: 12px;
-  }
-
   .client-form-grid {
     grid-template-columns: 1fr;
   }
@@ -2572,6 +2552,85 @@ h1 {
   .invoice-event-history__actor,
   .invoice-event-history__meta {
     word-break: break-word;
+  }
+}
+
+/* =========================
+   MODAL SHELL
+========================= */
+
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  background: rgba(5, 5, 10, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.modal-shell__surface {
+  width: min(100%, var(--modal-shell-max-width, 520px));
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
+  outline: none;
+}
+
+.modal-shell__header {
+  flex-shrink: 0;
+}
+
+.confirmation-modal .modal-shell__header {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modal-shell__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.modal-shell__footer {
+  flex-shrink: 0;
+}
+
+@media (max-height: 700px) {
+  .modal-shell {
+    align-items: flex-start;
+  }
+
+  .modal-shell__surface {
+    margin-top: max(16px, env(safe-area-inset-top));
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-shell {
+    padding: 12px;
+  }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .modal-shell {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .modal-shell__surface {
+    margin-top: 12px;
   }
 }
 
