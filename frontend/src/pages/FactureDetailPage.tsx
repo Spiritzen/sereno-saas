@@ -1,9 +1,7 @@
 import {
   ArrowLeft,
   CirclePlus,
-  ExternalLink,
   FileText,
-  Send,
   ShieldCheck,
   Trash2,
 } from "lucide-react";
@@ -23,10 +21,45 @@ import {
   listLignesFacture,
 } from "../api/lignesFactureApi";
 import { ConfirmModal } from "../components/ConfirmModal";
+import { InvoiceDetailHeader } from "../components/InvoiceDetailHeader";
 import { InvoiceLifecycleTimeline } from "../components/InvoiceLifecycleTimeline";
 import type { ConformiteResult } from "../types/conformite";
 import type { Facture } from "../types/facture";
 import type { LigneFacture } from "../types/ligneFacture";
+
+const CLIENT_TYPE_LABELS: Record<"entreprise" | "particulier" | "public", string> = {
+  entreprise: "Entreprise",
+  particulier: "Particulier",
+  public: "Public",
+};
+
+function resolveClientMeta(client: Facture["client"]) {
+  if (!client) {
+    return null;
+  }
+
+  if (client.email) {
+    return client.email;
+  }
+
+  if (client.ville && client.pays) {
+    return `${client.ville}, ${client.pays}`;
+  }
+
+  if (client.ville) {
+    return client.ville;
+  }
+
+  if (client.type) {
+    return CLIENT_TYPE_LABELS[client.type];
+  }
+
+  if (client.siret) {
+    return `SIRET ${client.siret}`;
+  }
+
+  return null;
+}
 
 export function FactureDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -290,7 +323,7 @@ export function FactureDetailPage() {
       <div className="page-heading">
         <div>
           <span className="page-kicker">Détail facture</span>
-          <h1>{facture?.numero ?? "Brouillon"}</h1>
+          <h1>Détail de la facture</h1>
           <p>
             Consultez le document, modifiez les brouillons et accédez aux
             fichiers PDF/XML après émission.
@@ -305,6 +338,29 @@ export function FactureDetailPage() {
 
       {isLoading && (
         <div className="state-card">Chargement de la facture...</div>
+      )}
+
+      {!isLoading && facture && (
+        <InvoiceDetailHeader
+          invoiceNumber={facture.numero}
+          status={facture.statut}
+          clientName={facture.client?.raison_sociale ?? null}
+          clientMeta={resolveClientMeta(facture.client)}
+          totalHt={toNumber(facture.total_ht)}
+          totalTva={toNumber(facture.total_tva)}
+          totalTtc={toNumber(facture.total_ttc)}
+          currency={facture.devise}
+          invoiceDate={facture.created_at ?? null}
+          emittedAt={facture.emise_at}
+          dueDate={facture.date_echeance}
+          canEmit={canEmit}
+          isEmitting={isEmitting}
+          hasPdf={hasPdf}
+          hasXml={hasXml}
+          onEmit={() => setIsEmitConfirmOpen(true)}
+          onOpenPdf={handleOpenPdf}
+          onOpenXml={handleOpenXml}
+        />
       )}
 
       {error && <div className="state-card error">{error}</div>}
@@ -324,35 +380,14 @@ export function FactureDetailPage() {
 
       {!isLoading && facture && (
         <div className="invoice-builder-card">
-          <div className="invoice-builder-header">
-            <div>
-              <span className="page-kicker">
-                {facture.numero ?? "Brouillon enregistré"}
-              </span>
-              <h2>{facture.client?.raison_sociale ?? "Client non chargé"}</h2>
-              <p>
-                {isDraft
-                  ? "Ce brouillon peut encore être modifié avant émission."
-                  : "Cette facture est émise : elle est consultable, mais non modifiable."}
-              </p>
-            </div>
-
-            <span className={`status ${isDraft ? "warning" : "success"}`}>
-              {isDraft ? "Brouillon" : "Émise"}
-            </span>
-          </div>
-
           <div className="draft-preview-card">
             <div className="document-icon">
               <FileText size={18} />
             </div>
 
             <div>
-              <strong>{facture.numero ?? "Brouillon sans numéro"}</strong>
-              <span>
-                Échéance : {formatDate(facture.date_echeance)} · Format :{" "}
-                {formatFactureFormat(facture.format)}
-              </span>
+              <strong>{formatFactureFormat(facture.format)}</strong>
+              <span>Échéance : {formatDate(facture.date_echeance)}</span>
             </div>
           </div>
 
@@ -484,66 +519,21 @@ export function FactureDetailPage() {
             </div>
           </div>
 
-          <div className="invoice-actions-row">
-            {isDraft && (
-              <>
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  disabled={isCheckingConformite || lignes.length === 0}
-                  onClick={handleCheckConformite}
-                >
-                  <ShieldCheck size={16} />
-                  {isCheckingConformite
-                    ? "Vérification..."
-                    : "Vérifier conformité"}
-                </button>
-
-                <button
-                  type="button"
-                  className="primary-btn"
-                  disabled={!canEmit || isEmitting}
-                  onClick={() => setIsEmitConfirmOpen(true)}
-                >
-                  <Send size={16} />
-                  {isEmitting ? "Émission..." : "Émettre"}
-                </button>
-              </>
-            )}
-
-            {!isDraft && (
-              <>
-                {hasPdf && (
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={handleOpenPdf}
-                  >
-                    <ExternalLink size={16} />
-                    Ouvrir PDF
-                  </button>
-                )}
-
-                {hasXml && (
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={handleOpenXml}
-                  >
-                    <ExternalLink size={16} />
-                    Ouvrir XML
-                  </button>
-                )}
-
-                {!hasPdf && !hasXml && (
-                  <div className="state-card">
-                    Les fichiers PDF/XML ne sont pas encore disponibles pour
-                    cette facture.
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+          {isDraft && (
+            <div className="invoice-actions-row">
+              <button
+                type="button"
+                className="secondary-btn"
+                disabled={isCheckingConformite || lignes.length === 0}
+                onClick={handleCheckConformite}
+              >
+                <ShieldCheck size={16} />
+                {isCheckingConformite
+                  ? "Vérification..."
+                  : "Vérifier conformité"}
+              </button>
+            </div>
+          )}
 
           {isDraft && conformite && (
             <div

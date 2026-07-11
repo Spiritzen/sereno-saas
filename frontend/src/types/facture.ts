@@ -19,7 +19,17 @@ export type FactureStatut =
 export type Facture = {
   id: string;
   client_id: string;
-  client?: Pick<Client, "id" | "raison_sociale" | "siret" | "identifiant_routage_pa"> | null;
+  client?: Pick<
+    Client,
+    | "id"
+    | "raison_sociale"
+    | "siret"
+    | "identifiant_routage_pa"
+    | "email"
+    | "ville"
+    | "pays"
+    | "type"
+  > | null;
   numero: string | null;
   type_document: "facture" | "acompte";
   statut: FactureStatut;
