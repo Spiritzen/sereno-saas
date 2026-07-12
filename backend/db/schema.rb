@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_24_012347) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_12_124139) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -196,7 +196,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_24_012347) do
     t.index ["organisation_id", "facture_id"], name: "index_evenement_facture_on_org_and_facture"
     t.index ["organisation_id"], name: "index_evenement_facture_on_organisation_id"
     t.index ["utilisateur_id"], name: "index_evenement_facture_on_utilisateur_id"
-    t.check_constraint "source::text = ANY (ARRAY['interne'::character varying, 'pa'::character varying, 'webhook'::character varying]::text[])", name: "check_evenement_facture_source"
+    t.check_constraint "source::text = ANY (ARRAY['interne'::character varying, 'pa'::character varying, 'webhook'::character varying, 'sandbox'::character varying]::text[])", name: "check_evenement_facture_source"
     t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'emise'::character varying, 'deposee'::character varying, 'recue'::character varying, 'mise_a_disposition'::character varying, 'approuvee'::character varying, 'refusee'::character varying, 'en_litige'::character varying, 'encaissee'::character varying, 'archivee'::character varying, 'annulee'::character varying]::text[])", name: "check_evenement_facture_statut"
   end
 
@@ -455,16 +455,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_24_012347) do
     t.string "direction", limit: 10, default: "sortant", null: false
     t.uuid "facture_id"
     t.string "format", limit: 20, default: "factur_x", null: false
+    t.uuid "idempotency_key", null: false
     t.string "identifiant_pa", limit: 100
     t.text "message_erreur"
     t.uuid "organisation_id", null: false
     t.uuid "plateforme_agreee_id", null: false
     t.string "statut", limit: 30, default: "en_attente", null: false
+    t.integer "tentative", default: 0, null: false
     t.datetime "transmis_at"
     t.datetime "updated_at", null: false
     t.index ["avoir_id"], name: "index_transmission_pa_on_avoir_id"
     t.index ["facture_id"], name: "index_transmission_pa_on_facture_id"
+    t.index ["idempotency_key"], name: "index_transmission_pa_on_idempotency_key", unique: true
     t.index ["organisation_id", "avoir_id"], name: "index_transmission_pa_on_org_and_avoir"
+    t.index ["organisation_id", "facture_id", "plateforme_agreee_id"], name: "index_transmission_pa_on_org_facture_pa_active", unique: true, where: "((statut)::text <> 'erreur'::text)"
     t.index ["organisation_id", "facture_id"], name: "index_transmission_pa_on_org_and_facture"
     t.index ["organisation_id", "statut"], name: "index_transmission_pa_on_org_and_statut"
     t.index ["organisation_id"], name: "index_transmission_pa_on_organisation_id"

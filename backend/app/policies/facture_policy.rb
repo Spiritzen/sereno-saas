@@ -25,6 +25,19 @@ class FacturePolicy < ApplicationPolicy
     peut_lire? && meme_organisation?
   end
 
+  def transmissions?
+    peut_lire? && meme_organisation?
+  end
+
+  # Autorisation seulement : qui a le droit de déclencher une transmission
+  # (rôle + tenant), pas SI la facture est éligible maintenant. L'éligibilité
+  # (emise, ou déjà déposée pour un rejeu idempotent) est une règle métier à
+  # granularité fine portée par TransmissionPaOrchestrationService, qui
+  # renvoie une 422 explicite plutôt qu'un 403 générique.
+  def transmettre?
+    peut_modifier? && meme_organisation?
+  end
+
   def create?
     peut_modifier?
   end

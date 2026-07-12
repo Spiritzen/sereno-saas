@@ -24,6 +24,7 @@ resources :factures do
 
   resources :lignes_facture, path: "lignes", only: [ :index, :create ]
   resources :evenements_facture, path: "evenements", only: [ :index ]
+  resources :transmissions_pa, path: "transmissions", only: [ :index, :create ]
 end
 
       resources :lignes_facture, path: "lignes-facture", only: [ :show, :update, :destroy ]
