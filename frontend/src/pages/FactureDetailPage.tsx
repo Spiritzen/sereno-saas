@@ -21,14 +21,21 @@ import {
   deleteLigneFacture,
   listLignesFacture,
 } from "../api/lignesFactureApi";
+import {
+  getTransmissionFromError,
+  listTransmissionsPa,
+  simulerTransmissionPa,
+} from "../api/transmissionPaApi";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { InvoiceDetailHeader } from "../components/InvoiceDetailHeader";
 import { InvoiceEventHistory } from "../components/InvoiceEventHistory";
 import { InvoiceLifecycleTimeline } from "../components/InvoiceLifecycleTimeline";
+import { InvoiceTransmissionSection } from "../components/InvoiceTransmissionSection";
 import type { ConformiteResult } from "../types/conformite";
 import type { EvenementFacture } from "../types/evenementFacture";
 import type { Facture } from "../types/facture";
 import type { LigneFacture } from "../types/ligneFacture";
+import type { TransmissionPa } from "../types/transmissionPa";
 
 const CLIENT_TYPE_LABELS: Record<"entreprise" | "particulier" | "public", string> = {
   entreprise: "Entreprise",
@@ -88,6 +95,16 @@ export function FactureDetailPage() {
   const [events, setEvents] = useState<EvenementFacture[]>([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(Boolean(id));
   const [eventsError, setEventsError] = useState<string | null>(null);
+
+  const [transmissions, setTransmissions] = useState<TransmissionPa[]>([]);
+  const [isLoadingTransmissions, setIsLoadingTransmissions] = useState(
+    Boolean(id),
+  );
+  const [transmissionsError, setTransmissionsError] = useState<string | null>(
+    null,
+  );
+  const [isTransmitting, setIsTransmitting] = useState(false);
+  const [isTransmitConfirmOpen, setIsTransmitConfirmOpen] = useState(false);
 
   const isDraft = facture?.statut === "brouillon";
 
@@ -168,6 +185,42 @@ export function FactureDetailPage() {
         }
 
         setIsLoadingEvents(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let ignore = false;
+
+    void listTransmissionsPa(id)
+      .then((transmissionsData) => {
+        if (ignore) {
+          return;
+        }
+
+        setTransmissions(transmissionsData);
+        setTransmissionsError(null);
+      })
+      .catch((apiError) => {
+        if (ignore) {
+          return;
+        }
+
+        setTransmissionsError(getApiErrorMessage(apiError));
+      })
+      .finally(() => {
+        if (ignore) {
+          return;
+        }
+
+        setIsLoadingTransmissions(false);
       });
 
     return () => {
@@ -345,6 +398,51 @@ export function FactureDetailPage() {
     setIsEmitConfirmOpen(false);
   };
 
+  function upsertTransmission(
+    previous: TransmissionPa[],
+    transmission: TransmissionPa,
+  ) {
+    const autres = previous.filter((item) => item.id !== transmission.id);
+
+    return [ transmission, ...autres ];
+  }
+
+  async function handleSimulateTransmission() {
+    if (!facture) {
+      setError("Facture introuvable.");
+      return;
+    }
+
+    setError(null);
+    setIsTransmitting(true);
+
+    try {
+      const transmission = await simulerTransmissionPa(facture.id);
+
+      setTransmissions((previous) => upsertTransmission(previous, transmission));
+
+      const updatedFacture = await getFacture(facture.id);
+      setFacture(updatedFacture);
+    } catch (apiError) {
+      const transmissionEnErreur = getTransmissionFromError(apiError);
+
+      if (transmissionEnErreur) {
+        setTransmissions((previous) =>
+          upsertTransmission(previous, transmissionEnErreur),
+        );
+      } else {
+        setError(getApiErrorMessage(apiError));
+      }
+    } finally {
+      setIsTransmitting(false);
+    }
+  }
+
+  const handleConfirmTransmit = async () => {
+    await handleSimulateTransmission();
+    setIsTransmitConfirmOpen(false);
+  };
+
   function handleOpenPdf() {
     if (!facture || !hasPdf) {
       return;
@@ -428,6 +526,18 @@ export function FactureDetailPage() {
           error={eventsError}
         />
       )}
+
+      {!isLoading &&
+        facture &&
+        (facture.statut === "emise" || transmissions.length > 0) && (
+          <InvoiceTransmissionSection
+            transmissions={transmissions}
+            isLoading={isLoadingTransmissions}
+            error={transmissionsError}
+            isTransmitting={isTransmitting}
+            onSimulate={() => setIsTransmitConfirmOpen(true)}
+          />
+        )}
 
       {!isLoading && facture && (
         <div className="invoice-builder-card">
@@ -649,6 +759,23 @@ export function FactureDetailPage() {
         onCancel={() => setIsEmitConfirmOpen(false)}
         onConfirm={() => {
           void handleConfirmEmitFacture();
+        }}
+      />
+
+      <ConfirmModal
+        open={isTransmitConfirmOpen}
+        title="Simuler une transmission de cette facture ?"
+        message="Cette action simule un dépôt auprès d’une plateforme agréée factice (sandbox). Aucune vraie Plateforme Agréée n’est contactée. En cas de succès simulé, la facture passera au statut « déposée »."
+        cancelLabel="Annuler"
+        confirmLabel={
+          isTransmitting
+            ? "Simulation en cours…"
+            : "Simuler une transmission (sandbox)"
+        }
+        isLoading={isTransmitting}
+        onCancel={() => setIsTransmitConfirmOpen(false)}
+        onConfirm={() => {
+          void handleConfirmTransmit();
         }}
       />
     </section>

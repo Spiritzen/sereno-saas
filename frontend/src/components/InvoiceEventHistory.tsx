@@ -50,6 +50,7 @@ const SOURCE_LABELS: Record<EvenementFactureSource, string> = {
   interne: "Action interne",
   pa: "Plateforme agréée",
   webhook: "Notification externe",
+  sandbox: "Simulation (sandbox)",
 };
 
 function formatEventDateTime(value: string) {
@@ -137,6 +138,11 @@ export function InvoiceEventHistory({
                 <div className="invoice-event-history__content">
                   <span className="invoice-event-history__label">
                     {STATUT_LABELS[event.statut]}
+                    {event.source === "sandbox" && (
+                      <span className="invoice-event-history__simulation-badge">
+                        Simulation
+                      </span>
+                    )}
                   </span>
 
                   {dateTimeLabel && (

@@ -1,6 +1,6 @@
 import type { FactureStatut } from "./facture";
 
-export type EvenementFactureSource = "interne" | "pa" | "webhook";
+export type EvenementFactureSource = "interne" | "pa" | "webhook" | "sandbox";
 
 export type EvenementFactureActor = {
   id: string;
