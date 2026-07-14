@@ -36,6 +36,30 @@ class Api::V1::TransmissionsPaController < Api::V1::BaseController
     }, status: :bad_gateway
   end
 
+  def synchroniser
+    authorize @facture, :synchroniser?
+
+    resultat = PaStatusIngestionService.new(facture: @facture).call
+
+    render json: {
+      resultat: resultat.resultat,
+      motif: resultat.motif,
+      statut_facture_avant: resultat.statut_facture_avant,
+      statut_facture_apres: resultat.statut_facture_apres,
+      transmission: JSON.parse(TransmissionPaBlueprint.render(resultat.transmission))
+    }, status: :ok
+  rescue PaStatusIngestionService::NonEligibleError => e
+    render json: {
+      error: "Synchronisation impossible",
+      details: e.details
+    }, status: :unprocessable_entity
+  rescue Pa::NetworkError => e
+    render json: {
+      error: "Échec technique de la synchronisation",
+      details: [ e.message ]
+    }, status: :bad_gateway
+  end
+
   private
 
   def set_facture

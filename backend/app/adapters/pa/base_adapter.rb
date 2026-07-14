@@ -8,5 +8,13 @@ module Pa
     def submit(facture:, transmission:)
       raise NotImplementedError, "#{self.class} doit implémenter #submit"
     end
+
+    # Interroge l'état côté PA d'une transmission déjà déposée. Comme #submit,
+    # n'écrit ni ne lit la base : `observation_count` est reçu en PARAMÈTRE
+    # (le nombre d'EvenementEntrantPa déjà enregistrés pour cette
+    # transmission), jamais recalculé en interne. Retourne un Pa::StatusResult.
+    def fetch_status(transmission:, observation_count:)
+      raise NotImplementedError, "#{self.class} doit implémenter #fetch_status"
+    end
   end
 end

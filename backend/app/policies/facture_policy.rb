@@ -38,6 +38,14 @@ class FacturePolicy < ApplicationPolicy
     peut_modifier? && meme_organisation?
   end
 
+  # Autorisation seulement (rôle + tenant), même discipline que
+  # #transmettre? : l'éligibilité métier (transmission déposée existante,
+  # facture non terminale) vit dans PaStatusIngestionService, qui renvoie
+  # une 422 explicite plutôt qu'un 403 générique.
+  def synchroniser?
+    peut_modifier? && meme_organisation?
+  end
+
   def create?
     peut_modifier?
   end

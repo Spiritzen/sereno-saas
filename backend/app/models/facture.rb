@@ -78,6 +78,11 @@ class Facture < ApplicationRecord
            foreign_key: :facture_id,
            dependent: :restrict_with_exception
 
+  has_many :evenements_entrants_pa,
+           class_name: "EvenementEntrantPa",
+           foreign_key: :facture_id,
+           dependent: :restrict_with_exception
+
   has_many :paiements, dependent: :restrict_with_exception
   has_many :relances, dependent: :restrict_with_exception
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_12_124139) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_13_234555) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -179,6 +179,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_12_124139) do
     t.check_constraint "periode_fin >= periode_debut", name: "check_e_reporting_periode_coherente"
     t.check_constraint "statut::text = ANY (ARRAY['en_attente'::character varying, 'transmis'::character varying, 'accepte'::character varying, 'rejete'::character varying]::text[])", name: "check_e_reporting_statut"
     t.check_constraint "type::text = ANY (ARRAY['transactions'::character varying, 'paiements'::character varying]::text[])", name: "check_e_reporting_type"
+  end
+
+  create_table "evenement_entrant_pa", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "cle_deduplication", null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.uuid "facture_id", null: false
+    t.text "motif"
+    t.datetime "occurred_at"
+    t.uuid "organisation_id", null: false
+    t.jsonb "payload"
+    t.string "provider", limit: 30, null: false
+    t.string "provider_event_id", limit: 100
+    t.datetime "received_at", null: false
+    t.string "resultat", limit: 20, null: false
+    t.string "statut_brut", limit: 50, null: false
+    t.string "statut_candidat", limit: 30
+    t.uuid "transmission_pa_id", null: false
+    t.index ["cle_deduplication"], name: "index_evenement_entrant_pa_on_cle_deduplication", unique: true
+    t.index ["facture_id"], name: "index_evenement_entrant_pa_on_facture_id"
+    t.index ["organisation_id", "facture_id"], name: "index_evenement_entrant_pa_on_org_and_facture"
+    t.index ["organisation_id"], name: "index_evenement_entrant_pa_on_organisation_id"
+    t.index ["resultat"], name: "index_evenement_entrant_pa_on_resultat"
+    t.index ["transmission_pa_id", "created_at"], name: "index_evenement_entrant_pa_on_transmission_and_created_at"
+    t.index ["transmission_pa_id"], name: "index_evenement_entrant_pa_on_transmission_pa_id"
+    t.check_constraint "resultat::text = ANY (ARRAY['applied'::character varying, 'duplicate'::character varying, 'stale'::character varying, 'requires_review'::character varying, 'unmapped'::character varying]::text[])", name: "check_evenement_entrant_pa_resultat"
   end
 
   create_table "evenement_facture", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -509,6 +534,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_12_124139) do
   add_foreign_key "devis", "clients"
   add_foreign_key "devis", "organisations"
   add_foreign_key "e_reporting", "organisations"
+  add_foreign_key "evenement_entrant_pa", "factures"
+  add_foreign_key "evenement_entrant_pa", "organisations"
+  add_foreign_key "evenement_entrant_pa", "transmission_pa"
   add_foreign_key "evenement_facture", "factures"
   add_foreign_key "evenement_facture", "organisations"
   add_foreign_key "evenement_facture", "utilisateurs"
