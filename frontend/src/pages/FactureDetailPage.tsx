@@ -25,6 +25,7 @@ import {
   getTransmissionFromError,
   listTransmissionsPa,
   simulerTransmissionPa,
+  synchroniserTransmissionPa,
 } from "../api/transmissionPaApi";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { InvoiceDetailHeader } from "../components/InvoiceDetailHeader";
@@ -35,7 +36,11 @@ import type { ConformiteResult } from "../types/conformite";
 import type { EvenementFacture } from "../types/evenementFacture";
 import type { Facture } from "../types/facture";
 import type { LigneFacture } from "../types/ligneFacture";
-import type { TransmissionPa } from "../types/transmissionPa";
+import type { PaSyncResult, TransmissionPa } from "../types/transmissionPa";
+
+// Miroir de FactureStatusTransitionPolicy::TERMINAUX (backend) : une facture
+// dans un de ces statuts ne peut plus être synchronisée.
+const FACTURE_STATUTS_TERMINAUX = ["encaissee", "refusee", "annulee", "archivee"];
 
 const CLIENT_TYPE_LABELS: Record<"entreprise" | "particulier" | "public", string> = {
   entreprise: "Entreprise",
@@ -106,7 +111,17 @@ export function FactureDetailPage() {
   const [isTransmitting, setIsTransmitting] = useState(false);
   const [isTransmitConfirmOpen, setIsTransmitConfirmOpen] = useState(false);
 
+  const [isSynchronizing, setIsSynchronizing] = useState(false);
+  const [syncResult, setSyncResult] = useState<PaSyncResult | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
   const isDraft = facture?.statut === "brouillon";
+
+  const derniereTransmission = transmissions[0] ?? null;
+  const canSynchronize =
+    Boolean(facture) &&
+    derniereTransmission?.statut === "depose" &&
+    !FACTURE_STATUTS_TERMINAUX.includes(facture?.statut ?? "");
 
   // B2 : on n'affiche les liens PDF/XML que si le backend confirme leur présence.
   const hasPdf = Boolean(facture?.pdf_url);
@@ -443,6 +458,39 @@ export function FactureDetailPage() {
     setIsTransmitConfirmOpen(false);
   };
 
+  async function handleSynchronize() {
+    if (!facture) {
+      return;
+    }
+
+    setSyncError(null);
+    setIsSynchronizing(true);
+
+    try {
+      const result = await synchroniserTransmissionPa(facture.id);
+
+      setSyncResult(result);
+      setTransmissions((previous) =>
+        upsertTransmission(previous, result.transmission),
+      );
+
+      if (result.resultat === "applied") {
+        const [updatedFacture, updatedEvents] = await Promise.all([
+          getFacture(facture.id),
+          listEvenementsFacture(facture.id),
+        ]);
+
+        setFacture(updatedFacture);
+        setEvents(updatedEvents);
+      }
+    } catch (apiError) {
+      setSyncResult(null);
+      setSyncError(getApiErrorMessage(apiError));
+    } finally {
+      setIsSynchronizing(false);
+    }
+  }
+
   function handleOpenPdf() {
     if (!facture || !hasPdf) {
       return;
@@ -536,6 +584,13 @@ export function FactureDetailPage() {
             error={transmissionsError}
             isTransmitting={isTransmitting}
             onSimulate={() => setIsTransmitConfirmOpen(true)}
+            canSynchronize={canSynchronize}
+            isSynchronizing={isSynchronizing}
+            syncResult={syncResult}
+            syncError={syncError}
+            onSynchronize={() => {
+              void handleSynchronize();
+            }}
           />
         )}
 

@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { TransmissionPa } from "../types/transmissionPa";
+import type { PaSyncResult, TransmissionPa } from "../types/transmissionPa";
 import { http } from "./http";
 import { normalizeCollection, normalizeResource } from "./normalize";
 
@@ -21,6 +21,16 @@ export async function simulerTransmissionPa(
   );
 
   return normalizeResource<TransmissionPa>(response.data, "transmission");
+}
+
+export async function synchroniserTransmissionPa(
+  factureId: string,
+): Promise<PaSyncResult> {
+  const response = await http.post<PaSyncResult>(
+    `/factures/${factureId}/transmissions/synchroniser`,
+  );
+
+  return response.data;
 }
 
 // En cas d'échec technique (502), le backend renvoie quand même la

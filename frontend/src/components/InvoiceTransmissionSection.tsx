@@ -1,8 +1,10 @@
-import { RadioTower } from "lucide-react";
+import { RadioTower, RefreshCw, TriangleAlert } from "lucide-react";
 import type {
+  PaSyncResult,
   TransmissionPa,
   TransmissionPaStatut,
 } from "../types/transmissionPa";
+import type { FactureStatut } from "../types/facture";
 
 const STATUT_LABELS: Record<TransmissionPaStatut, string> = {
   en_attente: "En attente",
@@ -12,12 +14,31 @@ const STATUT_LABELS: Record<TransmissionPaStatut, string> = {
   erreur: "Échec technique",
 };
 
+const FACTURE_STATUT_LABELS: Record<FactureStatut, string> = {
+  brouillon: "Brouillon",
+  emise: "Émise",
+  deposee: "Déposée",
+  recue: "Reçue",
+  mise_a_disposition: "Mise à disposition",
+  approuvee: "Approuvée",
+  refusee: "Refusée",
+  en_litige: "En litige",
+  encaissee: "Paiement reçu",
+  archivee: "Archivée",
+  annulee: "Annulée",
+};
+
 type InvoiceTransmissionSectionProps = {
   transmissions: TransmissionPa[];
   isLoading: boolean;
   error: string | null;
   isTransmitting: boolean;
   onSimulate: () => void;
+  canSynchronize: boolean;
+  isSynchronizing: boolean;
+  syncResult: PaSyncResult | null;
+  syncError: string | null;
+  onSynchronize: () => void;
 };
 
 export function InvoiceTransmissionSection({
@@ -26,6 +47,11 @@ export function InvoiceTransmissionSection({
   error,
   isTransmitting,
   onSimulate,
+  canSynchronize,
+  isSynchronizing,
+  syncResult,
+  syncError,
+  onSynchronize,
 }: InvoiceTransmissionSectionProps) {
   const derniereTransmission = transmissions[0] ?? null;
   const estEnErreur = derniereTransmission?.statut === "erreur";
@@ -108,6 +134,14 @@ export function InvoiceTransmissionSection({
         </p>
       )}
 
+      {syncResult && (
+        <SyncResultBanner result={syncResult} />
+      )}
+
+      {!isSynchronizing && syncError && (
+        <p className="invoice-transmission-section__error">{syncError}</p>
+      )}
+
       <div className="invoice-transmission-section__actions">
         <button
           type="button"
@@ -122,7 +156,54 @@ export function InvoiceTransmissionSection({
               ? "Réessayer"
               : "Simuler une transmission (sandbox)"}
         </button>
+
+        {canSynchronize && (
+          <button
+            type="button"
+            className="secondary-btn"
+            disabled={isSynchronizing}
+            onClick={onSynchronize}
+          >
+            <RefreshCw size={16} />
+            {isSynchronizing
+              ? "Synchronisation en cours..."
+              : "Synchroniser maintenant"}
+          </button>
+        )}
       </div>
     </section>
   );
+}
+
+function SyncResultBanner({ result }: { result: PaSyncResult }) {
+  switch (result.resultat) {
+    case "applied":
+      return (
+        <p className="invoice-transmission-section__sync-result invoice-transmission-section__sync-result--success">
+          Nouveau statut : {FACTURE_STATUT_LABELS[result.statut_facture_apres] ?? result.statut_facture_apres}
+        </p>
+      );
+    case "duplicate":
+    case "stale":
+      return (
+        <p className="invoice-transmission-section__sync-result invoice-transmission-section__sync-result--neutral">
+          Aucun changement.
+        </p>
+      );
+    case "unmapped":
+      return (
+        <p className="invoice-transmission-section__sync-result invoice-transmission-section__sync-result--neutral">
+          Statut fournisseur non reconnu.
+        </p>
+      );
+    case "requires_review":
+      return (
+        <p className="invoice-transmission-section__sync-result invoice-transmission-section__sync-result--warning">
+          <TriangleAlert size={16} />
+          Incohérence à examiner{result.motif ? ` — ${result.motif}` : ""}
+        </p>
+      );
+    default:
+      return null;
+  }
 }

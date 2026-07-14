@@ -1,3 +1,5 @@
+import type { FactureStatut } from "./facture";
+
 export type TransmissionPaStatut =
   | "en_attente"
   | "depose"
@@ -15,4 +17,22 @@ export type TransmissionPa = {
   transmis_at: string | null;
   created_at: string;
   simulation: boolean;
+};
+
+// Les 5 issues possibles d'une synchronisation : toutes NORMALES, aucune
+// n'est une erreur technique (celle-ci remonte en 502, voir
+// getTransmissionFromError / le catch dédié côté page).
+export type PaSyncResultat =
+  | "applied"
+  | "duplicate"
+  | "stale"
+  | "requires_review"
+  | "unmapped";
+
+export type PaSyncResult = {
+  resultat: PaSyncResultat;
+  motif: string | null;
+  statut_facture_avant: FactureStatut;
+  statut_facture_apres: FactureStatut;
+  transmission: TransmissionPa;
 };

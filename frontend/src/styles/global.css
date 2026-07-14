@@ -2686,9 +2686,38 @@ h1 {
   font-size: 13px;
 }
 
+.invoice-transmission-section__sync-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.invoice-transmission-section__sync-result--success {
+  background: var(--color-success-soft);
+  color: var(--color-text-primary);
+}
+
+.invoice-transmission-section__sync-result--neutral {
+  background: var(--color-bg-subtle, rgba(148, 163, 184, 0.12));
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.invoice-transmission-section__sync-result--warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
 .invoice-transmission-section__actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 10px;
 }
 
 @media (max-width: 900px) {
@@ -2701,7 +2730,7 @@ h1 {
   }
 
   .invoice-transmission-section__actions {
-    justify-content: stretch;
+    flex-direction: column;
   }
 
   .invoice-transmission-section__actions .secondary-btn {
