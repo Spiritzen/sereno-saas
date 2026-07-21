@@ -53,6 +53,14 @@ Rails.application.configure do
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
 
+  # V1.1-B3.1b : sans ceci, ActiveJob retombe sur l'adaptateur :async
+  # (in-process, non persistant) — le scanner récurrent (config/recurring.yml)
+  # et le polling perdraient tout leur intérêt (rien ne survit à un
+  # redémarrage). `bin/jobs` doit tourner pour que ça s'exécute réellement ;
+  # voir le rapport B3.1b pour la commande de préparation de base nécessaire
+  # (tables Solid Queue absentes de la base de dev à ce jour).
+  config.active_job.queue_adapter = :solid_queue
+
   # Highlight code that triggered redirect in logs.
   config.action_dispatch.verbose_redirect_logs = true
 

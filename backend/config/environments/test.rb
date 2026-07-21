@@ -50,4 +50,11 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # V1.1-B3.1b : adaptateur :test — les jobs enfilés via perform_later sont
+  # collectés (inspectables via ActiveJob::TestHelper) plutôt qu'exécutés en
+  # arrière-plan, ce qui rendrait les specs non déterministes. Les jobs
+  # eux-mêmes sont exercés en #perform_now dans les specs, jamais via une
+  # vraie queue.
+  config.active_job.queue_adapter = :test
 end
