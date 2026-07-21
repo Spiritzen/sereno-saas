@@ -2713,6 +2713,12 @@ h1 {
   color: var(--color-warning);
 }
 
+.invoice-transmission-section__polling-note {
+  margin: 0 0 16px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
 .invoice-transmission-section__actions {
   display: flex;
   flex-wrap: wrap;

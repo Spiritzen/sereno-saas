@@ -17,6 +17,11 @@ export type TransmissionPa = {
   transmis_at: string | null;
   created_at: string;
   simulation: boolean;
+  // V1.1-B3.1b — polling automatique.
+  next_poll_at: string | null;
+  polling_paused: boolean;
+  polling_stopped: boolean;
+  polling_stop_reason: string | null;
 };
 
 // Les 5 issues possibles d'une synchronisation : toutes NORMALES, aucune
