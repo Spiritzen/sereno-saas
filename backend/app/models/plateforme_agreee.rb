@@ -7,6 +7,12 @@ class PlateformeAgreee < ApplicationRecord
 
   belongs_to :organisation
 
+  # B5 — chiffrement au repos. Non déterministe (par défaut) : le champ n'est
+  # jamais recherché ni comparé (pas de WHERE/unicité dessus), donc rien
+  # n'exige le déterminisme, et le non-déterministe est le plus sûr des deux.
+  # Clés lues depuis l'ENV, cf. config/initializers/active_record_encryption.rb.
+  encrypts :credentials_chiffres
+
   has_many :transmissions_pa,
          class_name: "TransmissionPa",
          foreign_key: :plateforme_agreee_id,
