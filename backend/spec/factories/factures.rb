@@ -49,5 +49,28 @@ FactoryBot.define do
         )
       end
     end
+
+    # Facture déjà émise ET déposée, sans passer par le service
+    # d'orchestration : utilisé pour poser le point de départ des tests
+    # d'ingestion PA (B3.1a), qui ne testent pas la transmission sortante.
+    trait :deposee do
+      after(:create) do |facture|
+        create(:ligne_facture, facture: facture, organisation: facture.organisation) if facture.lignes_facture.empty?
+
+        facture.reload
+
+        numero = "FAC-#{Date.current.year}-#{format('%04d', rand(1000..9999))}"
+
+        facture.update_columns(
+          numero: numero,
+          statut: "deposee",
+          date_emission: Date.current,
+          emise_at: Time.current,
+          pdf_url: "storage/factures/#{facture.id}/facture-#{numero}.pdf",
+          xml_url: "storage/factures/#{facture.id}/factur-x-#{numero}.xml",
+          updated_at: Time.current
+        )
+      end
+    end
   end
 end

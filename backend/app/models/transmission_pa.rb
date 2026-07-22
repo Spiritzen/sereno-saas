@@ -13,9 +13,16 @@ class TransmissionPa < ApplicationRecord
              class_name: "PlateformeAgreee",
              foreign_key: :plateforme_agreee_id
 
+  has_many :evenements_entrants_pa,
+           class_name: "EvenementEntrantPa",
+           foreign_key: :transmission_pa_id,
+           dependent: :restrict_with_exception
+
   validates :direction, presence: true, inclusion: { in: DIRECTIONS }
   validates :statut, presence: true, inclusion: { in: STATUTS }
   validates :format, presence: true, inclusion: { in: FORMATS }
+  validates :idempotency_key, presence: true, uniqueness: true
+  validates :tentative, presence: true, numericality: { greater_than_or_equal_to: 0, only_integer: true }
 
   validate :un_seul_document_cible
   validate :facture_appartient_a_la_meme_organisation

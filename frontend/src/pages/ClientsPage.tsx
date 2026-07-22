@@ -14,6 +14,7 @@ import {
   updateClient,
 } from "../api/clientsApi";
 import { getApiErrorMessage } from "../api/http";
+import { ModalShell } from "../components/ModalShell";
 import type {
   Client,
   ClientInput,
@@ -477,36 +478,42 @@ export function ClientsPage() {
         </div>
       )}
 
-      {isModalOpen && (
-        <div className="client-modal-backdrop" role="presentation">
-          <div className="client-modal" role="dialog" aria-modal="true">
-            <div className="client-modal-header">
-              <div>
-                <span className="page-kicker">
-                  {editingClient ? "Modifier client" : "Nouveau client"}
-                </span>
-                <h2>
-                  {editingClient
-                    ? editingClient.raison_sociale
-                    : "Créer un client"}
-                </h2>
-              </div>
+      <ModalShell
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        labelledBy="client-modal-title"
+        isDismissDisabled={isSavingClient}
+        surfaceClassName="client-modal"
+      >
+        <header className="modal-shell__header client-modal-header">
+          <div>
+            <span className="page-kicker">
+              {editingClient ? "Modifier client" : "Nouveau client"}
+            </span>
+            <h2 id="client-modal-title">
+              {editingClient
+                ? editingClient.raison_sociale
+                : "Créer un client"}
+            </h2>
+          </div>
 
-              <button
-                type="button"
-                className="client-modal-close"
-                onClick={handleCloseModal}
-                aria-label="Fermer"
-              >
-                <X size={18} />
-              </button>
-            </div>
+          <button
+            type="button"
+            className="client-modal-close"
+            onClick={handleCloseModal}
+            aria-label="Fermer"
+          >
+            <X size={18} />
+          </button>
+        </header>
 
-            <form
-              className="client-form"
-              onSubmit={handleSubmitClient}
-              noValidate
-            >
+        <div className="modal-shell__body">
+          <form
+            id="client-modal-form"
+            className="client-form"
+            onSubmit={handleSubmitClient}
+            noValidate
+          >
               <div className="client-type-help-card">
                 <strong>{TYPE_LABELS[form.type]}</strong>
                 <span>{TYPE_HELP_TEXT[form.type]}</span>
@@ -721,78 +728,80 @@ export function ClientsPage() {
               </div>
 
               {modalError && <div className="state-card error">{modalError}</div>}
-
-              <div className="client-modal-actions">
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={handleCloseModal}
-                  disabled={isSavingClient}
-                >
-                  Annuler
-                </button>
-
-                <button
-                  type="submit"
-                  className="primary-btn"
-                  disabled={isSavingClient}
-                >
-                  {isSavingClient
-                    ? "Enregistrement..."
-                    : editingClient
-                      ? "Enregistrer"
-                      : "Créer le client"}
-                </button>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
-      )}
 
-      {clientToArchive && (
-        <div className="client-modal-backdrop" role="presentation">
-          <div
-            className="confirmation-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="archive-client-title"
+        <footer className="modal-shell__footer client-modal-actions">
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={handleCloseModal}
+            disabled={isSavingClient}
           >
-            <div className="confirmation-icon danger">
-              <Archive size={22} />
-            </div>
+            Annuler
+          </button>
 
-            <div>
-              <span className="page-kicker">Archivage client</span>
-              <h2 id="archive-client-title">Archiver ce client ?</h2>
-              <p>
-                Le client <strong>{clientToArchive.raison_sociale}</strong> ne
-                sera plus proposé dans les nouvelles factures. Ses documents
-                existants resteront conservés.
-              </p>
-            </div>
+          <button
+            type="submit"
+            form="client-modal-form"
+            className="primary-btn"
+            disabled={isSavingClient}
+          >
+            {isSavingClient
+              ? "Enregistrement..."
+              : editingClient
+                ? "Enregistrer"
+                : "Créer le client"}
+          </button>
+        </footer>
+      </ModalShell>
 
-            <div className="confirmation-actions">
-              <button
-                type="button"
-                className="secondary-btn"
-                disabled={Boolean(archivingClientId)}
-                onClick={handleCloseArchiveConfirmation}
-              >
-                Annuler
-              </button>
+      <ModalShell
+        open={Boolean(clientToArchive)}
+        onClose={handleCloseArchiveConfirmation}
+        labelledBy="archive-client-title"
+        isDismissDisabled={Boolean(archivingClientId)}
+        surfaceClassName="confirmation-modal"
+      >
+        <div className="modal-shell__header">
+          <div className="confirmation-icon danger">
+            <Archive size={22} />
+          </div>
 
-              <button
-                type="button"
-                className="danger-btn"
-                disabled={Boolean(archivingClientId)}
-                onClick={handleConfirmArchiveClient}
-              >
-                {archivingClientId ? "Archivage..." : "Archiver"}
-              </button>
-            </div>
+          <div>
+            <span className="page-kicker">Archivage client</span>
+            <h2 id="archive-client-title">Archiver ce client ?</h2>
           </div>
         </div>
-      )}
+
+        <div className="modal-shell__body">
+          <p>
+            Le client <strong>{clientToArchive?.raison_sociale}</strong> ne
+            sera plus proposé dans les nouvelles factures. Ses documents
+            existants resteront conservés.
+          </p>
+        </div>
+
+        <footer className="modal-shell__footer confirmation-actions">
+          <button
+            type="button"
+            className="secondary-btn"
+            disabled={Boolean(archivingClientId)}
+            onClick={handleCloseArchiveConfirmation}
+          >
+            Annuler
+          </button>
+
+          <button
+            type="button"
+            className="danger-btn"
+            disabled={Boolean(archivingClientId)}
+            onClick={handleConfirmArchiveClient}
+          >
+            {archivingClientId ? "Archivage..." : "Archiver"}
+          </button>
+        </footer>
+      </ModalShell>
     </section>
   );
 }

@@ -1,9 +1,7 @@
 import {
   ArrowLeft,
   CirclePlus,
-  ExternalLink,
   FileText,
-  Send,
   ShieldCheck,
   Trash2,
 } from "lucide-react";
@@ -16,16 +14,67 @@ import {
   getFacturePdfUrl,
   getFactureXmlUrl,
 } from "../api/facturesApi";
+import { listEvenementsFacture } from "../api/evenementsFactureApi";
 import { getApiErrorMessage } from "../api/http";
 import {
   createLigneFacture,
   deleteLigneFacture,
   listLignesFacture,
 } from "../api/lignesFactureApi";
+import {
+  getTransmissionFromError,
+  listTransmissionsPa,
+  simulerTransmissionPa,
+  synchroniserTransmissionPa,
+} from "../api/transmissionPaApi";
 import { ConfirmModal } from "../components/ConfirmModal";
+import { InvoiceDetailHeader } from "../components/InvoiceDetailHeader";
+import { InvoiceEventHistory } from "../components/InvoiceEventHistory";
+import { InvoiceLifecycleTimeline } from "../components/InvoiceLifecycleTimeline";
+import { InvoiceTransmissionSection } from "../components/InvoiceTransmissionSection";
 import type { ConformiteResult } from "../types/conformite";
+import type { EvenementFacture } from "../types/evenementFacture";
 import type { Facture } from "../types/facture";
 import type { LigneFacture } from "../types/ligneFacture";
+import type { PaSyncResult, TransmissionPa } from "../types/transmissionPa";
+
+// Miroir de FactureStatusTransitionPolicy::TERMINAUX (backend) : une facture
+// dans un de ces statuts ne peut plus être synchronisée.
+const FACTURE_STATUTS_TERMINAUX = ["encaissee", "refusee", "annulee", "archivee"];
+
+const CLIENT_TYPE_LABELS: Record<"entreprise" | "particulier" | "public", string> = {
+  entreprise: "Entreprise",
+  particulier: "Particulier",
+  public: "Public",
+};
+
+function resolveClientMeta(client: Facture["client"]) {
+  if (!client) {
+    return null;
+  }
+
+  if (client.email) {
+    return client.email;
+  }
+
+  if (client.ville && client.pays) {
+    return `${client.ville}, ${client.pays}`;
+  }
+
+  if (client.ville) {
+    return client.ville;
+  }
+
+  if (client.type) {
+    return CLIENT_TYPE_LABELS[client.type];
+  }
+
+  if (client.siret) {
+    return `SIRET ${client.siret}`;
+  }
+
+  return null;
+}
 
 export function FactureDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -45,9 +94,34 @@ export function FactureDetailPage() {
   const [lineToDelete, setLineToDelete] = useState<LigneFacture | null>(null);
   const [isCheckingConformite, setIsCheckingConformite] = useState(false);
   const [isEmitting, setIsEmitting] = useState(false);
+  const [isEmitConfirmOpen, setIsEmitConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [events, setEvents] = useState<EvenementFacture[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(Boolean(id));
+  const [eventsError, setEventsError] = useState<string | null>(null);
+
+  const [transmissions, setTransmissions] = useState<TransmissionPa[]>([]);
+  const [isLoadingTransmissions, setIsLoadingTransmissions] = useState(
+    Boolean(id),
+  );
+  const [transmissionsError, setTransmissionsError] = useState<string | null>(
+    null,
+  );
+  const [isTransmitting, setIsTransmitting] = useState(false);
+  const [isTransmitConfirmOpen, setIsTransmitConfirmOpen] = useState(false);
+
+  const [isSynchronizing, setIsSynchronizing] = useState(false);
+  const [syncResult, setSyncResult] = useState<PaSyncResult | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
   const isDraft = facture?.statut === "brouillon";
+
+  const derniereTransmission = transmissions[0] ?? null;
+  const canSynchronize =
+    Boolean(facture) &&
+    derniereTransmission?.statut === "depose" &&
+    !FACTURE_STATUTS_TERMINAUX.includes(facture?.statut ?? "");
 
   // B2 : on n'affiche les liens PDF/XML que si le backend confirme leur présence.
   const hasPdf = Boolean(facture?.pdf_url);
@@ -90,6 +164,78 @@ export function FactureDetailPage() {
         }
 
         setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let ignore = false;
+
+    void listEvenementsFacture(id)
+      .then((eventsData) => {
+        if (ignore) {
+          return;
+        }
+
+        setEvents(eventsData);
+        setEventsError(null);
+      })
+      .catch((apiError) => {
+        if (ignore) {
+          return;
+        }
+
+        setEventsError(getApiErrorMessage(apiError));
+      })
+      .finally(() => {
+        if (ignore) {
+          return;
+        }
+
+        setIsLoadingEvents(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let ignore = false;
+
+    void listTransmissionsPa(id)
+      .then((transmissionsData) => {
+        if (ignore) {
+          return;
+        }
+
+        setTransmissions(transmissionsData);
+        setTransmissionsError(null);
+      })
+      .catch((apiError) => {
+        if (ignore) {
+          return;
+        }
+
+        setTransmissionsError(getApiErrorMessage(apiError));
+      })
+      .finally(() => {
+        if (ignore) {
+          return;
+        }
+
+        setIsLoadingTransmissions(false);
       });
 
     return () => {
@@ -262,6 +408,89 @@ export function FactureDetailPage() {
     }
   }
 
+  const handleConfirmEmitFacture = async () => {
+    await handleEmitFacture();
+    setIsEmitConfirmOpen(false);
+  };
+
+  function upsertTransmission(
+    previous: TransmissionPa[],
+    transmission: TransmissionPa,
+  ) {
+    const autres = previous.filter((item) => item.id !== transmission.id);
+
+    return [ transmission, ...autres ];
+  }
+
+  async function handleSimulateTransmission() {
+    if (!facture) {
+      setError("Facture introuvable.");
+      return;
+    }
+
+    setError(null);
+    setIsTransmitting(true);
+
+    try {
+      const transmission = await simulerTransmissionPa(facture.id);
+
+      setTransmissions((previous) => upsertTransmission(previous, transmission));
+
+      const updatedFacture = await getFacture(facture.id);
+      setFacture(updatedFacture);
+    } catch (apiError) {
+      const transmissionEnErreur = getTransmissionFromError(apiError);
+
+      if (transmissionEnErreur) {
+        setTransmissions((previous) =>
+          upsertTransmission(previous, transmissionEnErreur),
+        );
+      } else {
+        setError(getApiErrorMessage(apiError));
+      }
+    } finally {
+      setIsTransmitting(false);
+    }
+  }
+
+  const handleConfirmTransmit = async () => {
+    await handleSimulateTransmission();
+    setIsTransmitConfirmOpen(false);
+  };
+
+  async function handleSynchronize() {
+    if (!facture) {
+      return;
+    }
+
+    setSyncError(null);
+    setIsSynchronizing(true);
+
+    try {
+      const result = await synchroniserTransmissionPa(facture.id);
+
+      setSyncResult(result);
+      setTransmissions((previous) =>
+        upsertTransmission(previous, result.transmission),
+      );
+
+      if (result.resultat === "applied") {
+        const [updatedFacture, updatedEvents] = await Promise.all([
+          getFacture(facture.id),
+          listEvenementsFacture(facture.id),
+        ]);
+
+        setFacture(updatedFacture);
+        setEvents(updatedEvents);
+      }
+    } catch (apiError) {
+      setSyncResult(null);
+      setSyncError(getApiErrorMessage(apiError));
+    } finally {
+      setIsSynchronizing(false);
+    }
+  }
+
   function handleOpenPdf() {
     if (!facture || !hasPdf) {
       return;
@@ -283,7 +512,7 @@ export function FactureDetailPage() {
       <div className="page-heading">
         <div>
           <span className="page-kicker">Détail facture</span>
-          <h1>{facture?.numero ?? "Brouillon"}</h1>
+          <h1>Détail de la facture</h1>
           <p>
             Consultez le document, modifiez les brouillons et accédez aux
             fichiers PDF/XML après émission.
@@ -300,6 +529,29 @@ export function FactureDetailPage() {
         <div className="state-card">Chargement de la facture...</div>
       )}
 
+      {!isLoading && facture && (
+        <InvoiceDetailHeader
+          invoiceNumber={facture.numero}
+          status={facture.statut}
+          clientName={facture.client?.raison_sociale ?? null}
+          clientMeta={resolveClientMeta(facture.client)}
+          totalHt={toNumber(facture.total_ht)}
+          totalTva={toNumber(facture.total_tva)}
+          totalTtc={toNumber(facture.total_ttc)}
+          currency={facture.devise}
+          invoiceDate={facture.created_at ?? null}
+          emittedAt={facture.emise_at}
+          dueDate={facture.date_echeance}
+          canEmit={canEmit}
+          isEmitting={isEmitting}
+          hasPdf={hasPdf}
+          hasXml={hasXml}
+          onEmit={() => setIsEmitConfirmOpen(true)}
+          onOpenPdf={handleOpenPdf}
+          onOpenXml={handleOpenXml}
+        />
+      )}
+
       {error && <div className="state-card error">{error}</div>}
 
       {!isLoading && !facture && !error && (
@@ -307,36 +559,51 @@ export function FactureDetailPage() {
       )}
 
       {!isLoading && facture && (
+        <InvoiceLifecycleTimeline
+          status={facture.statut}
+          createdAt={facture.created_at}
+          emittedAt={facture.emise_at}
+          invoiceNumber={facture.numero}
+        />
+      )}
+
+      {!isLoading && facture && (
+        <InvoiceEventHistory
+          events={events}
+          isLoading={isLoadingEvents}
+          error={eventsError}
+        />
+      )}
+
+      {!isLoading &&
+        facture &&
+        (facture.statut === "emise" || transmissions.length > 0) && (
+          <InvoiceTransmissionSection
+            transmissions={transmissions}
+            isLoading={isLoadingTransmissions}
+            error={transmissionsError}
+            isTransmitting={isTransmitting}
+            onSimulate={() => setIsTransmitConfirmOpen(true)}
+            canSynchronize={canSynchronize}
+            isSynchronizing={isSynchronizing}
+            syncResult={syncResult}
+            syncError={syncError}
+            onSynchronize={() => {
+              void handleSynchronize();
+            }}
+          />
+        )}
+
+      {!isLoading && facture && (
         <div className="invoice-builder-card">
-          <div className="invoice-builder-header">
-            <div>
-              <span className="page-kicker">
-                {facture.numero ?? "Brouillon enregistré"}
-              </span>
-              <h2>{facture.client?.raison_sociale ?? "Client non chargé"}</h2>
-              <p>
-                {isDraft
-                  ? "Ce brouillon peut encore être modifié avant émission."
-                  : "Cette facture est émise : elle est consultable, mais non modifiable."}
-              </p>
-            </div>
-
-            <span className={`status ${isDraft ? "warning" : "success"}`}>
-              {isDraft ? "Brouillon" : "Émise"}
-            </span>
-          </div>
-
           <div className="draft-preview-card">
             <div className="document-icon">
               <FileText size={18} />
             </div>
 
             <div>
-              <strong>{facture.numero ?? "Brouillon sans numéro"}</strong>
-              <span>
-                Échéance : {formatDate(facture.date_echeance)} · Format :{" "}
-                {formatFactureFormat(facture.format)}
-              </span>
+              <strong>{formatFactureFormat(facture.format)}</strong>
+              <span>Échéance : {formatDate(facture.date_echeance)}</span>
             </div>
           </div>
 
@@ -468,66 +735,21 @@ export function FactureDetailPage() {
             </div>
           </div>
 
-          <div className="invoice-actions-row">
-            {isDraft && (
-              <>
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  disabled={isCheckingConformite || lignes.length === 0}
-                  onClick={handleCheckConformite}
-                >
-                  <ShieldCheck size={16} />
-                  {isCheckingConformite
-                    ? "Vérification..."
-                    : "Vérifier conformité"}
-                </button>
-
-                <button
-                  type="button"
-                  className="primary-btn"
-                  disabled={!canEmit || isEmitting}
-                  onClick={handleEmitFacture}
-                >
-                  <Send size={16} />
-                  {isEmitting ? "Émission..." : "Émettre"}
-                </button>
-              </>
-            )}
-
-            {!isDraft && (
-              <>
-                {hasPdf && (
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={handleOpenPdf}
-                  >
-                    <ExternalLink size={16} />
-                    Ouvrir PDF
-                  </button>
-                )}
-
-                {hasXml && (
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={handleOpenXml}
-                  >
-                    <ExternalLink size={16} />
-                    Ouvrir XML
-                  </button>
-                )}
-
-                {!hasPdf && !hasXml && (
-                  <div className="state-card">
-                    Les fichiers PDF/XML ne sont pas encore disponibles pour
-                    cette facture.
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+          {isDraft && (
+            <div className="invoice-actions-row">
+              <button
+                type="button"
+                className="secondary-btn"
+                disabled={isCheckingConformite || lignes.length === 0}
+                onClick={handleCheckConformite}
+              >
+                <ShieldCheck size={16} />
+                {isCheckingConformite
+                  ? "Vérification..."
+                  : "Vérifier conformité"}
+              </button>
+            </div>
+          )}
 
           {isDraft && conformite && (
             <div
@@ -580,6 +802,36 @@ export function FactureDetailPage() {
         isLoading={Boolean(deletingLineId)}
         onCancel={handleCancelDeleteLine}
         onConfirm={handleConfirmDeleteLine}
+      />
+
+      <ConfirmModal
+        open={isEmitConfirmOpen}
+        title="Émettre définitivement cette facture ?"
+        message="Une fois émise, cette facture sera numérotée et ne pourra plus être modifiée ni supprimée. Vérifiez les informations avant de continuer."
+        cancelLabel="Annuler"
+        confirmLabel={isEmitting ? "Émission en cours…" : "Émettre définitivement"}
+        isLoading={isEmitting}
+        onCancel={() => setIsEmitConfirmOpen(false)}
+        onConfirm={() => {
+          void handleConfirmEmitFacture();
+        }}
+      />
+
+      <ConfirmModal
+        open={isTransmitConfirmOpen}
+        title="Simuler une transmission de cette facture ?"
+        message="Cette action simule un dépôt auprès d’une plateforme agréée factice (sandbox). Aucune vraie Plateforme Agréée n’est contactée. En cas de succès simulé, la facture passera au statut « déposée »."
+        cancelLabel="Annuler"
+        confirmLabel={
+          isTransmitting
+            ? "Simulation en cours…"
+            : "Simuler une transmission (sandbox)"
+        }
+        isLoading={isTransmitting}
+        onCancel={() => setIsTransmitConfirmOpen(false)}
+        onConfirm={() => {
+          void handleConfirmTransmit();
+        }}
       />
     </section>
   );

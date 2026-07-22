@@ -1,7 +1,7 @@
 class EvenementFacture < ApplicationRecord
   self.table_name = "evenement_facture"
 
-  SOURCES = %w[interne pa webhook].freeze
+  SOURCES = %w[interne pa webhook sandbox].freeze
 
   belongs_to :organisation
   belongs_to :facture

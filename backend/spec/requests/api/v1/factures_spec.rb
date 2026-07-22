@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rails_helper"
+require "fileutils"
 
 RSpec.describe "Api::V1::Factures", type: :request do
   def authenticate_as(utilisateur, organisation)
@@ -174,6 +175,77 @@ RSpec.describe "Api::V1::Factures", type: :request do
 
       expect(response).to have_http_status(:forbidden)
       expect(Facture.exists?(facture.id)).to be(true)
+    end
+  end
+
+  describe "journal des événements de statut" do
+    let(:organisation) { create(:organisation) }
+    let(:utilisateur) { create(:utilisateur, organisation: organisation, role: "owner") }
+
+    before do
+      authenticate_as(utilisateur, organisation)
+    end
+
+    it "crée un événement brouillon lors de la création d'une facture" do
+      client = create(:client, organisation: organisation, statut: "actif")
+
+      post "/api/v1/factures", params: { facture: { client_id: client.id } }
+
+      expect(response).to have_http_status(:created)
+
+      facture = Facture.last
+      evenements = EvenementFacture.where(facture_id: facture.id)
+
+      expect(evenements.count).to eq(1)
+
+      evenement = evenements.first
+      expect(evenement.organisation_id).to eq(organisation.id)
+      expect(evenement.statut).to eq("brouillon")
+      expect(evenement.source).to eq("interne")
+      expect(evenement.utilisateur_id).to eq(utilisateur.id)
+      expect(evenement.payload).to eq({ "action" => "facture_creee" })
+    end
+
+    it "n'ajoute pas de doublon d'événement brouillon lors de la création" do
+      client = create(:client, organisation: organisation, statut: "actif")
+
+      post "/api/v1/factures", params: { facture: { client_id: client.id } }
+      facture = Facture.last
+
+      expect(EvenementFacture.where(facture_id: facture.id, statut: "brouillon").count).to eq(1)
+    end
+
+    it "annule la création de la facture si l'écriture de l'événement échoue" do
+      client = create(:client, organisation: organisation, statut: "actif")
+
+      allow(EvenementFacture).to receive(:create!)
+        .and_raise(ActiveRecord::RecordInvalid.new(EvenementFacture.new))
+
+      expect do
+        post "/api/v1/factures", params: { facture: { client_id: client.id } }
+      end.not_to change(Facture, :count)
+
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "enregistre les événements brouillon puis emise dans l'ordre chronologique" do
+      client = create(:client, organisation: organisation, statut: "actif")
+
+      post "/api/v1/factures", params: { facture: { client_id: client.id } }
+      facture = Facture.last
+
+      create(:ligne_facture, facture: facture, organisation: organisation)
+
+      post "/api/v1/factures/#{facture.id}/emettre"
+
+      expect(response).to have_http_status(:ok)
+
+      evenements = EvenementFacture.where(facture_id: facture.id).order(:created_at, :id)
+
+      expect(evenements.map(&:statut)).to eq(%w[brouillon emise])
+      expect(EvenementFacture.where(facture_id: facture.id, statut: "emise").count).to eq(1)
+    ensure
+      FileUtils.rm_rf(Rails.root.join("storage", "factures", facture&.id.to_s)) if facture
     end
   end
 end

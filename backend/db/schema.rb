@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_24_012347) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_14_034551) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -181,6 +181,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_24_012347) do
     t.check_constraint "type::text = ANY (ARRAY['transactions'::character varying, 'paiements'::character varying]::text[])", name: "check_e_reporting_type"
   end
 
+  create_table "evenement_entrant_pa", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "cle_deduplication", null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.uuid "facture_id", null: false
+    t.text "motif"
+    t.datetime "occurred_at"
+    t.uuid "organisation_id", null: false
+    t.jsonb "payload"
+    t.string "provider", limit: 30, null: false
+    t.string "provider_event_id", limit: 100
+    t.datetime "received_at", null: false
+    t.string "resultat", limit: 20, null: false
+    t.string "statut_brut", limit: 50, null: false
+    t.string "statut_candidat", limit: 30
+    t.uuid "transmission_pa_id", null: false
+    t.index ["cle_deduplication"], name: "index_evenement_entrant_pa_on_cle_deduplication", unique: true
+    t.index ["facture_id"], name: "index_evenement_entrant_pa_on_facture_id"
+    t.index ["organisation_id", "facture_id"], name: "index_evenement_entrant_pa_on_org_and_facture"
+    t.index ["organisation_id"], name: "index_evenement_entrant_pa_on_organisation_id"
+    t.index ["resultat"], name: "index_evenement_entrant_pa_on_resultat"
+    t.index ["transmission_pa_id", "created_at"], name: "index_evenement_entrant_pa_on_transmission_and_created_at"
+    t.index ["transmission_pa_id"], name: "index_evenement_entrant_pa_on_transmission_pa_id"
+    t.check_constraint "resultat::text = ANY (ARRAY['applied'::character varying, 'duplicate'::character varying, 'stale'::character varying, 'requires_review'::character varying, 'unmapped'::character varying]::text[])", name: "check_evenement_entrant_pa_resultat"
+  end
+
   create_table "evenement_facture", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "code_statut_pa", limit: 50
     t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
@@ -196,7 +221,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_24_012347) do
     t.index ["organisation_id", "facture_id"], name: "index_evenement_facture_on_org_and_facture"
     t.index ["organisation_id"], name: "index_evenement_facture_on_organisation_id"
     t.index ["utilisateur_id"], name: "index_evenement_facture_on_utilisateur_id"
-    t.check_constraint "source::text = ANY (ARRAY['interne'::character varying, 'pa'::character varying, 'webhook'::character varying]::text[])", name: "check_evenement_facture_source"
+    t.check_constraint "source::text = ANY (ARRAY['interne'::character varying, 'pa'::character varying, 'webhook'::character varying, 'sandbox'::character varying]::text[])", name: "check_evenement_facture_source"
     t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'emise'::character varying, 'deposee'::character varying, 'recue'::character varying, 'mise_a_disposition'::character varying, 'approuvee'::character varying, 'refusee'::character varying, 'en_litige'::character varying, 'encaissee'::character varying, 'archivee'::character varying, 'annulee'::character varying]::text[])", name: "check_evenement_facture_statut"
   end
 
@@ -451,27 +476,42 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_24_012347) do
   create_table "transmission_pa", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "accuse_reception"
     t.uuid "avoir_id"
+    t.integer "consecutive_poll_errors", default: 0, null: false
     t.datetime "created_at", null: false
     t.string "direction", limit: 10, default: "sortant", null: false
     t.uuid "facture_id"
     t.string "format", limit: 20, default: "factur_x", null: false
+    t.uuid "idempotency_key", null: false
     t.string "identifiant_pa", limit: 100
+    t.datetime "last_polled_at"
     t.text "message_erreur"
+    t.datetime "next_poll_at"
     t.uuid "organisation_id", null: false
     t.uuid "plateforme_agreee_id", null: false
+    t.integer "poll_attempts", default: 0, null: false
+    t.integer "poll_backoff_step", default: 0, null: false
+    t.datetime "polling_paused_at"
+    t.string "polling_stop_reason", limit: 30
+    t.datetime "polling_stopped_at"
     t.string "statut", limit: 30, default: "en_attente", null: false
+    t.integer "tentative", default: 0, null: false
     t.datetime "transmis_at"
     t.datetime "updated_at", null: false
     t.index ["avoir_id"], name: "index_transmission_pa_on_avoir_id"
     t.index ["facture_id"], name: "index_transmission_pa_on_facture_id"
+    t.index ["idempotency_key"], name: "index_transmission_pa_on_idempotency_key", unique: true
+    t.index ["next_poll_at"], name: "index_transmission_pa_on_next_poll_at"
     t.index ["organisation_id", "avoir_id"], name: "index_transmission_pa_on_org_and_avoir"
+    t.index ["organisation_id", "facture_id", "plateforme_agreee_id"], name: "index_transmission_pa_on_org_facture_pa_active", unique: true, where: "((statut)::text <> 'erreur'::text)"
     t.index ["organisation_id", "facture_id"], name: "index_transmission_pa_on_org_and_facture"
     t.index ["organisation_id", "statut"], name: "index_transmission_pa_on_org_and_statut"
     t.index ["organisation_id"], name: "index_transmission_pa_on_organisation_id"
     t.index ["plateforme_agreee_id"], name: "index_transmission_pa_on_plateforme_agreee_id"
+    t.index ["statut", "next_poll_at"], name: "index_transmission_pa_on_statut_and_next_poll_at", where: "((polling_paused_at IS NULL) AND (polling_stopped_at IS NULL))"
     t.check_constraint "direction::text = ANY (ARRAY['sortant'::character varying, 'entrant'::character varying]::text[])", name: "check_transmission_pa_direction"
     t.check_constraint "facture_id IS NOT NULL AND avoir_id IS NULL OR facture_id IS NULL AND avoir_id IS NOT NULL", name: "check_transmission_pa_one_document_target"
     t.check_constraint "format::text = ANY (ARRAY['factur_x'::character varying, 'ubl'::character varying, 'cii'::character varying]::text[])", name: "check_transmission_pa_format"
+    t.check_constraint "polling_stop_reason IS NULL OR (polling_stop_reason::text = ANY (ARRAY['facture_terminale'::character varying, 'polling_expired'::character varying, 'plateforme_desactivee'::character varying, 'transmission_cloturee'::character varying]::text[]))", name: "check_transmission_pa_polling_stop_reason"
     t.check_constraint "statut::text = ANY (ARRAY['en_attente'::character varying, 'depose'::character varying, 'accepte'::character varying, 'rejete'::character varying, 'erreur'::character varying]::text[])", name: "check_transmission_pa_statut"
   end
 
@@ -505,6 +545,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_24_012347) do
   add_foreign_key "devis", "clients"
   add_foreign_key "devis", "organisations"
   add_foreign_key "e_reporting", "organisations"
+  add_foreign_key "evenement_entrant_pa", "factures"
+  add_foreign_key "evenement_entrant_pa", "organisations"
+  add_foreign_key "evenement_entrant_pa", "transmission_pa"
   add_foreign_key "evenement_facture", "factures"
   add_foreign_key "evenement_facture", "organisations"
   add_foreign_key "evenement_facture", "utilisateurs"

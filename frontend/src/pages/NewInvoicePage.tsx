@@ -22,6 +22,7 @@ import {
   createLigneFacture,
   listLignesFacture,
 } from "../api/lignesFactureApi";
+import { ConfirmModal } from "../components/ConfirmModal";
 import type { Client } from "../types/client";
 import type { ConformiteResult } from "../types/conformite";
 import type { Facture } from "../types/facture";
@@ -45,6 +46,7 @@ export function NewInvoicePage() {
   const [isAddingLine, setIsAddingLine] = useState(false);
   const [isCheckingConformite, setIsCheckingConformite] = useState(false);
   const [isEmitting, setIsEmitting] = useState(false);
+  const [isEmitConfirmOpen, setIsEmitConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isEmitted = createdFacture ? createdFacture.statut !== "brouillon" : false;
@@ -251,6 +253,11 @@ export function NewInvoicePage() {
       setIsEmitting(false);
     }
   }
+
+  const handleConfirmEmitFacture = async () => {
+    await handleEmitFacture();
+    setIsEmitConfirmOpen(false);
+  };
 
   function handleOpenPdf() {
     if (!createdFacture) {
@@ -558,7 +565,7 @@ export function NewInvoicePage() {
                       type="button"
                       className="primary-btn"
                       disabled={!canEmit || isEmitting}
-                      onClick={handleEmitFacture}
+                      onClick={() => setIsEmitConfirmOpen(true)}
                     >
                       <Send size={16} />
                       {isEmitting ? "Émission..." : "Émettre"}
@@ -672,6 +679,19 @@ export function NewInvoicePage() {
           )}
         </aside>
       </div>
+
+      <ConfirmModal
+        open={isEmitConfirmOpen}
+        title="Émettre définitivement cette facture ?"
+        message="Une fois émise, cette facture sera numérotée et ne pourra plus être modifiée ni supprimée. Vérifiez les informations avant de continuer."
+        cancelLabel="Annuler"
+        confirmLabel={isEmitting ? "Émission en cours…" : "Émettre définitivement"}
+        isLoading={isEmitting}
+        onCancel={() => setIsEmitConfirmOpen(false)}
+        onConfirm={() => {
+          void handleConfirmEmitFacture();
+        }}
+      />
     </section>
   );
 }
