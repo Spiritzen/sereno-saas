@@ -1,4 +1,4 @@
-import { RadioTower, RefreshCw, TriangleAlert } from "lucide-react";
+import { PlayCircle, RadioTower, RefreshCw, TriangleAlert } from "lucide-react";
 import type {
   PaSyncResult,
   TransmissionPa,
@@ -39,6 +39,11 @@ type InvoiceTransmissionSectionProps = {
   syncResult: PaSyncResult | null;
   syncError: string | null;
   onSynchronize: () => void;
+  // V1.1-B3.2 — supervision.
+  requiresReviewCount: number | null;
+  isRelaunching: boolean;
+  relaunchError: string | null;
+  onRelaunch: () => void;
 };
 
 export function InvoiceTransmissionSection({
@@ -52,9 +57,14 @@ export function InvoiceTransmissionSection({
   syncResult,
   syncError,
   onSynchronize,
+  requiresReviewCount,
+  isRelaunching,
+  relaunchError,
+  onRelaunch,
 }: InvoiceTransmissionSectionProps) {
   const derniereTransmission = transmissions[0] ?? null;
   const estEnErreur = derniereTransmission?.statut === "erreur";
+  const estEnPause = derniereTransmission?.polling_paused === true;
 
   return (
     <section
@@ -62,12 +72,24 @@ export function InvoiceTransmissionSection({
       aria-labelledby="invoice-transmission-title"
     >
       <div className="invoice-transmission-section__header">
-        <h2
-          id="invoice-transmission-title"
-          className="invoice-transmission-section__title"
-        >
-          Transmission
-        </h2>
+        <div className="invoice-transmission-section__heading-row">
+          <h2
+            id="invoice-transmission-title"
+            className="invoice-transmission-section__title"
+          >
+            Transmission
+          </h2>
+
+          {Boolean(requiresReviewCount) && (
+            <span
+              className="invoice-transmission-review-badge"
+              title="Nombre de transmissions dont la dernière notification reçue est une incohérence à examiner"
+            >
+              <TriangleAlert size={14} />
+              {requiresReviewCount} à examiner
+            </span>
+          )}
+        </div>
         <p className="invoice-transmission-section__subtitle">
           Simulez le dépôt de cette facture auprès d’une plateforme agréée
           (environnement sandbox — aucune vraie Plateforme Agréée n’est
@@ -118,6 +140,20 @@ export function InvoiceTransmissionSection({
                 <dd>{derniereTransmission.tentative}</dd>
               </div>
             )}
+
+            {derniereTransmission.last_polled_at && (
+              <div>
+                <dt>Dernière synchronisation</dt>
+                <dd>{formatDelaiRelatif(derniereTransmission.last_polled_at, { past: true })}</dd>
+              </div>
+            )}
+
+            {derniereTransmission.consecutive_poll_errors > 0 && (
+              <div>
+                <dt>Erreurs consécutives</dt>
+                <dd>{derniereTransmission.consecutive_poll_errors}</dd>
+              </div>
+            )}
           </dl>
 
           {estEnErreur && derniereTransmission.message_erreur && (
@@ -140,6 +176,10 @@ export function InvoiceTransmissionSection({
 
       {!isSynchronizing && syncError && (
         <p className="invoice-transmission-section__error">{syncError}</p>
+      )}
+
+      {!isRelaunching && relaunchError && (
+        <p className="invoice-transmission-section__error">{relaunchError}</p>
       )}
 
       {canSynchronize && derniereTransmission && (
@@ -170,6 +210,18 @@ export function InvoiceTransmissionSection({
           >
             <RefreshCw size={16} />
             {isSynchronizing ? "Vérification en cours..." : "Vérifier maintenant"}
+          </button>
+        )}
+
+        {estEnPause && (
+          <button
+            type="button"
+            className="secondary-btn"
+            disabled={isRelaunching}
+            onClick={onRelaunch}
+          >
+            <PlayCircle size={16} />
+            {isRelaunching ? "Relance en cours..." : "Relancer la synchronisation"}
           </button>
         )}
       </div>
@@ -254,36 +306,43 @@ function PollingStatusNote({ transmission }: { transmission: TransmissionPa }) {
   return null;
 }
 
-function formatDelaiRelatif(iso: string) {
+function formatDelaiRelatif(iso: string, options?: { past?: boolean }) {
+  const past = options?.past ?? false;
   const cible = new Date(iso).getTime();
 
   if (Number.isNaN(cible)) {
     return "bientôt";
   }
 
-  const diffMs = cible - Date.now();
+  const diffMs = past ? Date.now() - cible : cible - Date.now();
 
   if (diffMs <= 0) {
-    return "dans un instant";
+    return past ? "à l’instant" : "dans un instant";
   }
 
   const diffMinutes = Math.round(diffMs / 60_000);
 
   if (diffMinutes < 1) {
-    return "dans moins d’une minute";
+    return past ? "il y a moins d’une minute" : "dans moins d’une minute";
   }
 
   if (diffMinutes < 60) {
-    return `dans ${diffMinutes} minute${diffMinutes > 1 ? "s" : ""}`;
+    return past
+      ? `il y a ${diffMinutes} minute${diffMinutes > 1 ? "s" : ""}`
+      : `dans ${diffMinutes} minute${diffMinutes > 1 ? "s" : ""}`;
   }
 
   const diffHeures = Math.round(diffMinutes / 60);
 
   if (diffHeures < 24) {
-    return `dans ${diffHeures} heure${diffHeures > 1 ? "s" : ""}`;
+    return past
+      ? `il y a ${diffHeures} heure${diffHeures > 1 ? "s" : ""}`
+      : `dans ${diffHeures} heure${diffHeures > 1 ? "s" : ""}`;
   }
 
   const diffJours = Math.round(diffHeures / 24);
 
-  return `dans ${diffJours} jour${diffJours > 1 ? "s" : ""}`;
+  return past
+    ? `il y a ${diffJours} jour${diffJours > 1 ? "s" : ""}`
+    : `dans ${diffJours} jour${diffJours > 1 ? "s" : ""}`;
 }

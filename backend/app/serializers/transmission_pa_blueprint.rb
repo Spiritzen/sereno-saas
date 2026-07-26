@@ -47,4 +47,14 @@ class TransmissionPaBlueprint < Blueprinter::Base
   field :polling_stop_reason do |transmission|
     transmission.polling_stop_reason
   end
+
+  # B3.2 — supervision : dernière tentative effective et erreurs consécutives.
+  # Toujours pas d'historique de polling complet ni de payload brut ici.
+  field :last_polled_at do |transmission|
+    transmission.last_polled_at&.iso8601
+  end
+
+  field :consecutive_poll_errors do |transmission|
+    transmission.consecutive_poll_errors
+  end
 end

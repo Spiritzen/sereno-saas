@@ -13,6 +13,7 @@ import {
   UploadCloud,
   type LucideIcon,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { FactureStatut } from "../types/facture";
 
 type InvoiceLifecycleTimelineProps = {
@@ -200,110 +201,222 @@ export function InvoiceLifecycleTimeline({
       ? EXCEPTION_META[status].label
       : status;
 
+  // Sentinelle de hauteur nulle juste avant le bloc : IntersectionObserver
+  // (pas de scroll-listener) détecte le moment où le bloc atteint le haut du
+  // viewport et devient collant, pour y synchroniser le passage en mode
+  // compact. rootMargin à -1px : la sentinelle "sort" du viewport une frame
+  // avant que `position: sticky; top: 0` ne prenne effet.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [isStuck, setIsStuck] = useState(false);
+
+  // Garde-fou (b) — CORRECTIF boucle de scroll page courte : le sticky
+  // n'est activé QUE si le document a assez de hauteur pour que ça ait un
+  // sens (marge d'une hauteur d'écran, cf. prompt correctif). Sur un
+  // brouillon court, cette valeur reste false en permanence : le bloc ne
+  // colle jamais, ne compacte jamais.
+  const [isEligibleForSticky, setIsEligibleForSticky] = useState(false);
+
+  useEffect(() => {
+    function evaluerEligibilite() {
+      const hauteurViewport = window.innerHeight;
+      const hauteurDocument = document.documentElement.scrollHeight;
+
+      setIsEligibleForSticky(hauteurDocument > hauteurViewport * 2);
+    }
+
+    evaluerEligibilite();
+
+    // ResizeObserver sur le document (pas un scroll-listener) : recalcule à
+    // chaque changement de contenu (ex. ajout d'une ligne, passage
+    // brouillon -> conforme) et au redimensionnement de la fenêtre.
+    const resizeObserver = new ResizeObserver(evaluerEligibilite);
+    resizeObserver.observe(document.body);
+    window.addEventListener("resize", evaluerEligibilite);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", evaluerEligibilite);
+    };
+  }, []);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+
+    if (!sentinel) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsStuck(isEligibleForSticky && !entry.isIntersecting),
+      { threshold: 0, rootMargin: "-1px 0px 0px 0px" },
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [isEligibleForSticky]);
+
+  // isStuck seul ne suffit pas : sur une page devenue inéligible (b) entre
+  // temps, isStuck peut rester obsolète jusqu'à la prochaine intersection de
+  // la sentinelle — isCompact est la vérité affichée ET utilisée pour la
+  // réservation de place ci-dessous.
+  const isCompact = isEligibleForSticky && isStuck;
+
+  // Réservation de place (a) — CORRECTIF boucle de scroll : quand le bloc
+  // compacte, sa propre hauteur en flux diminue (position: sticky ne retire
+  // PAS l'élément du flux comme le ferait `fixed` : il continue à réserver
+  // sa hauteur RENDUE à sa place). Sans compensation, cette diminution
+  // raccourcit le document pendant qu'on est collé -> remontée forcée ->
+  // le bloc redevient visible -> redécolle -> le document rallonge -> la
+  // remontée se reproduit : boucle infinie. Un espaceur, sibling APRÈS la
+  // section, regonfle exactement de ce qu'elle a perdu : la hauteur totale
+  // du document reste constante pendant toute la transition.
+  const fullHeightRef = useRef(0);
+  const [spacerHeight, setSpacerHeight] = useState(0);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+
+    if (!section) {
+      return;
+    }
+
+    function mesurer() {
+      const hauteurActuelle = section!.offsetHeight;
+
+      if (!isCompact) {
+        fullHeightRef.current = hauteurActuelle;
+        setSpacerHeight(0);
+        return;
+      }
+
+      setSpacerHeight(Math.max(0, fullHeightRef.current - hauteurActuelle));
+    }
+
+    mesurer();
+
+    const resizeObserver = new ResizeObserver(mesurer);
+    resizeObserver.observe(section);
+
+    return () => resizeObserver.disconnect();
+  }, [isCompact]);
+
   return (
-    <section
-      className="invoice-lifecycle"
-      aria-label="Cycle de vie de la facture"
-    >
-      <div className="invoice-lifecycle__header">
-        <div>
-          <h2 className="invoice-lifecycle__title">
-            Cycle de vie de la facture
-          </h2>
-          <p className="invoice-lifecycle__subtitle">
-            Suivez son avancée, de la création au paiement.
-          </p>
-        </div>
+    <>
+      <div ref={sentinelRef} aria-hidden="true" />
 
-        <span className="invoice-lifecycle__status status info">
-          {statusLabel}
-        </span>
-      </div>
-
-      <ol
-        className={`invoice-lifecycle__track${
-          isException ? " invoice-lifecycle__track--muted" : ""
-        }`}
+      <section
+        ref={sectionRef}
+        className={`invoice-lifecycle${
+          isEligibleForSticky ? " invoice-lifecycle--sticky" : ""
+        }${isCompact ? " invoice-lifecycle--compact" : ""}`}
+        aria-label="Cycle de vie de la facture"
       >
-        {MAIN_LIFECYCLE.map((step, index) => {
-          const meta = STEP_META[step];
-          const StepIcon = meta.icon;
-          const visualState = resolveStepVisualState(
-            index,
-            currentMainIndex,
-            isException,
-          );
-          const isCurrent = visualState === "current";
-
-          let stepDate: string | null = null;
-
-          if (step === "brouillon") {
-            stepDate = formatDateTime(createdAt);
-          }
-
-          if (step === "emise") {
-            stepDate = formatDateTime(emittedAt);
-          }
-
-          const showNumero = step === "emise" && Boolean(invoiceNumber);
-
-          return (
-            <li
-              key={step}
-              className={`invoice-lifecycle__step invoice-lifecycle__step--${visualState}`}
-              aria-current={isCurrent ? "step" : undefined}
-            >
-              <span
-                className="invoice-lifecycle__connector"
-                aria-hidden="true"
-              />
-
-              <span className="invoice-lifecycle__marker" aria-hidden="true">
-                {visualState === "completed" ? (
-                  <Check size={14} />
-                ) : (
-                  <StepIcon size={14} />
-                )}
-              </span>
-
-              <span className="invoice-lifecycle__label">
-                {meta.label}
-                {isCurrent && (
-                  <span className="invoice-lifecycle__current-tag">
-                    Étape actuelle
-                  </span>
-                )}
-                {visualState === "upcoming" && !isException && (
-                  <span className="invoice-lifecycle__upcoming-tag">
-                    À venir
-                  </span>
-                )}
-              </span>
-
-              {(stepDate || showNumero) && (
-                <span className="invoice-lifecycle__meta">
-                  {showNumero && <span>{invoiceNumber}</span>}
-                  {stepDate && <span>{stepDate}</span>}
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-
-      {!isException && isMainStatut(status) && (
-        <div className="invoice-lifecycle__context">
-          <p>{STEP_META[status].context}</p>
-          {STEP_META[status].next && (
-            <p className="invoice-lifecycle__next">
-              Prochaine étape : {STEP_META[status].next}
+        <div className="invoice-lifecycle__header">
+          <div className="invoice-lifecycle__intro">
+            <h2 className="invoice-lifecycle__title">
+              Cycle de vie de la facture
+            </h2>
+            <p className="invoice-lifecycle__subtitle">
+              Suivez son avancée, de la création au paiement.
             </p>
-          )}
-        </div>
-      )}
+          </div>
 
-      {isExceptionStatut(status) && <ExceptionCard status={status} />}
-    </section>
+          <span className="invoice-lifecycle__status status info">
+            {statusLabel}
+          </span>
+        </div>
+
+        <ol
+          className={`invoice-lifecycle__track${
+            isException ? " invoice-lifecycle__track--muted" : ""
+          }`}
+        >
+          {MAIN_LIFECYCLE.map((step, index) => {
+            const meta = STEP_META[step];
+            const StepIcon = meta.icon;
+            const visualState = resolveStepVisualState(
+              index,
+              currentMainIndex,
+              isException,
+            );
+            const isCurrent = visualState === "current";
+
+            let stepDate: string | null = null;
+
+            if (step === "brouillon") {
+              stepDate = formatDateTime(createdAt);
+            }
+
+            if (step === "emise") {
+              stepDate = formatDateTime(emittedAt);
+            }
+
+            const showNumero = step === "emise" && Boolean(invoiceNumber);
+
+            return (
+              <li
+                key={step}
+                className={`invoice-lifecycle__step invoice-lifecycle__step--${visualState}`}
+                aria-current={isCurrent ? "step" : undefined}
+              >
+                <span
+                  className="invoice-lifecycle__connector"
+                  aria-hidden="true"
+                />
+
+                <span className="invoice-lifecycle__marker" aria-hidden="true">
+                  {visualState === "completed" ? (
+                    <Check size={14} />
+                  ) : (
+                    <StepIcon size={14} />
+                  )}
+                </span>
+
+                <span className="invoice-lifecycle__label">
+                  {meta.label}
+                  {isCurrent && (
+                    <span className="invoice-lifecycle__current-tag">
+                      Étape actuelle
+                    </span>
+                  )}
+                  {visualState === "upcoming" && !isException && (
+                    <span className="invoice-lifecycle__upcoming-tag">
+                      À venir
+                    </span>
+                  )}
+                </span>
+
+                {(stepDate || showNumero) && (
+                  <span className="invoice-lifecycle__meta">
+                    {showNumero && <span>{invoiceNumber}</span>}
+                    {stepDate && <span>{stepDate}</span>}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+
+        {!isException && isMainStatut(status) && (
+          <div className="invoice-lifecycle__context">
+            <p>{STEP_META[status].context}</p>
+            {STEP_META[status].next && (
+              <p className="invoice-lifecycle__next">
+                Prochaine étape : {STEP_META[status].next}
+              </p>
+            )}
+          </div>
+        )}
+
+        {isExceptionStatut(status) && <ExceptionCard status={status} />}
+      </section>
+
+      {spacerHeight > 0 && (
+        <div style={{ height: spacerHeight }} aria-hidden="true" />
+      )}
+    </>
   );
 }
 

@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   CirclePlus,
   FileText,
+  Send,
   ShieldCheck,
   Trash2,
 } from "lucide-react";
@@ -22,8 +23,10 @@ import {
   listLignesFacture,
 } from "../api/lignesFactureApi";
 import {
+  getRequiresReviewCount,
   getTransmissionFromError,
   listTransmissionsPa,
+  relancerTransmissionPa,
   simulerTransmissionPa,
   synchroniserTransmissionPa,
 } from "../api/transmissionPaApi";
@@ -114,6 +117,12 @@ export function FactureDetailPage() {
   const [isSynchronizing, setIsSynchronizing] = useState(false);
   const [syncResult, setSyncResult] = useState<PaSyncResult | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
+
+  const [requiresReviewCount, setRequiresReviewCount] = useState<
+    number | null
+  >(null);
+  const [isRelaunching, setIsRelaunching] = useState(false);
+  const [relaunchError, setRelaunchError] = useState<string | null>(null);
 
   const isDraft = facture?.statut === "brouillon";
 
@@ -206,6 +215,29 @@ export function FactureDetailPage() {
       ignore = true;
     };
   }, [id]);
+
+  // B3.2 — badge persistant : chargé au montage de la page, indépendamment
+  // de tout clic sur "Vérifier maintenant". Scopé Current.organisation côté
+  // backend, pas cette facture précise (cf. reconnaissance B3.2).
+  useEffect(() => {
+    let ignore = false;
+
+    void getRequiresReviewCount()
+      .then((count) => {
+        if (!ignore) {
+          setRequiresReviewCount(count);
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setRequiresReviewCount(null);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!id) {
@@ -491,6 +523,27 @@ export function FactureDetailPage() {
     }
   }
 
+  async function handleRelaunch() {
+    if (!facture) {
+      return;
+    }
+
+    setRelaunchError(null);
+    setIsRelaunching(true);
+
+    try {
+      const transmission = await relancerTransmissionPa(facture.id);
+
+      setTransmissions((previous) =>
+        upsertTransmission(previous, transmission),
+      );
+    } catch (apiError) {
+      setRelaunchError(getApiErrorMessage(apiError));
+    } finally {
+      setIsRelaunching(false);
+    }
+  }
+
   function handleOpenPdf() {
     if (!facture || !hasPdf) {
       return;
@@ -542,11 +595,8 @@ export function FactureDetailPage() {
           invoiceDate={facture.created_at ?? null}
           emittedAt={facture.emise_at}
           dueDate={facture.date_echeance}
-          canEmit={canEmit}
-          isEmitting={isEmitting}
           hasPdf={hasPdf}
           hasXml={hasXml}
-          onEmit={() => setIsEmitConfirmOpen(true)}
           onOpenPdf={handleOpenPdf}
           onOpenXml={handleOpenXml}
         />
@@ -590,6 +640,12 @@ export function FactureDetailPage() {
             syncError={syncError}
             onSynchronize={() => {
               void handleSynchronize();
+            }}
+            requiresReviewCount={requiresReviewCount}
+            isRelaunching={isRelaunching}
+            relaunchError={relaunchError}
+            onRelaunch={() => {
+              void handleRelaunch();
             }}
           />
         )}
@@ -784,6 +840,20 @@ export function FactureDetailPage() {
                 getConformiteWarnings(conformite).length === 0 && (
                   <p>Aucune erreur bloquante détectée.</p>
                 )}
+            </div>
+          )}
+
+          {canEmit && (
+            <div className="invoice-actions-row">
+              <button
+                type="button"
+                className="primary-btn"
+                disabled={isEmitting}
+                onClick={() => setIsEmitConfirmOpen(true)}
+              >
+                <Send size={16} aria-hidden="true" />
+                {isEmitting ? "Émission..." : "Émettre"}
+              </button>
             </div>
           )}
         </div>

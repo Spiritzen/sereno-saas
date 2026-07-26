@@ -26,8 +26,12 @@ resources :factures do
   resources :evenements_facture, path: "evenements", only: [ :index ]
   resources :transmissions_pa, path: "transmissions", only: [ :index, :create ] do
     post :synchroniser, on: :collection
+    post :relancer, on: :collection
   end
 end
+
+      # Organisation-scopée (pas liée à une facture précise) : badge B3.2.
+      get "transmissions_pa/review_count", to: "transmissions_pa#review_count"
 
       resources :lignes_facture, path: "lignes-facture", only: [ :show, :update, :destroy ]
     end
