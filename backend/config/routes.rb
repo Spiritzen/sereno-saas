@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  # B3.3 — endpoint public (aucune auth JWT, régi par signature), hors du
+  # namespace api/v1 authentifié : cf. Webhooks::PaController.
+  namespace :webhooks do
+    post "pa", to: "pa#recevoir"
+  end
+
   namespace :api do
     namespace :v1 do
       post "auth/login", to: "auth#login"

@@ -13,6 +13,13 @@ class PlateformeAgreee < ApplicationRecord
   # Clés lues depuis l'ENV, cf. config/initializers/active_record_encryption.rb.
   encrypts :credentials_chiffres
 
+  # R3 (B3.3) — secret de signature webhook PAR ORGANISATION (une seule
+  # plateforme_agreee par organisation, cf. validation d'unicité ci-dessous).
+  # Champ distinct de credentials_chiffres : nature différente (preuve
+  # d'authenticité d'une notification ENTRANTE, jamais utilisé pour un appel
+  # SORTANT vers la PA). Jamais recherché/comparé en base -> non déterministe.
+  encrypts :webhook_secret_chiffre
+
   has_many :transmissions_pa,
          class_name: "TransmissionPa",
          foreign_key: :plateforme_agreee_id,
