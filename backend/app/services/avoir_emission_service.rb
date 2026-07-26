@@ -61,10 +61,7 @@ class AvoirEmissionService
 
       @avoir.save!
 
-      # Pas d'événement créé ici : le journal miroir evenement_avoir est
-      # V1.2b (cf. prompt §0 — "décidé en V1.2b"). EvenementFacture ne peut
-      # pas l'accueillir : facture_id y est une FK obligatoire non
-      # polymorphique (cf. reco socle gelé §5/§6).
+      creer_evenement_emission!
 
       @avoir
     end
@@ -163,6 +160,25 @@ class AvoirEmissionService
 
     raise FacturXPackageService::PackagingImpossibleError,
           "Aucun profil ICC sRGB trouvé. Renseigner FACTURX_ICC_PROFILE_PATH."
+  end
+
+  # V1.2b — miroir de FactureEmissionService#creer_evenement_emission!.
+  def creer_evenement_emission!
+    EvenementAvoir.create!(
+      organisation_id: @organisation.id,
+      avoir_id: @avoir.id,
+      utilisateur_id: @utilisateur.id,
+      statut: @avoir.statut,
+      source: "interne",
+      payload: {
+        action: "emission_avoir",
+        numero: @avoir.numero,
+        date_emission: @avoir.date_emission&.iso8601,
+        emis_at: @avoir.emis_at&.iso8601,
+        pdf_url: @avoir.pdf_url,
+        xml_url: @avoir.xml_url
+      }
+    )
   end
 
   def nettoyer_archives_generees

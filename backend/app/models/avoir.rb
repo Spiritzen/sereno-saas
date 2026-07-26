@@ -45,6 +45,11 @@ class Avoir < ApplicationRecord
            foreign_key: :avoir_id,
            dependent: :restrict_with_exception
 
+  has_many :evenements_avoir,
+           class_name: "EvenementAvoir",
+           foreign_key: :avoir_id,
+           dependent: :restrict_with_exception
+
   validates :motif, presence: true
   validates :statut, presence: true, inclusion: { in: STATUTS }
 
