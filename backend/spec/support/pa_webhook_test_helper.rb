@@ -20,7 +20,10 @@ module PaWebhookTestHelper
 
   # signature/timestamp explicitement surchargeables pour forger des cas
   # invalides (T-SIGNATURE-KO, T-REJEU-TEMPOREL) sans dupliquer la mécanique.
-  def post_webhook_pa(raw_body:, secret:, timestamp: nil, signature: nil)
+  # remote_addr (R6) : optionnel, uniquement pour isoler le throttle IP du
+  # throttle organisation dans les tests de rate limiting — nil par défaut,
+  # comportement des appels B3.3 existants strictement inchangé.
+  def post_webhook_pa(raw_body:, secret:, timestamp: nil, signature: nil, remote_addr: nil)
     timestamp ||= webhook_timestamp
     signature ||= webhook_signature(secret: secret, raw_body: raw_body, timestamp: timestamp)
 
@@ -30,7 +33,8 @@ module PaWebhookTestHelper
            "Content-Type" => "application/json",
            "X-Sereno-Signature" => signature,
            "X-Sereno-Signature-Timestamp" => timestamp
-         }
+         },
+         env: (remote_addr ? { "REMOTE_ADDR" => remote_addr } : nil)
   end
 end
 
