@@ -13,7 +13,7 @@
 
 ![Statut](https://img.shields.io/badge/MVP-conforme_validé-10b981?style=flat-square)
 ![Conformité](https://img.shields.io/badge/Factur--X-EN16931_+_France_CTC-7c3aed?style=flat-square)
-![Audit](https://img.shields.io/badge/audit-96.5%2F100_GREEN-10b981?style=flat-square)
+![Audit](https://img.shields.io/badge/audit-97.5%2F100_GREEN-10b981?style=flat-square)
 ![Rails](https://img.shields.io/badge/Rails-8_API-CC0000?style=flat-square&logo=rubyonrails)
 ![React](https://img.shields.io/badge/React-18_+_TS-61DAFB?style=flat-square&logo=react)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
@@ -46,9 +46,9 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 
 ## ✅ Statut du projet — Juillet 2026
 
-> Phase actuelle : **MVP émission conforme validé** — socle légal gelé, cycle de conformité prouvé par validateurs officiels. Développement de la couche transmission & cycle de vie **en cours (V1.1)**.
+> Phase actuelle : **couche transmission & cycle de vie complète (V1.1 terminée)** — socle légal gelé, conformité prouvée par validateurs officiels, transmission PA (sandbox), ingestion des statuts, polling automatique, webhook entrant sécurisé et supervision UI livrés. Prochaine étape : correction légale (avoirs, V1.2).
 
-Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé conforme**. La note d'audit est de **96,5/100 (GREEN)** : socle légal gelé à 96/100 après quatre passages d'audit successifs et un delta conformité France CTC, plus un demi-point capitalisé sur la couche cycle de vie (journal d'événements réel, historique exposé et testé). Voir [Conformité prouvée](#-conformité-prouvée).
+Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé conforme**. La note d'audit est de **97,5/100 (GREEN)** : socle légal gelé à 96/100 après quatre passages d'audit successifs et un delta conformité France CTC, puis capitalisation prouvée de la couche transmission (journal d'événements réel, transmission sandbox, pipeline d'ingestion, polling automatique) — audit delta du 22/07/2026. Voir [Conformité prouvée](#-conformité-prouvée).
 
 | Couche | Statut | Détail |
 |--------|--------|--------|
@@ -64,15 +64,20 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | Backend — Moteur de conformité | ✅ **Complet** | Contrôle pré-émission bloquant |
 | Backend — Mentions France CTC (Flux 2) | ✅ **Complet** | BT-30/34/49, notes PMT/PMD/AAB, ProfileID, BusinessProcessID — **0 BR-FR restante (Mustang)** |
 | Backend — Journal d'événements + API historique | ✅ **Complet** | Événements \`créée\` / \`émise\` append-only, API lecture scopée organisation, testée multi-tenant |
+| Backend — Chiffrement des secrets PA | ✅ **Complet** | \`credentials_chiffres\` et secret webhook chiffrés (ActiveRecord::Encryption, clés en env) — chiffré au repos prouvé par test SQL brut |
+| Backend — Transmission PA (sandbox) | ✅ **Complet** | Adapter + orchestration 3 phases (réseau hors transaction), idempotence sortante, honnêteté \`source=sandbox\` |
+| Backend — Ingestion des statuts entrants | ✅ **Complet** | 5 résultats (applied/duplicate/stale/requires_review/unmapped), garde temporelle, déduplication, machine d'état en code |
+| Backend — Polling automatique des statuts | ✅ **Complet** | Job récurrent, backoff + jitter, pause/stop distincts, base source de vérité (\`next_poll_at\`) |
+| Backend — Webhook PA entrant sécurisé | ✅ **Complet** | Endpoint public, signature HMAC sur raw body (\`secure_compare\`), anti-rejeu temporel, rattachement scopé organisation, couloir d'ingestion unique partagé |
 | Frontend — Auth + Landing | ✅ **Complet** | Inscription, landing premium |
 | Frontend — Dashboard conformité | ✅ **Complet** | KPIs + greeting & échéance dynamiques |
 | Frontend — Facture en 2 clics | ✅ **Complet** | Écran de création + panneau conformité |
 | Frontend — Page détail facture (bandeau + timeline) | ✅ **Complet** | Bandeau premium + timeline cycle de vie + historique réel |
+| Frontend — Supervision transmission | ✅ **Complet** | Dernière/prochaine synchro, erreurs, badge \`requires_review\` persistant (monte et redescend), bouton de relance d'un polling en pause |
 | Frontend — Page Paramètres | ✅ **Complet** | Placeholder honnête (domaines à venir) |
-| CI/CD — GitHub Actions (RSpec, RuboCop, build) | ✅ **Complet** | Pipeline vert sur \`main\` |
-| Validateurs de conformité en CI (veraPDF/Schematron) | ⏳ **V1.1** | Preuve de conformité automatisée à chaque push |
-| Intégration Plateforme Agréée (PA) | ⏳ **V1.1** | Adapter API + suivi des statuts (sandbox) |
-| Suivi temps réel des 14 statuts (webhook + polling) | ⏳ **V1.1** | Statuts externes remontés dans le journal |
+| CI/CD — GitHub Actions (RSpec, RuboCop, build) | ✅ **Complet** | Pipeline vert sur \`main\` (secrets de chiffrement injectés) |
+| Rate limiting de l'endpoint webhook | ⏳ **avant prod** | \`rack-attack\` à ajouter avant tout déploiement (dette connue) |
+| Validateurs de conformité en CI (veraPDF/Schematron) | ⏳ **B4** | Preuve de conformité automatisée à chaque push |
 | Avoirs (notes de crédit) | ⏳ **V1.2** | Rectification légale d'une facture émise |
 | Relances automatiques | ⏳ **V1.2** | Jobs Solid Queue + e-mails |
 | E-reporting (B2C / international) | ⏳ **V1.2** | Lots de transmission |
@@ -132,8 +137,8 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | | Validation | veraPDF · XSD Factur-X 1.09 · Schematron EN 16931 · Mustang |
 | | Transmission | Plateforme Agréée (PA) via adapter |
 | | Secteur public | Chorus Pro (B2G) |
-| **Tests** | Backend | RSpec + FactoryBot + Faker |
-| | Frontend | Vitest + Testing Library |
+| **Tests** | Backend | RSpec + FactoryBot + Faker (262 examples) |
+| | Frontend | ESLint + \`tsc\` (build) — _Vitest prévu (V1.2, non encore installé)_ |
 | **DevOps** | Conteneurs | Docker (multi-stage, Debian slim) |
 | | Déploiement | Kamal 2 |
 | | CI/CD | GitHub Actions |
@@ -207,8 +212,11 @@ BROUILLON → ÉMISE → DÉPOSÉE (PA) → REÇUE → MISE À DISPOSITION
 - Chaque transition écrit un \`EVENEMENT_FACTURE\` **dans la même transaction** que la facture (aucun événement orphelin).
 - Une **timeline** affiche la progression déduite du statut, et un **panneau Historique** liste les événements réellement enregistrés — deux sources distinctes, jamais fusionnées, sans donnée inventée.
 - L'**API historique** (\`GET /api/v1/factures/:id/evenements\`) est en lecture seule, scopée à l'organisation et prouvée étanche entre tenants.
+- La **transmission via PA (sandbox)** dépose la facture, reçoit un accusé et fait passer la facture à \`DÉPOSÉE\` ; les statuts remontés (reçue, mise à disposition, approuvée…) alimentent le journal.
+- Les statuts entrants passent par **un couloir d'ingestion unique**, quelle que soit la porte : bouton manuel, **polling automatique** (backoff), ou **webhook temps réel signé**. Trois portes, une seule règle métier.
+- Une **garde temporelle** rejette tout statut plus ancien que le dernier appliqué ; les contradictions sont classées \`requires_review\` et signalées par un **badge persistant** dans l'UI.
 
-> Les statuts de transmission (dépôt PA → encaissement) et leur remontée temps réel arrivent en **V1.1** ; ils alimenteront ce même journal.
+> Principe conservé : **Sereno conserve tout ce que la PA affirme, n'applique que ce que sa machine métier peut accepter sans mentir, et jamais un fait plus ancien que ce qu'il sait déjà.**
 
 ---
 
@@ -222,6 +230,8 @@ BROUILLON → ÉMISE → DÉPOSÉE (PA) → REÇUE → MISE À DISPOSITION
 - **Immutabilité légale** — une facture émise ne peut **jamais** être modifiée ni supprimée ; toute correction passe par un \`AVOIR\` (garde au niveau modèle via \`statut_in_database\`)
 - **Journal append-only** — les événements de facture ne sont ni modifiables ni supprimables ; l'API ne les expose qu'en lecture (acteur limité à \`id\` + \`display_name\`, jamais l'email ni les URLs de fichiers)
 - **Numérotation sans trou** — advisory lock PostgreSQL + verrou de ligne sur un compteur dédié, dans la transaction d'émission (jamais de \`count + 1\`)
+- **Secrets PA chiffrés au repos** — \`credentials_chiffres\` et le secret de signature webhook sont chiffrés via \`ActiveRecord::Encryption\` (clés en variables d'environnement, jamais versionnées) ; le chiffré au repos est **prouvé par un test lisant la colonne en SQL brut**
+- **Webhook entrant sécurisé** — endpoint public sans JWT, mais protégé par **signature HMAC-SHA256 sur le corps brut** (comparaison à temps constant), **anti-rejeu temporel** (fenêtre) en plus de la déduplication, et **rattachement scopé organisation** prouvé étanche entre tenants
 - **Archivage 10 ans** — chaque facture émise (PDF/A-3 + XML) est archivée et horodatée
 
 ### 4 rôles
@@ -249,9 +259,13 @@ app/
 ├── services/      FactureConformiteService · FactureEmissionService
 │                  FacturXXmlService · FacturePdfService · FacturXPackageService
 │                  NumerotationService · FactureTotalsService
+│                  TransmissionPaOrchestrationService · PaStatusIngestionService
+│                  PaStatusMapper · PaInboundNotificationResolver
+│                  PaWebhookSignatureVerifier · PaRequiresReviewCounter
+│                  PaPollingRelanceService
 ├── serializers/   Blueprinter — sérialisation JSON
 ├── policies/      Pundit — une policy par ressource
-├── jobs/          RelanceJob · PaStatusPollJob · EReportingBatchJob · ArchivageJob
+├── jobs/          PaPollingScannerJob · PaPollTransmissionJob (polling + backoff)
 ├── adapters/
 │   └── pa/        BaseAdapter · <Provider>Adapter · ChorusProAdapter
 ├── vendor/
@@ -259,7 +273,7 @@ app/
 └── current.rb     ActiveSupport::CurrentAttributes (organisation, utilisateur)
 config/
 ├── initializers/  cors · jwt · pundit
-└── routes.rb      namespace api/v1
+└── routes.rb      namespace api/v1 + namespace webhooks (endpoint public signé)
 \`\`\`
 
 ---
@@ -340,14 +354,21 @@ Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »
 - [x] Dashboard conformité + écran « facture en 2 clics »
 - [x] CI/CD GitHub Actions (RSpec + RuboCop + build) verte sur \`main\`
 
-### 🚧 V1.1 — Preuve automatisée, transmission & cycle de vie *(en cours)*
+### ✅ V1.1 — Transmission & cycle de vie *(terminée)*
 - [x] Journal d'événements réel (\`créée\` / \`émise\`, append-only, dans la transaction)
 - [x] API historique exposée + isolation multi-tenant testée
 - [x] Timeline cycle de vie + panneau Historique (frontend)
 - [x] Confirmation avant émission (action irréversible protégée)
-- [ ] Validateurs de conformité (veraPDF + Schematron) **bloquants en CI**
-- [ ] Intégration Plateforme Agréée (adapter, sandbox)
-- [ ] Suivi temps réel des 14 statuts (webhook + polling)
+- [x] Chiffrement des secrets PA (\`ActiveRecord::Encryption\`, clés en env, chiffré au repos prouvé)
+- [x] Transmission via Plateforme Agréée (adapter + orchestration 3 phases, sandbox)
+- [x] Pipeline d'ingestion des statuts entrants (5 résultats, garde temporelle, déduplication)
+- [x] Polling automatique (backoff + jitter, pause/stop, base source de vérité)
+- [x] Webhook PA entrant sécurisé (signature HMAC, anti-rejeu, rattachement scopé)
+- [x] Supervision UI (badge \`requires_review\` persistant, relance d'un polling en pause)
+- [ ] Rate limiting de l'endpoint webhook (\`rack-attack\`) — **à ajouter avant tout déploiement prod**
+
+### ⏳ B4 — Preuve de conformité automatisée en CI
+- [ ] Validateurs officiels (veraPDF + Schematron + Mustang) **bloquants à chaque push**
 
 ### ⏳ V1.2 — Correction légale & automatisation
 - [ ] Avoirs (notes de crédit / rectification, type 381)
@@ -409,16 +430,18 @@ Org      : Studio Démo
 
 | Contrôle | Statut |
 |----------|--------|
-| Tests backend (RSpec) | ✅ verts — 110 examples, 0 failure |
+| Tests backend (RSpec) | ✅ verts — 262 examples, 0 failure |
 | Lint backend (RuboCop) | ✅ no offenses |
 | Audit dépendances (bundler-audit) | ✅ clean |
+| Analyse statique sécurité (Brakeman) | ✅ 0 erreur |
 | Lint + build frontend | ✅ verts |
 | PDF/A-3b (veraPDF) | ✅ VALID (146/146) |
 | XML CII (XSD 1.09) | ✅ VALID |
 | Schematron EN 16931 | ✅ 0 failed-assert |
 | France CTC / Flux 2 (Mustang) | ✅ 0 BR-FR restante |
-| Isolation multi-tenant (API journal) | ✅ testée (cross-tenant → 404) |
-| **Audit** | ✅ **96,5/100 — GREEN** |
+| Isolation multi-tenant (API journal + webhook) | ✅ testée (cross-tenant → 404 / rejet signé) |
+| Chiffrement des secrets au repos | ✅ prouvé (lecture SQL brute ≠ clair) |
+| **Audit** | ✅ **97,5/100 — GREEN** |
 
 ---
 
