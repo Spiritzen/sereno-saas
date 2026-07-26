@@ -47,6 +47,8 @@ class PaStatusIngestionService
     @organisation = facture.organisation
   end
 
+  # MODE PULL (bouton manuel B3.1a, polling B3.1b) : retrouve la transmission
+  # éligible, va chercher le statut auprès de la PA, puis délègue à #ingest.
   def call
     transmission = charger_transmission_eligible!
 
@@ -55,7 +57,17 @@ class PaStatusIngestionService
     observation_count = EvenementEntrantPa.where(transmission_pa: transmission).count
     status_result = adapter.fetch_status(transmission: transmission, observation_count: observation_count)
 
-    # PHASE 2 — TRANSACTION COURTE (aucun appel réseau au-delà de ce point)
+    ingest(transmission: transmission, status_result: status_result)
+  end
+
+  # MODE PUSH (webhook B3.3) : le Pa::StatusResult est déjà construit par
+  # l'appelant depuis la notification reçue — AUCUN appel réseau ici. Point
+  # d'entrée PUBLIC unique du couloir de persistance, partagé à l'identique
+  # avec #call : même déduplication, même mapping, même
+  # FactureStatusTransitionPolicy, même transaction, mêmes 5 résultats
+  # possibles. Rien n'est dupliqué entre pull et push — seule la manière
+  # d'obtenir le `status_result` diffère.
+  def ingest(transmission:, status_result:)
     persister!(transmission, status_result)
   end
 
