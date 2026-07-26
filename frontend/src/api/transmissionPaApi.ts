@@ -33,6 +33,24 @@ export async function synchroniserTransmissionPa(
   return response.data;
 }
 
+export async function relancerTransmissionPa(
+  factureId: string,
+): Promise<TransmissionPa> {
+  const response = await http.post<unknown>(
+    `/factures/${factureId}/transmissions/relancer`,
+  );
+
+  return normalizeResource<TransmissionPa>(response.data, "transmission");
+}
+
+export async function getRequiresReviewCount(): Promise<number> {
+  const response = await http.get<{ requires_review_count: number }>(
+    "/transmissions_pa/review_count",
+  );
+
+  return response.data.requires_review_count;
+}
+
 // En cas d'échec technique (502), le backend renvoie quand même la
 // TransmissionPa (statut "erreur") dans le corps de l'erreur : ça permet à
 // l'UI d'afficher l'échec sans re-fetch, sans jamais bloquer l'utilisateur.

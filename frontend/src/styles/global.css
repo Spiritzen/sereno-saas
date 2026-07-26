@@ -44,6 +44,10 @@ a {
   padding: 24px;
 }
 
+/* Pas d'`overflow` ici (hidden/auto/scroll) : ça casserait `position: sticky`
+   pour tout descendant (le cycle de vie sticky compact, entre autres), même
+   quand cette boîte ne clippe rien visuellement — l'arrondi des coins est
+   assuré par .topbar/.sidebar directement plutôt que par ce conteneur. */
 .sereno-frame {
   width: min(1180px, 100%);
   min-height: calc(100vh - 48px);
@@ -53,7 +57,6 @@ a {
   background: rgba(18, 18, 26, 0.72);
   box-shadow: var(--shadow-card);
   backdrop-filter: blur(22px);
-  overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr;
 }
@@ -70,6 +73,8 @@ a {
   align-items: center;
   justify-content: space-between;
   background: rgba(18, 18, 26, 0.58);
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
 }
 
 .topbar-brand {
@@ -159,6 +164,7 @@ a {
   gap: 16px;
   transition: width 180ms ease;
   background: rgba(9, 9, 15, 0.22);
+  border-bottom-left-radius: var(--radius-xl);
 }
 
 .sidebar.expanded {
@@ -1976,6 +1982,36 @@ h1 {
   background: var(--color-bg-card);
   padding: 24px;
   margin-bottom: 18px;
+  transition:
+    padding 200ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
+}
+
+/* Sticky compact (UX2/correctif) : n'active `position: sticky` que si le
+   composant a mesuré assez de contenu SOUS le bloc pour que ça ait un sens
+   (garde-fou (b) — cf. InvoiceLifecycleTimeline.tsx). Sur une page trop
+   courte (brouillon), cette classe n'est jamais posée : le bloc reste
+   statique, taille pleine, dans le flux — sinon compacter raccourcirait le
+   document sous la hauteur du viewport, forçant une remontée qui
+   redéclenche le compact en boucle. z-index 10 : au-dessus du contenu qui
+   défile, largement sous ModalShell (z-index: 90). */
+.invoice-lifecycle--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Lisibilité (correctif P2), COMPACT UNIQUEMENT : fond opaque (pas de
+   rgba translucide comme --color-bg-card) + léger flou pour que la frise
+   reste lisible par-dessus le contenu qui défile dessous. Dégradation
+   gracieuse automatique si `backdrop-filter` n'est pas supporté : le fond
+   reste opaque sans le flou, jamais transparent. */
+.invoice-lifecycle--compact {
+  padding: 10px 24px;
+  background: rgba(18, 18, 26, 0.75);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(8px);
 }
 
 .invoice-lifecycle__header {
@@ -1984,6 +2020,29 @@ h1 {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 28px;
+  transition: margin-bottom 200ms ease;
+}
+
+.invoice-lifecycle--compact .invoice-lifecycle__header {
+  align-items: center;
+  margin-bottom: 0;
+}
+
+/* Titre + sous-titre : masqués en mode compact, animés par un `max-height`
+   généreux (pas de hauteur "auto" animable en CSS) plutôt que retirés du DOM
+   — évite un saut brutal, l'IntersectionObserver ne re-mesure rien. */
+.invoice-lifecycle__intro {
+  max-height: 80px;
+  opacity: 1;
+  overflow: hidden;
+  transition:
+    max-height 200ms ease,
+    opacity 150ms ease;
+}
+
+.invoice-lifecycle--compact .invoice-lifecycle__intro {
+  max-height: 0;
+  opacity: 0;
 }
 
 .invoice-lifecycle__title {
@@ -2008,6 +2067,34 @@ h1 {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+/* Frise fine (UX2) : ne garder que les marqueurs + connecteurs, masquer
+   labels/dates — c'est ce qui rend la barre collée vraiment "fine". */
+.invoice-lifecycle--compact .invoice-lifecycle__step {
+  gap: 0;
+  padding: 6px 4px;
+}
+
+.invoice-lifecycle--compact .invoice-lifecycle__label,
+.invoice-lifecycle--compact .invoice-lifecycle__meta {
+  display: none;
+}
+
+.invoice-lifecycle--compact .invoice-lifecycle__marker {
+  width: 16px;
+  height: 16px;
+  border-width: 1px;
+}
+
+.invoice-lifecycle--compact .invoice-lifecycle__step--current .invoice-lifecycle__marker {
+  width: 20px;
+  height: 20px;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.16);
+}
+
+.invoice-lifecycle--compact .invoice-lifecycle__connector {
+  top: 8px;
 }
 
 .invoice-lifecycle__track--muted {
@@ -2088,6 +2175,14 @@ h1 {
   .invoice-lifecycle__step--current .invoice-lifecycle__marker {
     animation: none;
   }
+
+  .invoice-lifecycle,
+  .invoice-lifecycle__header,
+  .invoice-lifecycle__intro,
+  .invoice-lifecycle__context,
+  .invoice-lifecycle__exception {
+    transition: none;
+  }
 }
 
 .invoice-lifecycle__label {
@@ -2135,6 +2230,13 @@ h1 {
   border-top: 1px solid var(--color-border);
   color: var(--color-text-secondary);
   font-size: 14px;
+  max-height: 200px;
+  overflow: hidden;
+  transition:
+    max-height 200ms ease,
+    opacity 150ms ease,
+    margin-top 200ms ease,
+    padding-top 200ms ease;
 }
 
 .invoice-lifecycle__context p {
@@ -2156,6 +2258,24 @@ h1 {
   padding: 16px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
+  max-height: 200px;
+  overflow: hidden;
+  transition:
+    max-height 200ms ease,
+    opacity 150ms ease,
+    margin-top 200ms ease,
+    padding 200ms ease;
+}
+
+.invoice-lifecycle--compact .invoice-lifecycle__context,
+.invoice-lifecycle--compact .invoice-lifecycle__exception {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  border-top-width: 0;
+  border-bottom-width: 0;
 }
 
 .invoice-lifecycle__exception strong {
@@ -2585,11 +2705,31 @@ h1 {
   margin-bottom: 16px;
 }
 
+.invoice-transmission-section__heading-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .invoice-transmission-section__title {
   margin: 0 0 4px;
   color: var(--color-text-primary);
   font-size: 16px;
   letter-spacing: -0.01em;
+}
+
+.invoice-transmission-review-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .invoice-transmission-section__subtitle {
