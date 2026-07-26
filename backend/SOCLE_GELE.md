@@ -1,0 +1,167 @@
+# Socle légal gelé — Sereno
+
+> Ce fichier définit la **frontière du socle de conformité gelé**. Il est la
+> référence unique et versionnée de ce qui ne doit pas être modifié sans
+> précaution. Toute session de développement (humaine ou assistée) doit le
+> consulter avant de toucher au backend.
+>
+> **Référence de gel** : tag `v0.2.0-conformite-fr` (objet annoté `0acd4d9`),
+> pointant sur le commit `2079ad2` (« chore: close post-audit validation items »,
+> 10 juillet 2026). Message du tag : *« Sereno v0.2.0 - Factur-X EN16931 and
+> France CTC compliance validated »*.
+>
+> À cette date, le moteur légal complet existait déjà et était prouvé conforme
+> (PDF/A-3 + CII validés). Ce fichier gèle cet état de référence.
+
+---
+
+## Deux niveaux de protection
+
+Tout le code sensible n'a pas le même statut. On distingue :
+
+- **GELÉ STRICT** — toute modification EXIGE de re-passer la validation de
+  conformité (XSD aujourd'hui ; veraPDF / Schematron / Mustang quand ils seront
+  câblés) ou casse une preuve déjà testée. On n'y touche pas sans re-validation
+  complète et décision explicite de Sébastien.
+- **SENSIBLE** — protégé par un invariant légal (immutabilité, append-only,
+  numérotation sans trou). Modifiable avec rigueur et tests, mais ne déclenche
+  pas d'obligation de re-passer la chaîne de validation de conformité.
+
+---
+
+## GELÉ STRICT
+
+Ne jamais modifier sans re-validation de conformité et accord explicite.
+
+- **`backend/app/services/factur_x_xml_service.rb`**
+  Produit littéralement le XML CII validé par le XSD. Toute modification change
+  l'artefact même qui est prouvé conforme.
+
+- **`backend/app/services/factur_x_package_service.rb`**
+  Construit l'enveloppe PDF/A-3 (OutputIntent/ICC, métadonnées XMP
+  `pdfaid:conformance=B`, embarquement du XML avec AFRelationship, forçage
+  PDF 1.7). C'est lui qui rend correct le round-trip PDF→XML testé aujourd'hui,
+  et qui portera la conformité PDF/A-3 quand veraPDF sera câblé.
+
+- **`backend/app/services/facture_conformite_service.rb`**
+  Seul gardien des règles métier EN 16931 / France CTC (mentions BT-22,
+  cohérence TVA, SIRET…) tant que le Schematron officiel n'est pas exécutable.
+  Il remplace de fait cette couche de validation absente : le modifier sans
+  rigueur revient à modifier la preuve elle-même.
+
+- **`backend/app/services/facture_emission_service.rb`**
+  Orchestrateur qui enchaîne conformité → numérotation → génération XML/PDF →
+  assemblage → sauvegarde dans UNE transaction. Point d'entrée unique exercé par
+  100 % des exemples de `facturx_generation_spec.rb` ; un simple réordonnancement
+  des étapes casserait silencieusement la preuve.
+
+- **`backend/app/services/facture_totals_service.rb`**
+  Calcule totaux et groupes de TVA en `BigDecimal` avec arrondi `ROUND_HALF_UP`.
+  C'est ce que vérifie le test « cohérence PDF/XML au centime (BR-CO) » ; toute
+  modification de l'arrondi risque de violer une règle BR-CO déjà testée.
+
+- **`backend/vendor/facturx/`** (répertoire entier : XSD, Schematron, README de
+  provenance)
+  Artefacts tiers officiels. Le README interne l'interdit explicitement
+  (« Ne pas modifier ces fichiers à la main »).
+
+- **`backend/config/facturx/sRGB.icc`**
+  Profil colorimétrique utilisé tel quel dans l'OutputIntent PDF/A-3. Le
+  remplacer change la preuve de conformité colorimétrique.
+
+- **`backend/spec/integration/facturx_generation_spec.rb`**
+  Modifier ce fichier reviendrait à changer la preuve elle-même plutôt qu'à la
+  faire passer.
+
+---
+
+## SENSIBLE
+
+Modifiable avec rigueur et tests. Ne déclenche pas de re-validation de conformité,
+mais porte un invariant légal à préserver.
+
+- **`backend/app/models/facture.rb`**
+  Invariant : immutabilité des champs de contenu après émission
+  (`CHAMPS_IMMUABLES_APRES_EMISSION`). Déjà modifié plusieurs fois depuis le tag
+  sans incident (ex. ajout de `has_many :evenements_entrants_pa`) — ce qui
+  confirme le statut « sensible » et non « gelé strict ».
+
+- **`backend/app/models/ligne_facture.rb`**
+  Même famille d'invariant : une ligne devient immuable dès que la facture n'est
+  plus en brouillon.
+
+- **`backend/app/models/numerotation.rb`** + **`backend/app/services/numerotation_service.rb`**
+  Invariant : séquence sans trou par organisation/type/année
+  (`pg_advisory_xact_lock`). Exigence légale française distincte de la conformité
+  structurelle EN 16931 (aucun des validateurs ne vérifie la numérotation).
+
+- **`backend/app/models/evenement_facture.rb`**
+  Invariant : append-only (`empecher_update` / `empecher_destroy`). Déjà modifié
+  depuis le tag (ajout de la source `"sandbox"`) sans re-validation Factur-X.
+
+- **`backend/app/services/factur_x_storage_service.rb`**
+  Persiste un XML déjà généré ; ne génère ni n'altère de contenu légal, seulement
+  son emplacement/nom. Sensible car son interface est dépendue par
+  `facturx_generation_spec.rb` (lecture de `xml_url`) : un changement de
+  convention de chemin casserait ce test — régression fonctionnelle, pas
+  non-conformité.
+
+- **`backend/app/services/facture_pdf_service.rb`** — ⚠️ statut évolutif
+  Génère le PDF visuel. Aujourd'hui aucun test n'examine son rendu (seulement
+  `File.size > 0`), donc pas encore couvert par une preuve de conformité.
+  **Bascule en GELÉ STRICT le jour où veraPDF sera câblé** : c'est lui qui produit
+  la structure PDF de base que `FacturXPackageService` enveloppe en PDF/A-3 ; un
+  PDF de base malformé casserait la conformité même avec une enveloppe correcte.
+
+---
+
+## Explicitement LIBRES (non gelés)
+
+Pour prouver l'absence de sur-gel, ces fichiers ont été évalués et exclus :
+
+- **`backend/app/models/client.rb`**, **`backend/app/models/organisation.rb`** —
+  portent des données injectées dans le XML (SIRET, adresse) mais restent des
+  enregistrements métier modifiables ; changer l'adresse d'un client n'invalide
+  pas une facture déjà émise (dont le XML/PDF est un instantané figé).
+- **`backend/app/models/avoir.rb`**, **`backend/app/models/ligne_avoir.rb`** —
+  jamais consommés par le moteur XML à ce jour ; totalement libres.
+- Tout **`backend/app/controllers/`**, **`backend/app/policies/`**,
+  **`backend/app/serializers/`** liés à Facture — orchestration
+  HTTP / autorisation / sérialisation, ne touchent jamais à la génération.
+- **Toute la couche transmission** (`transmission_pa`, `PaStatusIngestionService`,
+  `Webhooks::PaController`, etc., B1→B3.3 + R6) — consomme le résultat déjà émis,
+  ne génère ni ne valide de XML/PDF Factur-X.
+
+---
+
+## Commande de contrôle
+
+À lancer par tout sprint avant de rendre la main. Une sortie **vide** = socle
+strict intact.
+
+```bash
+git diff --stat 2079ad2..HEAD -- \
+  backend/app/services/factur_x_xml_service.rb \
+  backend/app/services/factur_x_package_service.rb \
+  backend/app/services/facture_conformite_service.rb \
+  backend/app/services/facture_emission_service.rb \
+  backend/app/services/facture_totals_service.rb \
+  backend/vendor/facturx/ \
+  backend/config/facturx/sRGB.icc \
+  backend/spec/integration/facturx_generation_spec.rb
+```
+
+> Note : les sprints B1→R6 utilisaient une version incomplète de cette commande
+> (seuls 4 des 8 chemins étaient contrôlés). Cette version complète corrige
+> l'oubli — à utiliser désormais.
+
+---
+
+## Maintenir ce fichier honnête
+
+- Ce fichier décrit un **état**, pas un dogme figé. Le statut de
+  `facture_pdf_service.rb` évoluera (voir ci-dessus) ; d'autres pourront évoluer.
+- Toute promotion « sensible → gelé strict » (ex. câblage de veraPDF) doit
+  s'accompagner d'une mise à jour de ce fichier ET de la commande de contrôle.
+- Ne jamais laisser ce fichier mentir : un socle mal décrit est pire qu'un socle
+  non décrit.
