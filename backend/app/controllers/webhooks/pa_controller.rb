@@ -19,6 +19,15 @@ module Webhooks
     SIGNATURE_HEADER = "X-Sereno-Signature"
     TIMESTAMP_HEADER = "X-Sereno-Signature-Timestamp"
 
+    # R6 — throttle PAR ORGANISATION, appliqué ICI (après résolution) et non
+    # dans Rack::Attack (cf. config/initializers/rack_attack.rb : lire un
+    # identifiant d'organisation au niveau middleware toucherait le raw body
+    # dont la signature a besoin octet pour octet). Même cache, même fenêtre,
+    # même seuil généreux que le throttle IP.
+    ORGANISATION_THROTTLE_NAME = "webhooks/pa/organisation"
+    ORGANISATION_THROTTLE_LIMIT = 60
+    ORGANISATION_THROTTLE_PERIOD = 60
+
     def recevoir
       raw_body = request.raw_post
       payload = parser_payload(raw_body)
@@ -33,6 +42,8 @@ module Webhooks
       # cette résolution, jamais une donnée présumée.
       resolution = PaInboundNotificationResolver.call(identifiant_pa: identifiant_pa)
       return render_erreur(:not_found, "Notification non rattachable") if resolution.blank?
+
+      return render_throttled if organisation_throttlee?(resolution.organisation)
 
       # R3 — secret PROPRE à l'organisation résolue, jamais un secret global.
       secret = resolution.plateforme_agreee&.webhook_secret_chiffre
@@ -87,6 +98,26 @@ module Webhooks
 
     def render_erreur(status, message)
       render json: { error: message }, status: status
+    end
+
+    # Même clé/fenêtre que Rack::Attack::Throttle#matched_by? ("name:discriminant",
+    # cache.count(key, period)) — pour rester cohérent avec le throttle IP au
+    # même seuil, mais appliqué sur un discriminant que seul le contrôleur
+    # peut connaître (l'organisation, résolue après lecture du body).
+    def organisation_throttlee?(organisation)
+      compte = Rack::Attack.cache.count(
+        "#{ORGANISATION_THROTTLE_NAME}:#{organisation.id}",
+        ORGANISATION_THROTTLE_PERIOD
+      )
+
+      compte > ORGANISATION_THROTTLE_LIMIT
+    end
+
+    def render_throttled
+      retry_after = ORGANISATION_THROTTLE_PERIOD - (Time.now.to_i % ORGANISATION_THROTTLE_PERIOD)
+      response.set_header("Retry-After", retry_after.to_s)
+
+      render json: { error: "rate_limited" }, status: :too_many_requests
     end
   end
 end
