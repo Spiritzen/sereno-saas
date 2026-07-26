@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Api::V1::TransmissionsPaController < Api::V1::BaseController
-  before_action :set_facture
+  before_action :set_facture, except: [ :review_count ]
 
   def index
     authorize @facture, :transmissions?
@@ -58,6 +58,30 @@ class Api::V1::TransmissionsPaController < Api::V1::BaseController
       error: "Échec technique de la synchronisation",
       details: [ e.message ]
     }, status: :bad_gateway
+  end
+
+  def relancer
+    authorize @facture, :relancer?
+
+    transmission = PaPollingRelanceService.new(facture: @facture).call
+
+    render json: TransmissionPaBlueprint.render(transmission), status: :ok
+  rescue PaPollingRelanceService::NonRelancableError => e
+    render json: {
+      error: "Relance impossible",
+      details: e.details
+    }, status: :unprocessable_entity
+  end
+
+  # Organisation-scopée : aucune facture précise, donc pas de set_facture ni
+  # de policy_scope(Facture) ici. L'isolation tient au fait que le compteur
+  # ne lit jamais que Current.organisation (posé par authenticate_request!,
+  # cf. Api::V1::BaseController) — même discipline que
+  # FacturePolicy::Scope#resolve.
+  def review_count
+    count = PaRequiresReviewCounter.call(organisation: Current.organisation)
+
+    render json: { requires_review_count: count }, status: :ok
   end
 
   private

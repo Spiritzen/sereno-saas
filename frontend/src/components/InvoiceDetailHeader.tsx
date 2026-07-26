@@ -1,4 +1,4 @@
-import { ExternalLink, Send } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import type { FactureStatut } from "../types/facture";
 
 type StatusVariant = "success" | "info" | "warning" | "danger";
@@ -139,11 +139,8 @@ type InvoiceDetailHeaderProps = {
   invoiceDate: string | null;
   emittedAt: string | null;
   dueDate: string | null;
-  canEmit: boolean;
-  isEmitting: boolean;
   hasPdf: boolean;
   hasXml: boolean;
-  onEmit: () => void;
   onOpenPdf: () => void;
   onOpenXml: () => void;
 };
@@ -160,11 +157,8 @@ export function InvoiceDetailHeader({
   invoiceDate,
   emittedAt,
   dueDate,
-  canEmit,
-  isEmitting,
   hasPdf,
   hasXml,
-  onEmit,
   onOpenPdf,
   onOpenXml,
 }: InvoiceDetailHeaderProps) {
@@ -173,7 +167,7 @@ export function InvoiceDetailHeader({
   const dateLabel = formatDateLabel(isDraft ? invoiceDate : emittedAt);
   const dateCaption = isDraft ? "Créée le" : "Émise le";
   const dueInfo = resolveDueInfo(dueDate, status);
-  const hasActions = canEmit || hasPdf || hasXml;
+  const hasActions = hasPdf || hasXml;
 
   return (
     <header className="invoice-detail-header">
@@ -223,18 +217,6 @@ export function InvoiceDetailHeader({
 
       {hasActions && (
         <div className="invoice-detail-header__actions">
-          {canEmit && (
-            <button
-              type="button"
-              className="primary-btn invoice-detail-header__action"
-              disabled={isEmitting}
-              onClick={onEmit}
-            >
-              <Send size={16} aria-hidden="true" />
-              {isEmitting ? "Émission..." : "Émettre"}
-            </button>
-          )}
-
           {hasPdf && (
             <button
               type="button"

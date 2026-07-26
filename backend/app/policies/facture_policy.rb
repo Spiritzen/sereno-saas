@@ -46,6 +46,14 @@ class FacturePolicy < ApplicationPolicy
     peut_modifier? && meme_organisation?
   end
 
+  # Autorisation seulement (rôle + tenant), MÊME discipline que
+  # #synchroniser? : l'éligibilité métier (la transmission est-elle
+  # réellement en pause ?) vit dans PaPollingRelanceService, qui renvoie une
+  # 422 explicite plutôt qu'un 403 générique.
+  def relancer?
+    peut_modifier? && meme_organisation?
+  end
+
   def create?
     peut_modifier?
   end

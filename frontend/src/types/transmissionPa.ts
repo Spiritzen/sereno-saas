@@ -22,6 +22,9 @@ export type TransmissionPa = {
   polling_paused: boolean;
   polling_stopped: boolean;
   polling_stop_reason: string | null;
+  // V1.1-B3.2 — supervision.
+  last_polled_at: string | null;
+  consecutive_poll_errors: number;
 };
 
 // Les 5 issues possibles d'une synchronisation : toutes NORMALES, aucune
