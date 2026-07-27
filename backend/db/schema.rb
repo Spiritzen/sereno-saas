@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_27_153314) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -27,9 +27,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.datetime "updated_at", null: false
     t.index ["id_stripe"], name: "index_abonnements_on_id_stripe"
     t.index ["organisation_id"], name: "index_abonnements_on_organisation_id"
-    t.check_constraint "plan::text = ANY (ARRAY['gratuit'::character varying, 'pro'::character varying]::text[])", name: "check_abonnements_plan"
+    t.check_constraint "plan::text = ANY (ARRAY['gratuit'::character varying::text, 'pro'::character varying::text])", name: "check_abonnements_plan"
     t.check_constraint "prix_mensuel IS NULL OR prix_mensuel >= 0::numeric", name: "check_abonnements_prix_mensuel_positive"
-    t.check_constraint "statut::text = ANY (ARRAY['en_essai'::character varying, 'actif'::character varying, 'suspendu'::character varying, 'annule'::character varying]::text[])", name: "check_abonnements_statut"
+    t.check_constraint "statut::text = ANY (ARRAY['en_essai'::character varying::text, 'actif'::character varying::text, 'suspendu'::character varying::text, 'annule'::character varying::text])", name: "check_abonnements_statut"
   end
 
   create_table "acomptes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -58,7 +58,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.check_constraint "montant_ttc >= 0::numeric", name: "check_acomptes_montant_ttc_positive"
     t.check_constraint "montant_tva >= 0::numeric", name: "check_acomptes_montant_tva_positive"
     t.check_constraint "pourcentage IS NULL OR pourcentage > 0::numeric AND pourcentage <= 100::numeric", name: "check_acomptes_pourcentage_range"
-    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'emis'::character varying, 'encaisse'::character varying, 'deduit'::character varying]::text[])", name: "check_acomptes_statut"
+    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying::text, 'emis'::character varying::text, 'encaisse'::character varying::text, 'deduit'::character varying::text])", name: "check_acomptes_statut"
   end
 
   create_table "avoirs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -83,7 +83,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id", "facture_id"], name: "index_avoirs_on_organisation_id_and_facture_id"
     t.index ["organisation_id", "numero"], name: "index_avoirs_unique_numero_by_org", unique: true, where: "(numero IS NOT NULL)"
     t.index ["organisation_id"], name: "index_avoirs_on_organisation_id"
-    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'emise'::character varying, 'deposee'::character varying, 'recue'::character varying, 'mise_a_disposition'::character varying, 'approuvee'::character varying, 'refusee'::character varying, 'en_litige'::character varying, 'encaissee'::character varying, 'archivee'::character varying, 'annulee'::character varying]::text[])", name: "check_avoirs_statut"
+    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying::text, 'emise'::character varying::text, 'deposee'::character varying::text, 'recue'::character varying::text, 'mise_a_disposition'::character varying::text, 'approuvee'::character varying::text, 'refusee'::character varying::text, 'en_litige'::character varying::text, 'encaissee'::character varying::text, 'archivee'::character varying::text, 'annulee'::character varying::text])", name: "check_avoirs_statut"
     t.check_constraint "total_ht >= 0::numeric", name: "check_avoirs_total_ht_positive"
     t.check_constraint "total_ttc >= 0::numeric", name: "check_avoirs_total_ttc_positive"
     t.check_constraint "total_tva >= 0::numeric", name: "check_avoirs_total_tva_positive"
@@ -113,8 +113,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id"], name: "index_clients_on_organisation_id"
     t.check_constraint "char_length(pays::text) = 2", name: "check_clients_pays_length"
     t.check_constraint "siret IS NULL OR char_length(siret::text) = 14", name: "check_clients_siret_length"
-    t.check_constraint "statut::text = ANY (ARRAY['actif'::character varying, 'archive'::character varying]::text[])", name: "check_clients_statut"
-    t.check_constraint "type::text = ANY (ARRAY['entreprise'::character varying, 'particulier'::character varying, 'public'::character varying]::text[])", name: "check_clients_type"
+    t.check_constraint "statut::text = ANY (ARRAY['actif'::character varying::text, 'archive'::character varying::text])", name: "check_clients_statut"
+    t.check_constraint "type::text = ANY (ARRAY['entreprise'::character varying::text, 'particulier'::character varying::text, 'public'::character varying::text])", name: "check_clients_type"
   end
 
   create_table "contacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -153,7 +153,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id", "client_id"], name: "index_devis_on_organisation_id_and_client_id"
     t.index ["organisation_id", "numero"], name: "index_devis_on_organisation_id_and_numero", unique: true, where: "(numero IS NOT NULL)"
     t.index ["organisation_id"], name: "index_devis_on_organisation_id"
-    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'envoye'::character varying, 'accepte'::character varying, 'refuse'::character varying, 'expire'::character varying]::text[])", name: "check_devis_statut"
+    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying::text, 'envoye'::character varying::text, 'accepte'::character varying::text, 'refuse'::character varying::text, 'expire'::character varying::text])", name: "check_devis_statut"
     t.check_constraint "total_ht >= 0::numeric", name: "check_devis_total_ht_positive"
     t.check_constraint "total_ttc >= 0::numeric", name: "check_devis_total_ttc_positive"
     t.check_constraint "total_tva >= 0::numeric", name: "check_devis_total_tva_positive"
@@ -177,8 +177,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.check_constraint "montant_total >= 0::numeric", name: "check_e_reporting_montant_total_positive"
     t.check_constraint "nb_operations >= 0", name: "check_e_reporting_nb_operations_positive"
     t.check_constraint "periode_fin >= periode_debut", name: "check_e_reporting_periode_coherente"
-    t.check_constraint "statut::text = ANY (ARRAY['en_attente'::character varying, 'transmis'::character varying, 'accepte'::character varying, 'rejete'::character varying]::text[])", name: "check_e_reporting_statut"
-    t.check_constraint "type::text = ANY (ARRAY['transactions'::character varying, 'paiements'::character varying]::text[])", name: "check_e_reporting_type"
+    t.check_constraint "statut::text = ANY (ARRAY['en_attente'::character varying::text, 'transmis'::character varying::text, 'accepte'::character varying::text, 'rejete'::character varying::text])", name: "check_e_reporting_statut"
+    t.check_constraint "type::text = ANY (ARRAY['transactions'::character varying::text, 'paiements'::character varying::text])", name: "check_e_reporting_type"
   end
 
   create_table "evenement_avoir", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -201,9 +201,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
   end
 
   create_table "evenement_entrant_pa", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "avoir_id"
     t.string "cle_deduplication", null: false
     t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.uuid "facture_id", null: false
+    t.uuid "facture_id"
     t.text "motif"
     t.datetime "occurred_at"
     t.uuid "organisation_id", null: false
@@ -215,8 +216,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.string "statut_brut", limit: 50, null: false
     t.string "statut_candidat", limit: 30
     t.uuid "transmission_pa_id", null: false
+    t.index ["avoir_id"], name: "index_evenement_entrant_pa_on_avoir_id"
     t.index ["cle_deduplication"], name: "index_evenement_entrant_pa_on_cle_deduplication", unique: true
     t.index ["facture_id"], name: "index_evenement_entrant_pa_on_facture_id"
+    t.index ["organisation_id", "avoir_id"], name: "index_evenement_entrant_pa_on_org_and_avoir"
     t.index ["organisation_id", "facture_id"], name: "index_evenement_entrant_pa_on_org_and_facture"
     t.index ["organisation_id"], name: "index_evenement_entrant_pa_on_organisation_id"
     t.index ["resultat"], name: "index_evenement_entrant_pa_on_resultat"
@@ -240,8 +243,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id", "facture_id"], name: "index_evenement_facture_on_org_and_facture"
     t.index ["organisation_id"], name: "index_evenement_facture_on_organisation_id"
     t.index ["utilisateur_id"], name: "index_evenement_facture_on_utilisateur_id"
-    t.check_constraint "source::text = ANY (ARRAY['interne'::character varying, 'pa'::character varying, 'webhook'::character varying, 'sandbox'::character varying]::text[])", name: "check_evenement_facture_source"
-    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'emise'::character varying, 'deposee'::character varying, 'recue'::character varying, 'mise_a_disposition'::character varying, 'approuvee'::character varying, 'refusee'::character varying, 'en_litige'::character varying, 'encaissee'::character varying, 'archivee'::character varying, 'annulee'::character varying]::text[])", name: "check_evenement_facture_statut"
+    t.check_constraint "source::text = ANY (ARRAY['interne'::character varying::text, 'pa'::character varying::text, 'webhook'::character varying::text, 'sandbox'::character varying::text])", name: "check_evenement_facture_source"
+    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying::text, 'emise'::character varying::text, 'deposee'::character varying::text, 'recue'::character varying::text, 'mise_a_disposition'::character varying::text, 'approuvee'::character varying::text, 'refusee'::character varying::text, 'en_litige'::character varying::text, 'encaissee'::character varying::text, 'archivee'::character varying::text, 'annulee'::character varying::text])", name: "check_evenement_facture_statut"
   end
 
   create_table "factures", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -272,13 +275,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id", "numero"], name: "index_factures_unique_numero_by_org", unique: true, where: "(numero IS NOT NULL)"
     t.index ["organisation_id"], name: "index_factures_on_organisation_id"
     t.check_constraint "char_length(devise::text) = 3", name: "check_factures_devise_length"
-    t.check_constraint "format::text = ANY (ARRAY['factur_x'::character varying, 'ubl'::character varying, 'cii'::character varying]::text[])", name: "check_factures_format"
+    t.check_constraint "format::text = ANY (ARRAY['factur_x'::character varying::text, 'ubl'::character varying::text, 'cii'::character varying::text])", name: "check_factures_format"
     t.check_constraint "montant_paye >= 0::numeric", name: "check_factures_montant_paye_positive"
-    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'emise'::character varying, 'deposee'::character varying, 'recue'::character varying, 'mise_a_disposition'::character varying, 'approuvee'::character varying, 'refusee'::character varying, 'en_litige'::character varying, 'encaissee'::character varying, 'archivee'::character varying, 'annulee'::character varying]::text[])", name: "check_factures_statut"
+    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying::text, 'emise'::character varying::text, 'deposee'::character varying::text, 'recue'::character varying::text, 'mise_a_disposition'::character varying::text, 'approuvee'::character varying::text, 'refusee'::character varying::text, 'en_litige'::character varying::text, 'encaissee'::character varying::text, 'archivee'::character varying::text, 'annulee'::character varying::text])", name: "check_factures_statut"
     t.check_constraint "total_ht >= 0::numeric", name: "check_factures_total_ht_positive"
     t.check_constraint "total_ttc >= 0::numeric", name: "check_factures_total_ttc_positive"
     t.check_constraint "total_tva >= 0::numeric", name: "check_factures_total_tva_positive"
-    t.check_constraint "type_document::text = ANY (ARRAY['facture'::character varying, 'acompte'::character varying]::text[])", name: "check_factures_type_document"
+    t.check_constraint "type_document::text = ANY (ARRAY['facture'::character varying::text, 'acompte'::character varying::text])", name: "check_factures_type_document"
   end
 
   create_table "ligne_avoir", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -364,7 +367,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id"], name: "index_numerotations_on_organisation_id"
     t.check_constraint "annee >= 2000", name: "check_numerotations_annee"
     t.check_constraint "dernier_numero >= 0", name: "check_numerotations_dernier_numero_positive"
-    t.check_constraint "type_document::text = ANY (ARRAY['facture'::character varying, 'avoir'::character varying, 'acompte'::character varying, 'devis'::character varying]::text[])", name: "check_numerotations_type_document"
+    t.check_constraint "type_document::text = ANY (ARRAY['facture'::character varying::text, 'avoir'::character varying::text, 'acompte'::character varying::text, 'devis'::character varying::text])", name: "check_numerotations_type_document"
   end
 
   create_table "organisations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -388,7 +391,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.string "ville", limit: 100, null: false
     t.index ["siret"], name: "index_organisations_on_siret", unique: true
     t.check_constraint "char_length(siret::text) = 14", name: "check_organisations_siret_length"
-    t.check_constraint "regime_tva::text = ANY (ARRAY['franchise'::character varying, 'reel_simplifie'::character varying, 'reel_normal'::character varying]::text[])", name: "check_organisations_regime_tva"
+    t.check_constraint "regime_tva::text = ANY (ARRAY['franchise'::character varying::text, 'reel_simplifie'::character varying::text, 'reel_normal'::character varying::text])", name: "check_organisations_regime_tva"
   end
 
   create_table "paiements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -404,7 +407,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id", "date_paiement"], name: "index_paiements_on_org_and_date"
     t.index ["organisation_id", "facture_id"], name: "index_paiements_on_org_and_facture"
     t.index ["organisation_id"], name: "index_paiements_on_organisation_id"
-    t.check_constraint "methode::text = ANY (ARRAY['virement'::character varying, 'carte'::character varying, 'cheque'::character varying, 'especes'::character varying, 'prelevement'::character varying]::text[])", name: "check_paiements_methode"
+    t.check_constraint "methode::text = ANY (ARRAY['virement'::character varying::text, 'carte'::character varying::text, 'cheque'::character varying::text, 'especes'::character varying::text, 'prelevement'::character varying::text])", name: "check_paiements_methode"
     t.check_constraint "montant > 0::numeric", name: "check_paiements_montant_positive"
   end
 
@@ -421,8 +424,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.datetime "updated_at", null: false
     t.text "webhook_secret_chiffre"
     t.index ["organisation_id"], name: "index_plateformes_agreees_on_organisation_id", unique: true
-    t.check_constraint "statut::text = ANY (ARRAY['connecte'::character varying, 'deconnecte'::character varying, 'erreur'::character varying]::text[])", name: "check_plateformes_agreees_statut"
-    t.check_constraint "type::text = ANY (ARRAY['pa'::character varying, 'chorus_pro'::character varying]::text[])", name: "check_plateformes_agreees_type"
+    t.check_constraint "statut::text = ANY (ARRAY['connecte'::character varying::text, 'deconnecte'::character varying::text, 'erreur'::character varying::text])", name: "check_plateformes_agreees_statut"
+    t.check_constraint "type::text = ANY (ARRAY['pa'::character varying::text, 'chorus_pro'::character varying::text])", name: "check_plateformes_agreees_type"
   end
 
   create_table "produits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -439,7 +442,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id"], name: "index_produits_on_organisation_id"
     t.index ["taux_tva_id"], name: "index_produits_on_taux_tva_id"
     t.check_constraint "prix_unitaire_ht >= 0::numeric", name: "check_produits_prix_unitaire_ht_positive"
-    t.check_constraint "unite IS NULL OR (unite::text = ANY (ARRAY['unité'::character varying, 'heure'::character varying, 'jour'::character varying, 'forfait'::character varying]::text[]))", name: "check_produits_unite"
+    t.check_constraint "unite IS NULL OR (unite::text = ANY (ARRAY['unité'::character varying::text, 'heure'::character varying::text, 'jour'::character varying::text, 'forfait'::character varying::text]))", name: "check_produits_unite"
   end
 
   create_table "relances", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -457,9 +460,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id", "facture_id"], name: "index_relances_on_org_and_facture"
     t.index ["organisation_id", "statut"], name: "index_relances_on_org_and_statut"
     t.index ["organisation_id"], name: "index_relances_on_organisation_id"
-    t.check_constraint "canal::text = ANY (ARRAY['email'::character varying, 'courrier'::character varying]::text[])", name: "check_relances_canal"
+    t.check_constraint "canal::text = ANY (ARRAY['email'::character varying::text, 'courrier'::character varying::text])", name: "check_relances_canal"
     t.check_constraint "niveau >= 1 AND niveau <= 3", name: "check_relances_niveau"
-    t.check_constraint "statut::text = ANY (ARRAY['planifiee'::character varying, 'envoyee'::character varying, 'echec'::character varying]::text[])", name: "check_relances_statut"
+    t.check_constraint "statut::text = ANY (ARRAY['planifiee'::character varying::text, 'envoyee'::character varying::text, 'echec'::character varying::text])", name: "check_relances_statut"
   end
 
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -477,127 +480,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["refresh_token_hash"], name: "index_sessions_on_refresh_token_hash", unique: true
     t.index ["utilisateur_id", "organisation_id"], name: "index_sessions_on_utilisateur_id_and_organisation_id"
     t.index ["utilisateur_id"], name: "index_sessions_on_utilisateur_id"
-  end
-
-  create_table "solid_queue_blocked_executions", force: :cascade do |t|
-    t.string "concurrency_key", null: false
-    t.datetime "created_at", null: false
-    t.datetime "expires_at", null: false
-    t.bigint "job_id", null: false
-    t.integer "priority", default: 0, null: false
-    t.string "queue_name", null: false
-    t.index ["concurrency_key", "priority", "job_id"], name: "index_solid_queue_blocked_executions_for_release"
-    t.index ["expires_at", "concurrency_key"], name: "index_solid_queue_blocked_executions_for_maintenance"
-    t.index ["job_id"], name: "index_solid_queue_blocked_executions_on_job_id", unique: true
-  end
-
-  create_table "solid_queue_claimed_executions", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "job_id", null: false
-    t.bigint "process_id"
-    t.index ["job_id"], name: "index_solid_queue_claimed_executions_on_job_id", unique: true
-    t.index ["process_id", "job_id"], name: "index_solid_queue_claimed_executions_on_process_id_and_job_id"
-  end
-
-  create_table "solid_queue_failed_executions", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.text "error"
-    t.bigint "job_id", null: false
-    t.index ["job_id"], name: "index_solid_queue_failed_executions_on_job_id", unique: true
-  end
-
-  create_table "solid_queue_jobs", force: :cascade do |t|
-    t.string "active_job_id"
-    t.text "arguments"
-    t.string "class_name", null: false
-    t.string "concurrency_key"
-    t.datetime "created_at", null: false
-    t.datetime "finished_at"
-    t.integer "priority", default: 0, null: false
-    t.string "queue_name", null: false
-    t.datetime "scheduled_at"
-    t.datetime "updated_at", null: false
-    t.index ["active_job_id"], name: "index_solid_queue_jobs_on_active_job_id"
-    t.index ["class_name"], name: "index_solid_queue_jobs_on_class_name"
-    t.index ["finished_at"], name: "index_solid_queue_jobs_on_finished_at"
-    t.index ["queue_name", "finished_at"], name: "index_solid_queue_jobs_for_filtering"
-    t.index ["scheduled_at", "finished_at"], name: "index_solid_queue_jobs_for_alerting"
-  end
-
-  create_table "solid_queue_pauses", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "queue_name", null: false
-    t.index ["queue_name"], name: "index_solid_queue_pauses_on_queue_name", unique: true
-  end
-
-  create_table "solid_queue_processes", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "hostname"
-    t.string "kind", null: false
-    t.datetime "last_heartbeat_at", null: false
-    t.text "metadata"
-    t.string "name", null: false
-    t.integer "pid", null: false
-    t.bigint "supervisor_id"
-    t.index ["last_heartbeat_at"], name: "index_solid_queue_processes_on_last_heartbeat_at"
-    t.index ["name", "supervisor_id"], name: "index_solid_queue_processes_on_name_and_supervisor_id", unique: true
-    t.index ["supervisor_id"], name: "index_solid_queue_processes_on_supervisor_id"
-  end
-
-  create_table "solid_queue_ready_executions", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "job_id", null: false
-    t.integer "priority", default: 0, null: false
-    t.string "queue_name", null: false
-    t.index ["job_id"], name: "index_solid_queue_ready_executions_on_job_id", unique: true
-    t.index ["priority", "job_id"], name: "index_solid_queue_poll_all"
-    t.index ["queue_name", "priority", "job_id"], name: "index_solid_queue_poll_by_queue"
-  end
-
-  create_table "solid_queue_recurring_executions", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "job_id", null: false
-    t.datetime "run_at", null: false
-    t.string "task_key", null: false
-    t.index ["job_id"], name: "index_solid_queue_recurring_executions_on_job_id", unique: true
-    t.index ["task_key", "run_at"], name: "index_solid_queue_recurring_executions_on_task_key_and_run_at", unique: true
-  end
-
-  create_table "solid_queue_recurring_tasks", force: :cascade do |t|
-    t.text "arguments"
-    t.string "class_name"
-    t.string "command", limit: 2048
-    t.datetime "created_at", null: false
-    t.text "description"
-    t.string "key", null: false
-    t.integer "priority", default: 0
-    t.string "queue_name"
-    t.string "schedule", null: false
-    t.boolean "static", default: true, null: false
-    t.datetime "updated_at", null: false
-    t.index ["key"], name: "index_solid_queue_recurring_tasks_on_key", unique: true
-    t.index ["static"], name: "index_solid_queue_recurring_tasks_on_static"
-  end
-
-  create_table "solid_queue_scheduled_executions", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "job_id", null: false
-    t.integer "priority", default: 0, null: false
-    t.string "queue_name", null: false
-    t.datetime "scheduled_at", null: false
-    t.index ["job_id"], name: "index_solid_queue_scheduled_executions_on_job_id", unique: true
-    t.index ["scheduled_at", "priority", "job_id"], name: "index_solid_queue_dispatch_all"
-  end
-
-  create_table "solid_queue_semaphores", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "expires_at", null: false
-    t.string "key", null: false
-    t.datetime "updated_at", null: false
-    t.integer "value", default: 1, null: false
-    t.index ["expires_at"], name: "index_solid_queue_semaphores_on_expires_at"
-    t.index ["key", "value"], name: "index_solid_queue_semaphores_on_key_and_value"
-    t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
   create_table "taux_tvas", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -650,11 +532,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.index ["organisation_id"], name: "index_transmission_pa_on_organisation_id"
     t.index ["plateforme_agreee_id"], name: "index_transmission_pa_on_plateforme_agreee_id"
     t.index ["statut", "next_poll_at"], name: "index_transmission_pa_on_statut_and_next_poll_at", where: "((polling_paused_at IS NULL) AND (polling_stopped_at IS NULL))"
-    t.check_constraint "direction::text = ANY (ARRAY['sortant'::character varying, 'entrant'::character varying]::text[])", name: "check_transmission_pa_direction"
+    t.check_constraint "direction::text = ANY (ARRAY['sortant'::character varying::text, 'entrant'::character varying::text])", name: "check_transmission_pa_direction"
     t.check_constraint "facture_id IS NOT NULL AND avoir_id IS NULL OR facture_id IS NULL AND avoir_id IS NOT NULL", name: "check_transmission_pa_one_document_target"
-    t.check_constraint "format::text = ANY (ARRAY['factur_x'::character varying, 'ubl'::character varying, 'cii'::character varying]::text[])", name: "check_transmission_pa_format"
+    t.check_constraint "format::text = ANY (ARRAY['factur_x'::character varying::text, 'ubl'::character varying::text, 'cii'::character varying::text])", name: "check_transmission_pa_format"
     t.check_constraint "polling_stop_reason IS NULL OR (polling_stop_reason::text = ANY (ARRAY['facture_terminale'::character varying, 'polling_expired'::character varying, 'plateforme_desactivee'::character varying, 'transmission_cloturee'::character varying]::text[]))", name: "check_transmission_pa_polling_stop_reason"
-    t.check_constraint "statut::text = ANY (ARRAY['en_attente'::character varying, 'depose'::character varying, 'accepte'::character varying, 'rejete'::character varying, 'erreur'::character varying]::text[])", name: "check_transmission_pa_statut"
+    t.check_constraint "statut::text = ANY (ARRAY['en_attente'::character varying::text, 'depose'::character varying::text, 'accepte'::character varying::text, 'rejete'::character varying::text, 'erreur'::character varying::text])", name: "check_transmission_pa_statut"
   end
 
   create_table "utilisateurs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -670,7 +552,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_utilisateurs_on_email", unique: true
     t.index ["organisation_id"], name: "index_utilisateurs_on_organisation_id"
-    t.check_constraint "role::text = ANY (ARRAY['super_admin'::character varying, 'owner'::character varying, 'comptable'::character varying, 'membre'::character varying]::text[])", name: "check_utilisateurs_role"
+    t.check_constraint "role::text = ANY (ARRAY['super_admin'::character varying::text, 'owner'::character varying::text, 'comptable'::character varying::text, 'membre'::character varying::text])", name: "check_utilisateurs_role"
   end
 
   add_foreign_key "abonnements", "organisations"
@@ -690,6 +572,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
   add_foreign_key "evenement_avoir", "avoirs"
   add_foreign_key "evenement_avoir", "organisations"
   add_foreign_key "evenement_avoir", "utilisateurs"
+  add_foreign_key "evenement_entrant_pa", "avoirs"
   add_foreign_key "evenement_entrant_pa", "factures"
   add_foreign_key "evenement_entrant_pa", "organisations"
   add_foreign_key "evenement_entrant_pa", "transmission_pa"
@@ -717,12 +600,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_26_103453) do
   add_foreign_key "relances", "organisations"
   add_foreign_key "sessions", "organisations"
   add_foreign_key "sessions", "utilisateurs"
-  add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "taux_tvas", "organisations"
   add_foreign_key "transmission_pa", "avoirs"
   add_foreign_key "transmission_pa", "factures"

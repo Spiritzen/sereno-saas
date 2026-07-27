@@ -47,6 +47,13 @@ end
         get :avoir_x_xml, on: :member
 
         resources :evenements_avoir, path: "evenements", only: [ :index ]
+
+        # V1.2c — miroir des transmissions facture (pas de :relancer pour
+        # l'instant, hors périmètre de ce sprint, cf. rapport).
+        resources :transmissions_pa, path: "transmissions", only: [ :index, :create ],
+                                      controller: "avoir_transmissions_pa" do
+          post :synchroniser, on: :collection
+        end
       end
 
       resources :lignes_facture, path: "lignes-facture", only: [ :show, :update, :destroy ]

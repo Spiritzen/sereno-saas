@@ -24,13 +24,19 @@ class PaPollTransmissionJob < ApplicationJob
     return if transmission.polling_paused_at.present?
     return if transmission.polling_stopped_at.present?
 
-    facture = transmission.facture
-    return if facture.blank?
+    # V1.2c : transmission.document (= facture || avoir) généralise sans
+    # dupliquer — ce job sonde désormais aussi les transmissions d'avoirs.
+    document = transmission.document
+    return if document.blank?
 
-    return if stopper_si_condition_arret!(transmission, facture)
+    return if stopper_si_condition_arret!(transmission, document)
 
     begin
-      resultat = PaStatusIngestionService.new(facture: facture).call
+      # Mot-clé `facture:` conservé tel quel (signature historique, testée
+      # par mock exact dans pa_poll_transmission_job_spec.rb #12) — seule la
+      # VALEUR passée change : un avoir ou une facture, le service accepte
+      # les deux indifféremment sous ce nom de paramètre (cf. son commentaire).
+      resultat = PaStatusIngestionService.new(facture: document).call
       traiter_resultat!(transmission, resultat)
     rescue Pa::NetworkError
       traiter_erreur_reseau!(transmission)
@@ -72,8 +78,8 @@ class PaPollTransmissionJob < ApplicationJob
   # LIMITE TEMPORELLE (§8, ci-dessous) la stoppe pour de bon — borné, donc,
   # mais pas immédiat. Compromis assumé pour ne pas sacrifier
   # `requires_review`.
-  def stopper_si_condition_arret!(transmission, facture)
-    if date_limite(transmission, facture) <= Time.current
+  def stopper_si_condition_arret!(transmission, document)
+    if date_limite(transmission, document) <= Time.current
       stopper!(transmission, "polling_expired")
       return true
     end
@@ -88,12 +94,17 @@ class PaPollTransmissionJob < ApplicationJob
     false
   end
 
-  def date_limite(transmission, facture)
+  # V1.2c — date_echeance n'existe QUE sur Facture (Avoir n'a pas ce concept :
+  # une note de crédit n'a pas d'échéance de paiement). respond_to? plutôt
+  # qu'un nom de méthode supposé commun : la surface commune facture/avoir
+  # est organisation/statut/numero/pdf_url/xml_url, PAS date_echeance.
+  def date_limite(transmission, document)
     base_transmission = (transmission.transmis_at || transmission.created_at) + DATE_LIMITE_TRANSMISSION
 
-    return base_transmission if facture.date_echeance.blank?
+    date_echeance = document.respond_to?(:date_echeance) ? document.date_echeance : nil
+    return base_transmission if date_echeance.blank?
 
-    base_echeance = facture.date_echeance.to_time + DATE_LIMITE_APRES_ECHEANCE
+    base_echeance = date_echeance.to_time + DATE_LIMITE_APRES_ECHEANCE
 
     [ base_transmission, base_echeance ].max
   end

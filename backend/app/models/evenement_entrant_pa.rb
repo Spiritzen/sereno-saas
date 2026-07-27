@@ -14,7 +14,8 @@ class EvenementEntrantPa < ApplicationRecord
 
   belongs_to :organisation
   belongs_to :transmission_pa
-  belongs_to :facture
+  belongs_to :facture, optional: true
+  belongs_to :avoir, optional: true
 
   validates :provider, presence: true
   validates :cle_deduplication, presence: true, uniqueness: true
@@ -22,19 +23,45 @@ class EvenementEntrantPa < ApplicationRecord
   validates :received_at, presence: true
   validates :resultat, presence: true, inclusion: { in: RESULTATS }
 
+  # V1.2c — miroir exact de TransmissionPa#un_seul_document_cible : exactement
+  # un des deux (facture XOR avoir), jamais aucun, jamais les deux.
+  validate :un_seul_document_cible
   validate :facture_appartient_a_la_meme_organisation
+  validate :avoir_appartient_a_la_meme_organisation
   validate :transmission_pa_appartient_a_la_meme_organisation
 
   validate :empecher_update, on: :update
   before_destroy :empecher_destroy
 
+  def document
+    facture || avoir
+  end
+
   private
+
+  def un_seul_document_cible
+    if facture.blank? && avoir.blank?
+      errors.add(:base, "Un événement entrant PA doit concerner une facture ou un avoir")
+    end
+
+    if facture.present? && avoir.present?
+      errors.add(:base, "Un événement entrant PA ne peut pas concerner une facture et un avoir en même temps")
+    end
+  end
 
   def facture_appartient_a_la_meme_organisation
     return if organisation.blank? || facture.blank?
 
     if facture.organisation_id != organisation_id
       errors.add(:facture, "doit appartenir à la même organisation que l'événement entrant")
+    end
+  end
+
+  def avoir_appartient_a_la_meme_organisation
+    return if organisation.blank? || avoir.blank?
+
+    if avoir.organisation_id != organisation_id
+      errors.add(:avoir, "doit appartenir à la même organisation que l'événement entrant")
     end
   end
 

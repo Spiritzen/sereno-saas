@@ -58,11 +58,12 @@ module Webhooks
       return render_erreur(:unauthorized, "Signature invalide") unless verification.valide?
 
       # R2 — couloir unique : même StatusResult, même code de persistance que
-      # le bouton manuel et le polling.
+      # le bouton manuel et le polling. V1.2c : resolution.document peut être
+      # une Facture OU un Avoir — le couloir est agnostique, pas dupliqué.
       status_result = construire_status_result(resolution.plateforme_agreee, payload)
 
       resultat = PaStatusIngestionService
-        .new(facture: resolution.facture)
+        .new(document: resolution.document)
         .ingest(transmission: resolution.transmission, status_result: status_result)
 
       render json: { resultat: resultat.resultat }, status: :ok

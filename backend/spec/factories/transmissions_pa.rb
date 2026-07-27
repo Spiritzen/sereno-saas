@@ -20,5 +20,15 @@ FactoryBot.define do
       identifiant_pa { "SANDBOX-#{SecureRandom.hex(8)}" }
       transmis_at { Time.current }
     end
+
+    # V1.2c — même point de départ que :depose, mais pour un AVOIR (XOR
+    # facture/avoir sur TransmissionPa) : facture explicitement nil.
+    trait :depose_avoir do
+      facture { nil }
+      avoir { association(:avoir, :emise, organisation: organisation) }
+      statut { "depose" }
+      identifiant_pa { "SANDBOX-AV-#{SecureRandom.hex(8)}" }
+      transmis_at { Time.current }
+    end
   end
 end
