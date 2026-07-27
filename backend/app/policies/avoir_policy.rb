@@ -19,6 +19,10 @@ class AvoirPolicy < ApplicationPolicy
     peut_lire? && meme_organisation?
   end
 
+  def transmissions?
+    peut_lire? && meme_organisation?
+  end
+
   def pdf?
     peut_lire? && meme_organisation?
   end
@@ -33,6 +37,19 @@ class AvoirPolicy < ApplicationPolicy
 
   def emettre?
     peut_modifier? && meme_organisation? && brouillon?
+  end
+
+  # V1.2c — miroir exact de FacturePolicy#transmettre?/#synchroniser? : rôle
+  # + tenant UNIQUEMENT. L'éligibilité métier (l'avoir doit être émis pour
+  # être transmis, une transmission déposée doit exister pour synchroniser)
+  # vit dans TransmissionPaOrchestrationService/PaStatusIngestionService, qui
+  # remontent une 422 explicite — jamais un 403 générique ici.
+  def transmettre?
+    peut_modifier? && meme_organisation?
+  end
+
+  def synchroniser?
+    peut_modifier? && meme_organisation?
   end
 
   class Scope < Scope
