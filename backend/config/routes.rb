@@ -48,6 +48,10 @@ end
 
         resources :evenements_avoir, path: "evenements", only: [ :index ]
 
+        # V1.2b-bis — miroir de lignes_facture, tout nichée (pas de route à
+        # plat séparée : non nécessaire, le frontend connaît déjà l'avoir_id).
+        resources :lignes_avoir, path: "lignes", only: [ :create, :update, :destroy ]
+
         # V1.2c — miroir des transmissions facture (pas de :relancer pour
         # l'instant, hors périmètre de ce sprint, cf. rapport).
         resources :transmissions_pa, path: "transmissions", only: [ :index, :create ],
