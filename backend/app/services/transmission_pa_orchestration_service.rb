@@ -39,10 +39,14 @@ class TransmissionPaOrchestrationService
     end
   end
 
-  def initialize(facture:, utilisateur:)
-    @facture = facture
+  # V1.2c — même discipline que PaStatusIngestionService : `facture:` reste
+  # accepté tel quel pour ne rien casser côté appelants existants (contrôleur
+  # facture, specs), `document:` est le nom générique pour les nouveaux
+  # appelants (avoir). Les deux se résolvent dans @document.
+  def initialize(facture: nil, document: nil, utilisateur:)
+    @document = document || facture
     @utilisateur = utilisateur
-    @organisation = facture.organisation
+    @organisation = @document.organisation
   end
 
   def call
@@ -74,7 +78,7 @@ class TransmissionPaOrchestrationService
 
   def phase_1_preparer!
     ActiveRecord::Base.transaction do
-      @facture.lock!
+      @document.lock!
 
       plateforme = @organisation.plateforme_agreee
 
@@ -86,12 +90,13 @@ class TransmissionPaOrchestrationService
       end
 
       # Une transmission active (en_attente ou déjà déposée) existante prime
-      # sur le statut courant de la facture : c'est précisément le chemin de
+      # sur le statut courant du document : c'est précisément le chemin de
       # l'idempotence (2e appel après dépôt) et de la reprise après crash
       # (2e appel alors que la 1re transmission est restée en_attente).
-      # `emise?` n'est exigé que pour en CRÉER une nouvelle.
+      # Le statut "emise" n'est exigé que pour en CRÉER une nouvelle.
       transmission_active = TransmissionPa
-        .where(organisation: @organisation, facture: @facture, plateforme_agreee: plateforme)
+        .where(organisation: @organisation, plateforme_agreee: plateforme)
+        .where(document_association_attrs)
         .where.not(statut: "erreur")
         .order(created_at: :desc)
         .first
@@ -99,19 +104,26 @@ class TransmissionPaOrchestrationService
       if transmission_active.present?
         transmission_active
       else
-        unless @facture.emise?
+        # V1.2c : comparaison directe sur la CHAÎNE de statut, jamais sur un
+        # nom de méthode prédicat — Facture#emise? et Avoir#emis? n'ont PAS
+        # la même sémantique (emise? = strictement "emise" ; emis? = "pas
+        # brouillon", donc aussi vrai pour deposee/recue/...). Utiliser
+        # emis? par erreur ici autoriserait de créer une transmission pour
+        # un avoir déjà déposé sans transmission active trouvée — un bug
+        # silencieux. Le statut brut, lui, est une surface RÉELLEMENT commune.
+        unless @document.statut == "emise"
           raise NonEligibleError.new(
-            "La facture doit être émise pour être transmise",
-            details: [ "statut actuel : #{@facture.statut}" ]
+            "Le document doit être émis pour être transmis",
+            details: [ "statut actuel : #{@document.statut}" ]
           )
         end
 
         TransmissionPa.create!(
           organisation: @organisation,
-          facture: @facture,
+          **document_association_attrs,
           plateforme_agreee: plateforme,
           direction: "sortant",
-          format: @facture.format,
+          format: format_document,
           statut: "en_attente",
           tentative: 1,
           idempotency_key: SecureRandom.uuid
@@ -122,7 +134,7 @@ class TransmissionPaOrchestrationService
 
   def phase_2_appeler_adapter(transmission)
     adapter = Pa::AdapterFactory.for(transmission.plateforme_agreee)
-    adapter.submit(facture: @facture, transmission: transmission)
+    adapter.submit(facture: @document, transmission: transmission)
   end
 
   def phase_3_succes!(transmission, resultat)
@@ -134,25 +146,52 @@ class TransmissionPaOrchestrationService
         transmis_at: resultat.received_at
       )
 
-      @facture.update!(statut: "deposee")
+      @document.update!(statut: "deposee")
 
-      EvenementFacture.create!(
-        organisation_id: @organisation.id,
-        facture_id: @facture.id,
-        utilisateur_id: @utilisateur&.id,
-        statut: "deposee",
-        source: "sandbox",
-        code_statut_pa: resultat.provider_status,
-        payload: {
-          simulation: true,
-          provider: resultat.provider,
-          external_id: resultat.external_id,
-          provider_status: resultat.provider_status
-        }
-      )
+      creer_evenement_depot!(resultat)
     end
 
     transmission
+  end
+
+  # V1.2c — même document_association_attrs que PaStatusIngestionService
+  # (dupliqué à l'identique plutôt que partagé : deux services distincts,
+  # même style de duplication explicite que le reste du projet).
+  def document_association_attrs
+    if @document.is_a?(Avoir)
+      { avoir: @document }
+    else
+      { facture: @document }
+    end
+  end
+
+  # Avoir n'a pas de colonne format propre (toujours Factur-X aujourd'hui,
+  # cf. AvoirXmlService) : on hérite du format de la facture corrigée plutôt
+  # que d'inventer une valeur par défaut déconnectée de son origine.
+  def format_document
+    @document.respond_to?(:format) ? @document.format : @document.facture.format
+  end
+
+  def creer_evenement_depot!(resultat)
+    attributs = {
+      organisation_id: @organisation.id,
+      utilisateur_id: @utilisateur&.id,
+      statut: "deposee",
+      source: "sandbox",
+      code_statut_pa: resultat.provider_status,
+      payload: {
+        simulation: true,
+        provider: resultat.provider,
+        external_id: resultat.external_id,
+        provider_status: resultat.provider_status
+      }
+    }
+
+    if @document.is_a?(Avoir)
+      EvenementAvoir.create!(attributs.merge(avoir_id: @document.id))
+    else
+      EvenementFacture.create!(attributs.merge(facture_id: @document.id))
+    end
   end
 
   def phase_3_echec!(transmission, error)

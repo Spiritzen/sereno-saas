@@ -42,9 +42,15 @@ class PaStatusIngestionService
     end
   end
 
-  def initialize(facture:)
-    @facture = facture
-    @organisation = facture.organisation
+  # V1.2c — GÉNÉRALISATION AU DOCUMENT (facture OU avoir), SANS RIEN CASSER :
+  # `facture:` reste accepté tel quel (tous les appelants existants — bouton
+  # manuel, job de polling, specs B3.3 — continuent de fonctionner sans
+  # aucune modification), `document:` est le nouveau nom générique pour les
+  # appelants qui manipulent déjà un avoir (webhook, polling généralisé).
+  # Les deux se résolvent dans la même variable interne @document.
+  def initialize(facture: nil, document: nil)
+    @document = document || facture
+    @organisation = @document.organisation
   end
 
   # MODE PULL (bouton manuel B3.1a, polling B3.1b) : retrouve la transmission
@@ -75,13 +81,14 @@ class PaStatusIngestionService
 
   def charger_transmission_eligible!
     transmission = TransmissionPa
-      .where(organisation: @organisation, facture: @facture, statut: "depose")
+      .where(organisation: @organisation, statut: "depose")
+      .where(document_association_attrs)
       .order(created_at: :desc)
       .first
 
     if transmission.blank?
       raise NonEligibleError.new(
-        "Aucune transmission déposée à synchroniser pour cette facture",
+        "Aucune transmission déposée à synchroniser pour ce document",
         details: [ "aucune transmission au statut \"depose\"" ]
       )
     end
@@ -116,7 +123,7 @@ class PaStatusIngestionService
     resultat = nil
 
     ActiveRecord::Base.transaction do
-      @facture.lock!
+      @document.lock!
 
       cle = PaInboundDeduplicationKey.call(
         provider: status_result.provider,
@@ -134,8 +141,8 @@ class PaStatusIngestionService
           resultat: "duplicate",
           motif: "Notification déjà enregistrée (même clé de déduplication)",
           evenement_entrant_pa: existant,
-          statut_facture_avant: @facture.statut,
-          statut_facture_apres: @facture.statut,
+          statut_facture_avant: @document.statut,
+          statut_facture_apres: @document.statut,
           transmission: transmission
         )
 
@@ -161,18 +168,18 @@ class PaStatusIngestionService
     occurred_at_effectif = status_result.occurred_at || received_at
 
     decision = FactureStatusTransitionPolicy.call(
-      statut_facture_actuel: @facture.statut,
+      statut_facture_actuel: @document.statut,
       statut_candidat: statut_candidat,
       occurred_at: occurred_at_effectif,
       dernier_occurred_at_applique: dernier_occurred_at_reference
     )
 
-    statut_avant = @facture.statut
+    statut_avant = @document.statut
 
     evenement_entrant_pa = EvenementEntrantPa.create!(
       organisation: @organisation,
       transmission_pa: transmission,
-      facture: @facture,
+      **document_association_attrs,
       provider: status_result.provider,
       provider_event_id: status_result.provider_event_id,
       cle_deduplication: cle,
@@ -186,22 +193,9 @@ class PaStatusIngestionService
     )
 
     if decision.applied?
-      @facture.update!(statut: statut_candidat)
+      @document.update!(statut: statut_candidat)
 
-      EvenementFacture.create!(
-        organisation: @organisation,
-        facture: @facture,
-        statut: statut_candidat,
-        source: "sandbox",
-        code_statut_pa: status_result.statut_brut,
-        payload: {
-          simulation: true,
-          provider: status_result.provider,
-          statut_brut: status_result.statut_brut,
-          occurred_at: status_result.occurred_at&.iso8601,
-          pa_inbound_event_id: evenement_entrant_pa.id
-        }
-      )
+      creer_evenement_statut!(statut_candidat, status_result, evenement_entrant_pa)
     end
 
     Resultat.new(
@@ -209,8 +203,45 @@ class PaStatusIngestionService
       motif: decision.motif,
       evenement_entrant_pa: evenement_entrant_pa,
       statut_facture_avant: statut_avant,
-      statut_facture_apres: @facture.statut,
+      statut_facture_apres: @document.statut,
       transmission: transmission
     )
+  end
+
+  # V1.2c — un seul point qui sait vers quelle association affecter le
+  # document (facture: ou avoir:), réutilisé pour la requête d'éligibilité
+  # ET pour la création de l'EvenementEntrantPa : jamais de logique dupliquée.
+  def document_association_attrs
+    if @document.is_a?(Avoir)
+      { avoir: @document }
+    else
+      { facture: @document }
+    end
+  end
+
+  # V1.2c — le journal SUIT le document : evenement_avoir pour un avoir,
+  # evenement_facture sinon (jamais l'inverse, jamais les deux). Mêmes
+  # attributs, même "source" sandbox, que le couloir facture d'origine —
+  # rien n'est dupliqué, seule la classe cible et l'association changent.
+  def creer_evenement_statut!(statut_candidat, status_result, evenement_entrant_pa)
+    attributs = {
+      organisation: @organisation,
+      statut: statut_candidat,
+      source: "sandbox",
+      code_statut_pa: status_result.statut_brut,
+      payload: {
+        simulation: true,
+        provider: status_result.provider,
+        statut_brut: status_result.statut_brut,
+        occurred_at: status_result.occurred_at&.iso8601,
+        pa_inbound_event_id: evenement_entrant_pa.id
+      }
+    }
+
+    if @document.is_a?(Avoir)
+      EvenementAvoir.create!(attributs.merge(avoir: @document))
+    else
+      EvenementFacture.create!(attributs.merge(facture: @document))
+    end
   end
 end
