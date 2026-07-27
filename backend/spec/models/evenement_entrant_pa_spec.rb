@@ -36,4 +36,54 @@ RSpec.describe EvenementEntrantPa, type: :model do
       expect(evenement.errors[:facture]).to be_present
     end
   end
+
+  # V1.2c — miroir du XOR déjà testé sur TransmissionPa.
+  describe "document (facture XOR avoir, V1.2c)" do
+    it "accepte un événement rattaché à un avoir, et #document renvoie cet avoir" do
+      avoir = create(:avoir, :deposee)
+      transmission = create(:transmission_pa, :depose_avoir, organisation: avoir.organisation, avoir: avoir)
+
+      evenement = build(
+        :evenement_entrant_pa,
+        organisation: avoir.organisation,
+        transmission_pa: transmission,
+        facture: nil,
+        avoir: avoir
+      )
+
+      expect(evenement).to be_valid
+      expect(evenement.document).to eq(avoir)
+    end
+
+    it "refuse un événement sans AUCUN document cible" do
+      transmission = create(:transmission_pa, :depose)
+
+      evenement = build(
+        :evenement_entrant_pa,
+        organisation: transmission.organisation,
+        transmission_pa: transmission,
+        facture: nil,
+        avoir: nil
+      )
+
+      expect(evenement).not_to be_valid
+      expect(evenement.errors[:base]).to be_present
+    end
+
+    it "refuse un événement rattaché À LA FOIS à une facture et à un avoir" do
+      transmission = create(:transmission_pa, :depose)
+      avoir = create(:avoir, :deposee, organisation: transmission.organisation)
+
+      evenement = build(
+        :evenement_entrant_pa,
+        organisation: transmission.organisation,
+        transmission_pa: transmission,
+        facture: transmission.facture,
+        avoir: avoir
+      )
+
+      expect(evenement).not_to be_valid
+      expect(evenement.errors[:base]).to be_present
+    end
+  end
 end
