@@ -3,6 +3,7 @@
 require "rails_helper"
 require "nokogiri"
 require "bigdecimal"
+require "hexapdf"
 require "active_support/testing/time_helpers"
 
 # Garde-fou V1.2a (voie b) : preuve que l'avoir (TypeCode 381) référence sa
@@ -105,6 +106,34 @@ RSpec.describe "Génération avoir (381) — cœur backend V1.2a", type: :integr
       expect(avoir_emis.total_ht).to eq(BigDecimal("200.00"))
       expect(avoir_emis.total_tva).to eq(BigDecimal("40.00"))
       expect(avoir_emis.total_ttc).to eq(BigDecimal("240.00"))
+    end
+
+    it "T-FILIGRANE (V1.2b-bis) : le PDF de base contient une rotation 45° (signature du filigrane), le XML/XSD ne sont pas affectés" do
+      avoir_emis = AvoirEmissionService.new(avoir: avoir, utilisateur: utilisateur).call
+
+      pdf_bytes = File.binread(Rails.root.join(avoir_emis.pdf_url))
+      document = HexaPDF::Document.new(io: StringIO.new(pdf_bytes))
+      contenu_page = document.pages[0].contents
+
+      # cos(45°) = sin(45°) ≈ 0.70710678 : signature de la seule rotation du
+      # document (rien d'autre n'est pivoté sur la page) -> preuve que le
+      # filigrane a bien été dessiné, sans dépendre du décodage des glyphes.
+      expect(contenu_page).to match(/0\.70710/)
+
+      # Le XML/XSD restent inchangés (le filigrane est dans le PDF, jamais
+      # dans le XML) : re-vérifié explicitement ici, pas seulement supposé.
+      # Deux parsings distincts : remove_namespaces! (pour l'XPath simplifié)
+      # casserait la résolution du schéma si réutilisé pour la validation XSD.
+      doc_sans_namespaces = Nokogiri::XML(File.read(Rails.root.join(avoir_emis.xml_url)))
+      doc_sans_namespaces.remove_namespaces!
+      expect(doc_sans_namespaces.at_xpath("//ExchangedDocument/TypeCode")&.text).to eq("381")
+
+      xsd_path = Rails.root.join("vendor", "facturx", "xsd", "en16931", "Factur-X_1.09_EN16931.xsd")
+      schema = Nokogiri::XML::Schema.new(File.open(xsd_path))
+      doc_avec_namespaces = Nokogiri::XML(File.read(Rails.root.join(avoir_emis.xml_url)))
+      expect(schema.validate(doc_avec_namespaces).map(&:message)).to eq([])
+    ensure
+      FileUtils.rm_rf(Rails.root.join("storage", "avoirs", avoir.id.to_s))
     end
   end
 

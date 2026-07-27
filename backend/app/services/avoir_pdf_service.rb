@@ -102,7 +102,29 @@ class AvoirPdfService
     @page = @document.pages.add
     @canvas = @page.canvas
     charger_polices!
+    dessiner_filigrane
     @y = MARGIN_TOP
+  end
+
+  # V1.2b-bis — distinction visuelle avoir/facture au premier coup d'œil.
+  # Dessiné dans le PDF de BASE (ce service, SENSIBLE), AVANT l'enveloppe
+  # PDF/A-3 (FacturXPackageService, GELÉ, non touché) : l'enveloppe embarque
+  # le XML et pose l'OutputIntent/XMP par-dessus un PDF déjà complet, elle ne
+  # regarde jamais le contenu des pages. Couleur UNIE (DeviceGray, pas de
+  # transparence/ExtGState) : compatible sans ambiguïté avec PDF/A-3B, et
+  # plus simple à raisonner qu'une opacité — un simple gris clair qui ne
+  # masque jamais le texte réel dessiné par-dessus ensuite.
+  # save_graphics_state(&block) restaure automatiquement couleur/police/CTM
+  # après le bloc (cf. HexaPDF::Content::Canvas) : aucune fuite d'état vers
+  # le reste du contenu de la page.
+  def dessiner_filigrane
+    @canvas.save_graphics_state do
+      @canvas.fill_color(210)
+      @canvas.font(@font_bold, size: 92)
+      @canvas.rotate(45, origin: [ PAGE_WIDTH / 2.0, PAGE_HEIGHT / 2.0 ]) do
+        @canvas.text("AVOIR", at: [ PAGE_WIDTH / 2.0 - 175, PAGE_HEIGHT / 2.0 - 30 ])
+      end
+    end
   end
 
   def dessiner_entete
