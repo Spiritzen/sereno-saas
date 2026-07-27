@@ -39,6 +39,16 @@ end
       # Organisation-scopée (pas liée à une facture précise) : badge B3.2.
       get "transmissions_pa/review_count", to: "transmissions_pa#review_count"
 
+      # V1.2b — index filtrable par ?facture_id= (comme factures#index avec
+      # ?client_id=), pas de route nichée sous factures (décision Sébastien).
+      resources :avoirs, only: [ :index, :show, :create ] do
+        post :emettre, on: :member
+        get :pdf, on: :member
+        get :avoir_x_xml, on: :member
+
+        resources :evenements_avoir, path: "evenements", only: [ :index ]
+      end
+
       resources :lignes_facture, path: "lignes-facture", only: [ :show, :update, :destroy ]
     end
   end
