@@ -17,6 +17,14 @@
   --color-info: #3b82f6;
   --color-info-soft: rgba(59, 130, 246, 0.13);
 
+  /* V1.2d — accent de TYPE DE DOCUMENT (avoir), distinct des couleurs de
+     STATUT ci-dessus (success/warning/danger/info ne sont jamais réutilisées
+     ici). Ambre plus profond/saturé que --color-warning (#f59e0b) pour ne
+     jamais se confondre avec un badge de statut "brouillon"/"émise". Chaud,
+     en écho volontaire au violet --color-brand (froid) de l'identité facture. */
+  --color-avoir: #d97706;
+  --color-avoir-soft: rgba(217, 119, 6, 0.16);
+
   --color-text-primary: #f1f5f9;
   --color-text-secondary: #94a3b8;
   --color-text-muted: #475569;

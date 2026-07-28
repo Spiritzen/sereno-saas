@@ -1,11 +1,13 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AppShell } from "./components/layout/AppShell";
+import { AvoirDetailPage } from "./pages/AvoirDetailPage";
 import { ClientsPage } from "./pages/ClientsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { FactureDetailPage } from "./pages/FactureDetailPage";
 import { FacturesPage } from "./pages/FacturesPage";
 import { LoginPage } from "./pages/LoginPage";
+import { NewCreditNotePage } from "./pages/NewCreditNotePage";
 import { NewInvoicePage } from "./pages/NewInvoicePage";
 import { ParametresPage } from "./pages/ParametresPage";
 
@@ -55,6 +57,28 @@ export default function App() {
           <ProtectedRoute>
             <AppShell>
               <FactureDetailPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/factures/:id/avoirs/nouveau"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <NewCreditNotePage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/avoirs/:id"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <AvoirDetailPage />
             </AppShell>
           </ProtectedRoute>
         }
