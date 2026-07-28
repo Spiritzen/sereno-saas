@@ -43,8 +43,8 @@ FactoryBot.define do
           statut: "emise",
           date_emission: Date.current,
           emise_at: Time.current,
-          pdf_url: "storage/factures/#{facture.id}/facture-#{numero}.pdf",
-          xml_url: "storage/factures/#{facture.id}/factur-x-#{numero}.xml",
+          pdf_url: "storage/#{Rails.env}/factures/#{facture.id}/facture-#{numero}.pdf",
+          xml_url: "storage/#{Rails.env}/factures/#{facture.id}/factur-x-#{numero}.xml",
           updated_at: Time.current
         )
       end
@@ -66,8 +66,8 @@ FactoryBot.define do
           statut: "deposee",
           date_emission: Date.current,
           emise_at: Time.current,
-          pdf_url: "storage/factures/#{facture.id}/facture-#{numero}.pdf",
-          xml_url: "storage/factures/#{facture.id}/factur-x-#{numero}.xml",
+          pdf_url: "storage/#{Rails.env}/factures/#{facture.id}/facture-#{numero}.pdf",
+          xml_url: "storage/#{Rails.env}/factures/#{facture.id}/factur-x-#{numero}.xml",
           updated_at: Time.current
         )
       end

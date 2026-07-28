@@ -148,7 +148,7 @@ RSpec.describe "Api::V1::EvenementsAvoir — gabarit facture_evenements_spec", t
       expect(response.body).not_to include(".pdf")
       expect(response.body).not_to include(".xml")
     ensure
-      FileUtils.rm_rf(Rails.root.join("storage", "factures", avoir&.id.to_s)) if avoir
+      FileUtils.rm_rf(Rails.root.join("storage", Rails.env, "avoirs", avoir&.id.to_s)) if avoir
     end
   end
 
@@ -179,7 +179,7 @@ RSpec.describe "Api::V1::EvenementsAvoir — gabarit facture_evenements_spec", t
       expect(body.length).to eq(2)
       expect(body.map { |evenement| evenement["statut"] }).to eq(%w[brouillon emise])
     ensure
-      FileUtils.rm_rf(Rails.root.join("storage", "factures", avoir_id.to_s)) if avoir_id
+      FileUtils.rm_rf(Rails.root.join("storage", Rails.env, "avoirs", avoir_id.to_s)) if avoir_id
     end
   end
 end

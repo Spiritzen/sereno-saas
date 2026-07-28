@@ -120,7 +120,7 @@ RSpec.describe "Api::V1::Avoirs", type: :request do
 
     before { authenticate_as(utilisateur, organisation) }
 
-    after { FileUtils.rm_rf(Rails.root.join("storage", "factures", avoir.id.to_s)) }
+    after { FileUtils.rm_rf(Rails.root.join("storage", Rails.env, "avoirs", avoir.id.to_s)) }
 
     it "T-EMETTRE : émet l'avoir, attribue un numéro AV, crée l'événement d'émission" do
       create(:ligne_avoir, avoir: avoir, organisation: organisation, quantite: 2, prix_unitaire_ht: 100, taux_tva: 20)

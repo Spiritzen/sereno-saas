@@ -144,7 +144,7 @@ RSpec.describe "Api::V1::FactureEvenements — verrouillage 97", type: :request 
       expect(response.body).not_to include(".pdf")
       expect(response.body).not_to include(".xml")
     ensure
-      FileUtils.rm_rf(Rails.root.join("storage", "factures", facture&.id.to_s)) if facture
+      FileUtils.rm_rf(Rails.root.join("storage", Rails.env, "factures", facture&.id.to_s)) if facture
     end
   end
 

@@ -25,8 +25,8 @@ FactoryBot.define do
           statut: "emise",
           date_emission: Date.current,
           emis_at: Time.current,
-          pdf_url: "storage/avoirs/#{avoir.id}/avoir-#{numero}.pdf",
-          xml_url: "storage/avoirs/#{avoir.id}/avoir-#{numero}.xml",
+          pdf_url: "storage/#{Rails.env}/avoirs/#{avoir.id}/avoir-#{numero}.pdf",
+          xml_url: "storage/#{Rails.env}/avoirs/#{avoir.id}/avoir-#{numero}.xml",
           updated_at: Time.current
         )
       end
@@ -44,8 +44,8 @@ FactoryBot.define do
           statut: "deposee",
           date_emission: Date.current,
           emis_at: Time.current,
-          pdf_url: "storage/avoirs/#{avoir.id}/avoir-#{numero}.pdf",
-          xml_url: "storage/avoirs/#{avoir.id}/avoir-#{numero}.xml",
+          pdf_url: "storage/#{Rails.env}/avoirs/#{avoir.id}/avoir-#{numero}.pdf",
+          xml_url: "storage/#{Rails.env}/avoirs/#{avoir.id}/avoir-#{numero}.xml",
           updated_at: Time.current
         )
       end
