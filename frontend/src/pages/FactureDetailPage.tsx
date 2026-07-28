@@ -145,6 +145,15 @@ export function FactureDetailPage() {
   const hasPdf = Boolean(facture?.pdf_url);
   const hasXml = Boolean(facture?.xml_url);
 
+  // Problème 2 — solde après avoirs : DÉRIVÉ uniquement (jamais stocké sur la
+  // facture, jamais un remplacement du Total TTC légal affiché par
+  // InvoiceDetailHeader ci-dessous, qui reste intact). Seuls les avoirs NON
+  // brouillon réduisent le dû — sommeAvoirsDejaEmis (V1.2d) filtre déjà
+  // exactement ainsi, réutilisée telle quelle plutôt que réécrite.
+  const avoirsEmis = avoirs.filter((avoir) => avoir.statut !== "brouillon");
+  const montantAvoirsEmis = sommeAvoirsDejaEmis(avoirs);
+  const resteDu = Math.max(0, toNumber(facture?.total_ttc) - montantAvoirsEmis);
+
   const canEmit =
     Boolean(facture) &&
     isDraft &&
@@ -641,6 +650,32 @@ export function FactureDetailPage() {
         />
       )}
 
+      {!isLoading && facture && avoirsEmis.length > 0 && (
+        <div className="invoice-builder-card">
+          <p className="hint-text">
+            Solde de gestion après avoirs — le document facture ci-dessus
+            reste inchangé (valeur légale {formatCurrency(toNumber(facture.total_ttc))}).
+          </p>
+
+          <div className="invoice-totals-card">
+            <div>
+              <span>Total facturé (TTC)</span>
+              <strong>{formatCurrency(toNumber(facture.total_ttc))}</strong>
+            </div>
+
+            <div>
+              <span>Avoirs émis</span>
+              <strong>− {formatCurrency(montantAvoirsEmis)}</strong>
+            </div>
+
+            <div className="total-ttc-row">
+              <span>Reste dû</span>
+              <strong>{formatCurrency(resteDu)}</strong>
+            </div>
+          </div>
+        </div>
+      )}
+
       {error && <div className="state-card error">{error}</div>}
 
       {!isLoading && !facture && !error && (
@@ -701,12 +736,9 @@ export function FactureDetailPage() {
               </h2>
             </div>
             <p className="invoice-transmission-section__subtitle">
-              {formatCurrency(sommeAvoirsDejaEmis(avoirs))} déjà crédités sur{" "}
+              {formatCurrency(montantAvoirsEmis)} déjà crédités sur{" "}
               {formatCurrency(toNumber(facture.total_ttc))} TTC — reste{" "}
-              {formatCurrency(
-                Math.max(0, toNumber(facture.total_ttc) - sommeAvoirsDejaEmis(avoirs)),
-              )}{" "}
-              créditables.
+              {formatCurrency(resteDu)} créditables.
             </p>
           </div>
 
