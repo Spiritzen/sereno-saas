@@ -497,6 +497,66 @@ h1 {
 }
 
 /* =========================
+   AVOIR — accent de type de document (V1.2d)
+   Distinct de .status : celui-ci ne porte jamais un statut ("brouillon",
+   "émise"...), toujours le même mot "AVOIR", pour qu'un coup d'œil
+   suffise à ne jamais confondre un avoir avec une facture.
+========================= */
+
+.badge-avoir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  width: fit-content;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--color-avoir-soft);
+  color: var(--color-avoir);
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.avoir-accent-text {
+  color: var(--color-avoir);
+  font-weight: 700;
+}
+
+.avoir-identity-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.avoir-btn {
+  background: var(--color-avoir-soft);
+  color: var(--color-avoir);
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.avoir-btn:hover:not(:disabled) {
+  background: rgba(217, 119, 6, 0.24);
+}
+
+.avoir-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================
    NEW INVOICE
 ========================= */
 
@@ -1452,6 +1512,43 @@ h1 {
   color: var(--color-text-primary);
 }
 
+/* Correction post-V1.2d (v2) — formulaire d'avoir avec montant à créditer
+   par ligne (TTC) : désignation/qté/PU HT/TVA/facturé figés, seul le champ
+   "à créditer" est éditable ; TVA créditée et reste facturé sont des
+   colonnes d'information calculées. */
+.avoir-credit-table .invoice-lines-header,
+.avoir-credit-table .invoice-lines-row {
+  grid-template-columns: minmax(0, 1.5fr) 55px 90px 60px 100px 130px 100px 100px;
+}
+
+.avoir-credit-table .invoice-lines-row .credit-amount-input {
+  min-height: 36px;
+  width: 100%;
+  border: 1px solid var(--color-avoir);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--color-text-primary);
+  padding: 0 10px;
+  outline: none;
+  font: inherit;
+  font-weight: 700;
+}
+
+.avoir-credit-table .invoice-lines-row .credit-amount-input:focus {
+  border-color: rgba(217, 119, 6, 0.9);
+}
+
+.avoir-credit-table .invoice-lines-row .info-muted {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.hint-text {
+  margin: -8px 0 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
 .invoice-totals-card {
   width: min(360px, 100%);
   margin-left: auto;
@@ -1675,6 +1772,14 @@ h1 {
   }
 
   .detail-lines-table .invoice-lines-row {
+    grid-template-columns: 1fr;
+  }
+
+  .avoir-credit-table .invoice-lines-header {
+    display: none;
+  }
+
+  .avoir-credit-table .invoice-lines-row {
     grid-template-columns: 1fr;
   }
 }

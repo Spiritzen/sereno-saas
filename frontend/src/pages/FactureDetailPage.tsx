@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   CirclePlus,
   FileText,
+  Receipt,
   Send,
   ShieldCheck,
   Trash2,
@@ -15,6 +16,7 @@ import {
   getFacturePdfUrl,
   getFactureXmlUrl,
 } from "../api/facturesApi";
+import { listAvoirs, sommeAvoirsDejaEmis } from "../api/avoirsApi";
 import { listEvenementsFacture } from "../api/evenementsFactureApi";
 import { getApiErrorMessage } from "../api/http";
 import {
@@ -35,6 +37,7 @@ import { InvoiceDetailHeader } from "../components/InvoiceDetailHeader";
 import { InvoiceEventHistory } from "../components/InvoiceEventHistory";
 import { InvoiceLifecycleTimeline } from "../components/InvoiceLifecycleTimeline";
 import { InvoiceTransmissionSection } from "../components/InvoiceTransmissionSection";
+import type { Avoir } from "../types/avoir";
 import type { ConformiteResult } from "../types/conformite";
 import type { EvenementFacture } from "../types/evenementFacture";
 import type { Facture } from "../types/facture";
@@ -123,6 +126,12 @@ export function FactureDetailPage() {
   >(null);
   const [isRelaunching, setIsRelaunching] = useState(false);
   const [relaunchError, setRelaunchError] = useState<string | null>(null);
+
+  // V1.2d — navigation croisée + garde-fou cumulé : les avoirs de CETTE
+  // facture, pour afficher le total déjà crédité et le reste créditable.
+  const [avoirs, setAvoirs] = useState<Avoir[]>([]);
+  const [isLoadingAvoirs, setIsLoadingAvoirs] = useState(Boolean(id));
+  const [avoirsError, setAvoirsError] = useState<string | null>(null);
 
   const isDraft = facture?.statut === "brouillon";
 
@@ -268,6 +277,36 @@ export function FactureDetailPage() {
         }
 
         setIsLoadingTransmissions(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let ignore = false;
+
+    void listAvoirs(id)
+      .then((avoirsData) => {
+        if (!ignore) {
+          setAvoirs(avoirsData);
+          setAvoirsError(null);
+        }
+      })
+      .catch((apiError) => {
+        if (!ignore) {
+          setAvoirsError(getApiErrorMessage(apiError));
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsLoadingAvoirs(false);
+        }
       });
 
     return () => {
@@ -649,6 +688,82 @@ export function FactureDetailPage() {
             }}
           />
         )}
+
+      {!isLoading && facture && facture.statut !== "brouillon" && (
+        <section
+          className="invoice-transmission-section"
+          aria-labelledby="facture-avoirs-title"
+        >
+          <div className="invoice-transmission-section__header">
+            <div className="invoice-transmission-section__heading-row">
+              <h2 id="facture-avoirs-title" className="invoice-transmission-section__title">
+                Avoirs
+              </h2>
+            </div>
+            <p className="invoice-transmission-section__subtitle">
+              {formatCurrency(sommeAvoirsDejaEmis(avoirs))} déjà crédités sur{" "}
+              {formatCurrency(toNumber(facture.total_ttc))} TTC — reste{" "}
+              {formatCurrency(
+                Math.max(0, toNumber(facture.total_ttc) - sommeAvoirsDejaEmis(avoirs)),
+              )}{" "}
+              créditables.
+            </p>
+          </div>
+
+          {isLoadingAvoirs && (
+            <p className="invoice-transmission-section__loading">
+              Chargement des avoirs...
+            </p>
+          )}
+
+          {!isLoadingAvoirs && avoirsError && (
+            <p className="invoice-transmission-section__error">{avoirsError}</p>
+          )}
+
+          {!isLoadingAvoirs && !avoirsError && avoirs.length === 0 && (
+            <p className="invoice-transmission-section__empty">
+              Aucun avoir n’a encore été créé pour cette facture.
+            </p>
+          )}
+
+          {!isLoadingAvoirs && avoirs.length > 0 && (
+            <div className="invoice-lines-table">
+              <div className="invoice-lines-header">
+                <span>Numéro</span>
+                <span>Motif</span>
+                <span>Statut</span>
+                <span>Montant TTC</span>
+                <span>Type</span>
+              </div>
+
+              {avoirs.map((avoir) => (
+                <Link
+                  key={avoir.id}
+                  to={`/app/avoirs/${avoir.id}`}
+                  className="invoice-lines-row"
+                  style={{ textDecoration: "none", cursor: "pointer" }}
+                >
+                  <strong>{avoir.numero ?? "Brouillon"}</strong>
+                  <span>{avoir.motif}</span>
+                  <span>{avoir.statut}</span>
+                  <strong>{formatCurrency(toNumber(avoir.total_ttc))}</strong>
+                  <span className="badge-avoir">Avoir</span>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="invoice-actions-row">
+            <Link
+              to={`/app/factures/${facture.id}/avoirs/nouveau`}
+              className="avoir-btn"
+            >
+              <Receipt size={16} />
+              Créer un avoir
+            </Link>
+          </div>
+        </section>
+      )}
 
       {!isLoading && facture && (
         <div className="invoice-builder-card">
