@@ -8,20 +8,16 @@ require "fileutils"
 #
 # RÉUTILISATION SANS MODIFICATION (§2.C du prompt — "appeler un service gelé
 # est autorisé, le modifier ne l'est pas") :
-#   - FacturXStorageService : sa signature (facture:, xml_string:) et son
-#     corps ne lisent que .blank?, .statut, .numero, .id — tous présents et
-#     de même sémantique sur Avoir (le statut "emise" existe dans les deux
-#     STATUTS). Appelé tel quel avec facture: @avoir. Quirk cosmétique
-#     accepté : le chemin de stockage reste "storage/factures/<avoir_id>/…"
-#     (dossier nommé en dur dans le service gelé/sensible) — sans risque de
-#     collision (avoir.id et facture.id sont des UUID d'espaces disjoints),
-#     juste un nom de dossier trompeur pour l'inspection manuelle.
 #   - FacturXPackageService : sa signature (pdf_bytes:, xml_string:, facture:,
 #     icc_profile_path:) ne lit que .blank? et .respond_to?(:numero) sur
 #     facture: — déjà entièrement générique. Appelé tel quel avec facture: @avoir.
 #
-# AvoirXmlService et AvoirPdfService sont NEUFS (voie b) : voir leurs
-# propres commentaires pour la justification de la duplication.
+# AvoirXmlService, AvoirPdfService et AvoirXmlStorageService sont NEUFS
+# (voie b) : voir leurs propres commentaires pour la justification de la
+# duplication. AvoirXmlStorageService ferme la dette n°13 : le XML de l'avoir
+# n'est plus rangé sous storage/<env>/factures/ via FacturXStorageService
+# (ancien quirk de duck-typing, corrigé), mais sous storage/<env>/avoirs/,
+# au même endroit que le PDF de ce même avoir.
 class AvoirEmissionService
   class EmissionImpossibleError < StandardError
     attr_reader :details
@@ -101,8 +97,8 @@ class AvoirEmissionService
   def generer_archives_factur_x!
     xml_string = AvoirXmlService.new(avoir: @avoir).call
 
-    xml_service = FacturXStorageService.new(
-      facture: @avoir,
+    xml_service = AvoirXmlStorageService.new(
+      avoir: @avoir,
       xml_string: xml_string
     )
 
@@ -129,7 +125,7 @@ class AvoirEmissionService
       pdf_url: pdf_service.chemin_archive_relatif
     )
   rescue AvoirXmlService::GenerationImpossibleError,
-         FacturXStorageService::StorageImpossibleError,
+         AvoirXmlStorageService::StorageImpossibleError,
          AvoirPdfService::PdfGenerationImpossibleError,
          FacturXPackageService::PackagingImpossibleError,
          SystemCallError => e

@@ -313,8 +313,12 @@ class FacturePdfService
     DEFAULT_BOLD_FONT_PATHS.find { |path| path.present? && File.file?(path) }
   end
 
+  # Cloisonné par Rails.env (storage/<env>/factures/...) : un test ne peut
+  # plus jamais écrire dans/effacer le storage/development/ réel du poste
+  # dev. Seuls dossier_facture/chemin_relatif changent ; génération et
+  # contenu du PDF inchangés.
   def dossier_facture
-    Rails.root.join("storage", "factures", @facture.id)
+    Rails.root.join("storage", Rails.env, "factures", @facture.id)
   end
 
   def nom_fichier
@@ -326,7 +330,7 @@ class FacturePdfService
   end
 
   def chemin_relatif
-    "storage/factures/#{@facture.id}/#{nom_fichier}"
+    "storage/#{Rails.env}/factures/#{@facture.id}/#{nom_fichier}"
   end
 
   def nom_fichier_securise(valeur)

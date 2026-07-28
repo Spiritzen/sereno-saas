@@ -37,7 +37,7 @@ RSpec.describe FactureEmissionService, type: :service do
       expect(File.exist?(Rails.root.join(facture_emise.xml_url))).to be(true)
       expect(EvenementFacture.where(facture_id: facture_emise.id, statut: "emise").count).to eq(1)
     ensure
-      FileUtils.rm_rf(Rails.root.join("storage", "factures", facture&.id.to_s)) if facture
+      FileUtils.rm_rf(Rails.root.join("storage", Rails.env, "factures", facture&.id.to_s)) if facture
     end
   end
 end

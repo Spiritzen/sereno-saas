@@ -2,6 +2,9 @@
 
 require "fileutils"
 
+# Chemin cloisonné par Rails.env (storage/<env>/factures/...) : un test ne
+# peut plus jamais écrire dans/effacer le storage/development/ réel du poste
+# dev. Seul chemin_relatif change ; génération et contenu du XML inchangés.
 class FacturXStorageService
   class StorageImpossibleError < StandardError; end
 
@@ -39,7 +42,7 @@ class FacturXStorageService
   end
 
   def chemin_relatif
-    "storage/factures/#{@facture.id}/#{nom_fichier}"
+    "storage/#{Rails.env}/factures/#{@facture.id}/#{nom_fichier}"
   end
 
   def nom_fichier_securise(valeur)

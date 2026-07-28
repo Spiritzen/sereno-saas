@@ -331,8 +331,10 @@ class AvoirPdfService
     DEFAULT_BOLD_FONT_PATHS.find { |path| path.present? && File.file?(path) }
   end
 
+  # Cloisonné par Rails.env (storage/<env>/avoirs/...), même principe que
+  # FacturePdfService/FacturXStorageService.
   def dossier_avoir
-    Rails.root.join("storage", "avoirs", @avoir.id)
+    Rails.root.join("storage", Rails.env, "avoirs", @avoir.id)
   end
 
   def nom_fichier
@@ -344,7 +346,7 @@ class AvoirPdfService
   end
 
   def chemin_relatif
-    "storage/avoirs/#{@avoir.id}/#{nom_fichier}"
+    "storage/#{Rails.env}/avoirs/#{@avoir.id}/#{nom_fichier}"
   end
 
   def nom_fichier_securise(valeur)

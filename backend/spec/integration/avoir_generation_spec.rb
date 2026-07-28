@@ -36,7 +36,7 @@ RSpec.describe "Génération avoir (381) — cœur backend V1.2a", type: :integr
   end
 
   after do
-    FileUtils.rm_rf(Rails.root.join("storage", "factures", avoir.id.to_s))
+    FileUtils.rm_rf(Rails.root.join("storage", Rails.env, "avoirs", avoir.id.to_s))
   end
 
   describe "chemin heureux — avoir conforme référençant une facture émise" do
@@ -133,7 +133,7 @@ RSpec.describe "Génération avoir (381) — cœur backend V1.2a", type: :integr
       doc_avec_namespaces = Nokogiri::XML(File.read(Rails.root.join(avoir_emis.xml_url)))
       expect(schema.validate(doc_avec_namespaces).map(&:message)).to eq([])
     ensure
-      FileUtils.rm_rf(Rails.root.join("storage", "avoirs", avoir.id.to_s))
+      FileUtils.rm_rf(Rails.root.join("storage", Rails.env, "avoirs", avoir.id.to_s))
     end
   end
 

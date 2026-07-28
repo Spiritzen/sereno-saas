@@ -15,7 +15,9 @@ RSpec.describe "Émission concurrente de factures", type: :service do
   end
 
   after(:all) do
-    FileUtils.rm_rf(Rails.root.join("storage", "factures"))
+    @factures.each do |facture|
+      FileUtils.rm_rf(Rails.root.join("storage", Rails.env, "factures", facture.id.to_s))
+    end
 
     EvenementFacture.where(organisation_id: @organisation.id).delete_all
     LigneFacture.where(organisation_id: @organisation.id).delete_all

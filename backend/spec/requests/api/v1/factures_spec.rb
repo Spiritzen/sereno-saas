@@ -245,7 +245,7 @@ RSpec.describe "Api::V1::Factures", type: :request do
       expect(evenements.map(&:statut)).to eq(%w[brouillon emise])
       expect(EvenementFacture.where(facture_id: facture.id, statut: "emise").count).to eq(1)
     ensure
-      FileUtils.rm_rf(Rails.root.join("storage", "factures", facture&.id.to_s)) if facture
+      FileUtils.rm_rf(Rails.root.join("storage", Rails.env, "factures", facture&.id.to_s)) if facture
     end
   end
 end
