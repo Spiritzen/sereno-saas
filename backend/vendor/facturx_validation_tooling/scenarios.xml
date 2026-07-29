@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenarios xmlns="http://www.xoev.de/de/validator/framework/1/scenarios" frameworkVersion="1.1.0">
+  <name>Sereno - Factur-X EN16931 (380 facture / 381 avoir)</name>
+  <date>2026-07-29</date>
+  <description>
+    <p>Scenario Mustang (KoSIT Validator 1.6.2) ecrit par Sereno pour valider structure (XSD) et regles metier (Schematron EN16931) des artefacts Factur-X 380/381. Aucun scenario Factur-X officiel n'existe publiquement. Reference le XSD gele (vendor/facturx/, lu en place, jamais modifie) et le Schematron compile (vendor/facturx_validation_tooling/schematron_en16931/, artefact derive non gele). A utiliser avec -r backend/ (racine backend comme repository).</p>
+  </description>
+  <scenario>
+    <name>Factur-X EN16931 (380/381)</name>
+    <match>true()</match>
+    <validateWithXmlSchema>
+      <resource>
+        <name>Factur-X EN16931 XSD (gele, lu en place)</name>
+        <location>vendor/facturx/xsd/en16931/Factur-X_1.09_EN16931.xsd</location>
+      </resource>
+    </validateWithXmlSchema>
+    <validateWithSchematron>
+      <resource>
+        <name>Factur-X EN16931 Schematron (compile depuis le .sch gele)</name>
+        <location>vendor/facturx_validation_tooling/schematron_en16931/Factur-X_1.09_EN16931-compiled.xsl</location>
+      </resource>
+    </validateWithSchematron>
+  </scenario>
+  <noScenarioReport>
+    <resource>
+      <name>none</name>
+      <location>vendor/facturx_validation_tooling/no_scenario_report.xsl</location>
+    </resource>
+  </noScenarioReport>
+</scenarios>
