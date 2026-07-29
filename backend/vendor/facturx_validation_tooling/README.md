@@ -1,4 +1,4 @@
-# Outillage de validation Schematron EN 16931 — Sereno (B4 étage 1, partie A)
+# Outillage de validation Schematron EN 16931 — Sereno (B4 étage 1, parties A + A-bis)
 
 Ce répertoire n'est PAS gelé (absent des 8 chemins `GELÉ STRICT` de
 `backend/SOCLE_GELE.md` — voir la commande de contrôle du socle, qui ignore ce
@@ -50,7 +50,8 @@ Sereno à partir du `.sch` gelé (lu, jamais modifié), via :
 2. Le squelette officiel ISO Schematron pour XSLT2/Saxon
    (`iso_svrl_for_xslt2.xsl` + `iso_schematron_skeleton_for_saxon.xsl`, dépôt
    [`Schematron/schematron`](https://github.com/Schematron/schematron),
-   Apache License 2.0 / MIT selon les fichiers du dépôt)
+   Apache License 2.0 / MIT selon les fichiers du dépôt), **avec un patch
+   Sereno minimal** (voir « Patch @id » ci-dessous)
 
 Commande de compilation (reproductible, à rejouer si `vendor/facturx/schematron/en16931/Factur-X_1.09_EN16931.sch`
 changeait un jour — ce qui ne devrait jamais arriver puisqu'il est gelé) :
@@ -58,13 +59,38 @@ changeait un jour — ce qui ne devrait jamais arriver puisqu'il est gelé) :
 ```
 java -cp "saxon-he.jar;xmlresolver.jar" net.sf.saxon.Transform \
   -s:vendor/facturx/schematron/en16931/Factur-X_1.09_EN16931.sch \
-  -xsl:<squelette>/iso_svrl_for_xslt2.xsl \
+  -xsl:<squelette patché>/iso_svrl_for_xslt2_sereno_id_fix.xsl \
   -o:Factur-X_1.09_EN16931-compiled.xsl
 ```
 
 Ce fichier n'est PAS à modifier à la main non plus (c'est un artefact généré),
 mais pour une raison différente du `.sch`/XSD/`codedb.xml` : le régénérer est
 sans risque et reproductible, l'éditer à la main ne le serait pas.
+
+#### Patch `@id` (B4 étage 1, partie A-bis)
+
+Le squelette ISO standard n'émet l'attribut `@id` sur `<svrl:failed-assert>`/
+`<svrl:successful-report>` QUE si l'`<assert>`/`<report>` **source** en porte
+un. Le `.sch` officiel FeRD n'en porte aucun (0 sur 618 vérifié), ce qui est
+parfaitement valide au sens ISO Schematron/SVRL (l'`id` y est optionnel) —
+mais le schéma de rapport **interne** de Mustang (`svrl-kosit.xsd`, embarqué
+dans son JAR) le rend **obligatoire** (`use="required"`) sur ces deux
+éléments. Sans lui, Mustang classait tout document (même parfaitement
+conforme) en `UNDEFINED` au lieu d'`ACCEPTABLE`, à cause d'une erreur de
+validation de SON PROPRE rapport (`cvc-complex-type.4`), pas d'un échec de
+règle métier.
+
+Fix retenu : une copie patchée du squelette
+(`iso_svrl_for_xslt2_sereno_id_fix.xsl`, dans `backend/tmp/b4-spike/schematron-skeleton/`,
+scratch réutilisable) où les deux templates concernés (`process-assert`,
+`process-report`) émettent désormais **toujours** un `@id` — celui de la
+source s'il existe, sinon `generate-id(.)` évalué à l'exécution sur le nœud
+du document instance en cours de validation. Aucune logique de test/assert
+n'est modifiée ; seul un attribut de libellé de rapport, absent de la source
+et non porteur de sens métier, est synthétisé. Preuve que rien n'est masqué :
+un XML délibérément corrompu (code devise invalide) est toujours classé
+`REJECTED` avec les `failed-assert` attendus après ce patch (voir rapport
+technique du sprint).
 
 ### `scenarios.xml`
 

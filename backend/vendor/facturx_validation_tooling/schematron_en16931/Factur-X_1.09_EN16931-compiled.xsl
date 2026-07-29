@@ -645,6 +645,9 @@
          <xsl:when test="false"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="false">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="flag">warning</xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
@@ -674,6 +677,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:IssuerAssignedID!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -701,6 +707,9 @@
          <xsl:when test="(ram:BasisAmount)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(ram:BasisAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -714,6 +723,9 @@
          <xsl:when test="(ram:CalculatedAmount)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(ram:CalculatedAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -727,6 +739,9 @@
          <xsl:when test="(ram:CategoryCode)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(ram:CategoryCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -741,6 +756,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:RateApplicablePercent) or (ram:CategoryCode = 'O')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -755,6 +773,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="((ram:TaxPointDate) and not (ram:DueDateTypeCode)) or (not (ram:TaxPointDate) and (ram:DueDateTypeCode)) or (not (ram:TaxPointDate) and not (ram:DueDateTypeCode))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -769,6 +790,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(round(.[normalize-space(upper-case(ram:TypeCode)) = 'VAT']/xs:decimal(ram:RateApplicablePercent)) = 0 and (round(xs:decimal(ram:CalculatedAmount)) = 0)) or (round(.[normalize-space(upper-case(ram:TypeCode)) = 'VAT']/xs:decimal(ram:RateApplicablePercent)) != 0 and ((abs(xs:decimal(ram:CalculatedAmount)) - 1 &lt;= round(abs(xs:decimal(ram:BasisAmount)) * (.[normalize-space(upper-case(ram:TypeCode)) = 'VAT']/xs:decimal(ram:RateApplicablePercent) div 100) * 10 * 10) div 100 ) and (abs(xs:decimal(ram:CalculatedAmount)) + 1 &gt;= round(abs(xs:decimal(ram:BasisAmount)) * (.[normalize-space(upper-case(ram:TypeCode)) = 'VAT']/xs:decimal(ram:RateApplicablePercent) div 100) * 10 * 10) div 100 ))) or (not(exists(.[normalize-space(upper-case(ram:TypeCode))='VAT']/xs:decimal(ram:RateApplicablePercent))) and (round(xs:decimal(ram:CalculatedAmount)) = 0))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -783,6 +807,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:BasisAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -797,6 +824,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:CalculatedAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -825,6 +855,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:BasisAmount -1 &lt;= (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'Z']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[(ram:ChargeIndicator/udt:Indicator cast as xs:boolean)=true() and ram:CategoryTradeTax/ram:CategoryCode='Z']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[(ram:ChargeIndicator/udt:Indicator cast as xs:boolean)=false() and ram:CategoryTradeTax/ram:CategoryCode='Z']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100)) and (../ram:BasisAmount +1 &gt; (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'Z']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[(ram:ChargeIndicator/udt:Indicator cast as xs:boolean)=true() and ram:CategoryTradeTax/ram:CategoryCode='Z']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[(ram:ChargeIndicator/udt:Indicator cast as xs:boolean)=false() and ram:CategoryTradeTax/ram:CategoryCode='Z']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -839,6 +872,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="../ram:CalculatedAmount = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -853,6 +889,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(../ram:ExemptionReason) and not (../ram:ExemptionReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -881,6 +920,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(abs(xs:decimal(../ram:CalculatedAmount)) - 1 &lt; round(abs(xs:decimal(../ram:BasisAmount)) * ../ram:RateApplicablePercent) div 100 ) and (abs(xs:decimal(../ram:CalculatedAmount)) + 1 &gt; round(abs(xs:decimal(../ram:BasisAmount)) * ../ram:RateApplicablePercent) div 100 )">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -895,6 +937,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(../ram:ExemptionReason) and not (../ram:ExemptionReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -909,6 +954,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="every $rate in ../ram:RateApplicablePercent/xs:decimal(.) satisfies (../ram:BasisAmount = (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'S' and ram:ApplicableTradeTax/xs:decimal(ram:RateApplicablePercent) =$rate]/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount)) * 10 * 10) div 100 + round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='S' and ram:CategoryTradeTax/xs:decimal(ram:RateApplicablePercent)=$rate]/xs:decimal(ram:ActualAmount)) * 10 * 10) div 100 - round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='S' and ram:CategoryTradeTax/xs:decimal(ram:RateApplicablePercent)=$rate]/xs:decimal(ram:ActualAmount)) * 10 * 10) div 100))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -937,6 +985,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:EndDateTime/udt:DateTimeString[@format = '102']) &gt;= (ram:StartDateTime/udt:DateTimeString[@format = '102']) or not (ram:EndDateTime) or not (ram:StartDateTime)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -951,6 +1002,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:StartDateTime) or (ram:EndDateTime)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -978,6 +1032,9 @@
          <xsl:when test="(../ram:ActualAmount)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(../ram:ActualAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -992,6 +1049,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:CategoryTradeTax[upper-case(ram:TypeCode) = 'VAT']/ram:CategoryCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1006,6 +1066,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:Reason) or (../ram:ReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1019,6 +1082,9 @@
          <xsl:when test="true()"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1033,6 +1099,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:Reason) or (../ram:ReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1047,6 +1116,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(../ram:ActualAmount[1],'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1061,6 +1133,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(../ram:BasisAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1088,6 +1163,9 @@
          <xsl:when test="(../ram:ActualAmount)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(../ram:ActualAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1102,6 +1180,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:CategoryTradeTax[upper-case(ram:TypeCode) = 'VAT']/ram:CategoryCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1116,6 +1197,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:Reason) or (../ram:ReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1129,6 +1213,9 @@
          <xsl:when test="true()"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1143,6 +1230,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:Reason) or (../ram:ReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1157,6 +1247,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(../ram:ActualAmount[1],'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1171,6 +1264,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(../ram:BasisAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1199,6 +1295,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:Description) and (ram:Value)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1227,6 +1326,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(normalize-space(ram:ID)) &lt;= 10">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1255,6 +1357,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:AssociatedDocumentLineDocument/ram:LineID!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1269,6 +1374,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedLineTradeDelivery/ram:BilledQuantity)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1283,6 +1391,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedLineTradeDelivery/ram:BilledQuantity/@unitCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1297,6 +1408,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1311,6 +1425,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedTradeProduct/ram:Name!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1325,6 +1442,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/ram:ChargeAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1339,6 +1459,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/ram:ChargeAmount) &gt;= 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1353,6 +1476,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedLineTradeAgreement/ram:GrossPriceProductTradePrice/ram:ChargeAmount &gt;= 0) or not(ram:SpecifiedLineTradeAgreement/ram:GrossPriceProductTradePrice/ram:ChargeAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1367,6 +1493,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:SpecifiedTradeProduct/ram:GlobalID/@schemeID!='' or not (ram:SpecifiedTradeProduct/ram:GlobalID)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1381,6 +1510,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedTradeProduct/ram:DesignatedProductClassification/ram:ClassCode/@listID!='') or not (ram:SpecifiedTradeProduct/ram:DesignatedProductClassification)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1395,6 +1527,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[upper-case(ram:TypeCode) = 'VAT']/ram:CategoryCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1409,6 +1544,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1434,6 +1572,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:Name) and (not(ram:Name = ../ram:SellerTradeParty/ram:Name) and not(ram:ID = ../ram:SellerTradeParty/ram:ID) and not(ram:SpecifiedLegalOrganization/ram:ID = ../ram:SellerTradeParty/ram:SpecifiedLegalOrganization/ram:ID))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1462,6 +1603,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="normalize-space(ram:Name) != ''">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1475,6 +1619,9 @@
          <xsl:when test="(ram:PostalTradeAddress)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(ram:PostalTradeAddress)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1489,6 +1636,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="normalize-space(ram:PostalTradeAddress/ram:CountryID) != ''">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1503,6 +1653,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:SpecifiedTaxRegistration/ram:ID[@schemeID='VA']!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1529,6 +1682,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:ID) or (ram:GlobalID) or (ram:SpecifiedLegalOrganization/ram:ID) or (ram:SpecifiedTaxRegistration/ram:ID[@schemeID='VA'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1557,6 +1713,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:EndDateTime/udt:DateTimeString[@format = '102']) &gt;= (ram:StartDateTime/udt:DateTimeString[@format = '102']) or not (ram:EndDateTime) or not (ram:StartDateTime)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1571,6 +1730,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:StartDateTime) or (ram:EndDateTime)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1599,6 +1761,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:Reason) or (../ram:ReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1626,6 +1791,9 @@
          <xsl:when test="(../ram:ActualAmount)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(../ram:ActualAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1639,6 +1807,9 @@
          <xsl:when test="true()"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1653,6 +1824,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:Reason) or (../ram:ReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1667,6 +1841,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(../ram:ActualAmount[1],'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1681,6 +1858,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(../ram:BasisAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1708,6 +1888,9 @@
          <xsl:when test="(../ram:ActualAmount)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(../ram:ActualAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1722,6 +1905,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:Reason) or (../ram:ReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1735,6 +1921,9 @@
          <xsl:when test="true()"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1749,6 +1938,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:Reason) or (../ram:ReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1763,6 +1955,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(../ram:ActualAmount[1],'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1777,6 +1972,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(../ram:BasisAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1805,6 +2003,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="contains(' 1A AD AE AF AG AI AL AM AN AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BL BJ BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH EL ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS XI YE YT ZA ZM ZW ', concat(' ', substring(.,1,2), ' '))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1832,6 +2033,9 @@
          <xsl:when test="(ram:ChargeIndicator)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(ram:ChargeIndicator)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1860,6 +2064,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or //ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and (//ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'] or //ram:BuyerTradeParty/ram:SpecifiedLegalOrganization/ram:ID)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1874,6 +2081,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1902,6 +2112,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1916,6 +2129,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1944,6 +2160,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'] or //ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1958,6 +2177,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -1986,6 +2208,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'] or //ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and //ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2000,6 +2225,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2028,6 +2256,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2042,6 +2273,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent &gt; 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2070,6 +2304,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2084,6 +2321,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent &gt;= 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2112,6 +2352,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and not (/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and not (//ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2126,6 +2369,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(ram:RateApplicablePercent)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2154,6 +2400,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2168,6 +2417,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent &gt; 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2196,6 +2448,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2210,6 +2465,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2238,6 +2496,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or //ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and (//ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'] or //ram:BuyerTradeParty/ram:SpecifiedLegalOrganization/ram:ID)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2252,6 +2513,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2280,6 +2544,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2294,6 +2561,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2322,6 +2592,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'] or //ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2336,6 +2609,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2364,6 +2640,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'] or //ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and //ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2378,6 +2657,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2406,6 +2688,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2420,6 +2705,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent &gt; 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2448,6 +2736,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2462,6 +2753,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent &gt;= 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2490,6 +2784,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and not (/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and not (//ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2504,6 +2801,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(ram:RateApplicablePercent)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2532,6 +2832,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2546,6 +2849,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent &gt; 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2574,6 +2880,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2588,6 +2897,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2616,6 +2928,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="xs:decimal(ram:LineTotalAmount) = round(xs:decimal(sum(../../ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount)) * xs:decimal(100)) div xs:decimal(100)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2629,6 +2944,9 @@
          <xsl:when test="(ram:LineTotalAmount)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(ram:LineTotalAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2643,6 +2961,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:TaxBasisTotalAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2656,6 +2977,9 @@
          <xsl:when test="(ram:GrandTotalAmount)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(ram:GrandTotalAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2669,6 +2993,9 @@
          <xsl:when test="(ram:DuePayableAmount)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(ram:DuePayableAmount)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2683,6 +3010,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(not(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator='false'])and not (ram:AllowanceTotalAmount)) or ram:AllowanceTotalAmount = (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator='false']/ram:ActualAmount)* 10 * 10 ) div 100)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2697,6 +3027,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(not(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator='true'])and not (ram:ChargeTotalAmount)) or (round (/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:ChargeTotalAmount * 10 * 10) div 100)= round(((round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator='true']/ram:ActualAmount)* 10 * 10 ) div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedLogisticsServiceCharge/ram:AppliedAmount)* 10 * 10 ) div 100))*10*10) div 100">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2711,6 +3044,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(xs:decimal(ram:TaxBasisTotalAmount[1]) = round((xs:decimal(ram:LineTotalAmount[1]) - xs:decimal(ram:AllowanceTotalAmount[1]) + xs:decimal(ram:ChargeTotalAmount[1])) * 10 * 10) div 100) or ((xs:decimal(ram:TaxBasisTotalAmount[1]) = round((xs:decimal(ram:LineTotalAmount[1]) - xs:decimal(ram:AllowanceTotalAmount[1])) * 10 * 10) div 100) and not(ram:ChargeTotalAmount)) or ((xs:decimal(ram:TaxBasisTotalAmount[1]) = round((xs:decimal(ram:LineTotalAmount[1]) + xs:decimal(ram:ChargeTotalAmount[1])) * 10 * 10) div 100) and not(ram:AllowanceTotalAmount)) or ((xs:decimal(ram:TaxBasisTotalAmount[1]) = round((xs:decimal(ram:LineTotalAmount[1])) * 10 * 10) div 100) and not(ram:ChargeTotalAmount) and not(ram:AllowanceTotalAmount))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2725,6 +3061,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="every $Currency in /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode satisfies ( ( count(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxTotalAmount[@currencyID = $Currency]) = 1 and xs:decimal((/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:GrandTotalAmount)[1]) = round( ( xs:decimal((/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxBasisTotalAmount)[1]) + xs:decimal((/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxTotalAmount[@currencyID = $Currency])[1]) ) * 100 ) div 100 ) or ( xs:decimal((/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:GrandTotalAmount)[1]) = xs:decimal((/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxBasisTotalAmount)[1]) ) )">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2739,6 +3078,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(xs:decimal(ram:DuePayableAmount[1]) = xs:decimal(ram:GrandTotalAmount[1]) - xs:decimal(ram:TotalPrepaidAmount[1]) + xs:decimal(ram:RoundingAmount[1])) or ((xs:decimal(ram:DuePayableAmount[1]) = xs:decimal(ram:GrandTotalAmount[1]) + xs:decimal(ram:RoundingAmount[1])) and not(ram:TotalPrepaidAmount)) or ((xs:decimal(ram:DuePayableAmount[1]) = xs:decimal(ram:GrandTotalAmount[1]) - xs:decimal(ram:TotalPrepaidAmount[1])) and not(ram:RoundingAmount)) or ((xs:decimal(ram:DuePayableAmount[1]) = xs:decimal(ram:GrandTotalAmount[1])) and not(ram:TotalPrepaidAmount) and not(ram:RoundingAmount))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2753,6 +3095,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:LineTotalAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2767,6 +3112,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:AllowanceTotalAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2781,6 +3129,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:ChargeTotalAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2795,6 +3146,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:TaxBasisTotalAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2809,6 +3163,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(ram:TaxTotalAmount) or ram:TaxTotalAmount[(@currencyID =/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode and . = round(. * 100) div 100) or not (@currencyID =/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode)]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2823,6 +3180,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:GrandTotalAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2837,6 +3197,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(ram:TaxTotalAmount) or ram:TaxTotalAmount[(@currencyID =/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:TaxCurrencyCode and . = round(. * 100) div 100) or not (/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:TaxCurrencyCode)]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2851,6 +3214,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:TotalPrepaidAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2865,6 +3231,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:RoundingAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2879,6 +3248,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length(substring-after(ram:DuePayableAmount,'.'))&lt;=2">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2893,6 +3265,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:TaxCurrencyCode) or (/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:TaxCurrencyCode and (ram:TaxTotalAmount/@currencyID = /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:TaxCurrencyCode) and not(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:TaxCurrencyCode = /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2921,6 +3296,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test=". = (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:CalculatedAmount)*10*10)div 100)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2948,6 +3326,9 @@
          <xsl:when test="(ram:TypeCode)"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="(ram:TypeCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2962,6 +3343,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:PayeeSpecifiedCreditorFinancialInstitution or ram:PayerSpecifiedDebtorFinancialInstitution) or (not(ram:PayeeSpecifiedCreditorFinancialInstitution) and not(ram:PayerSpecifiedDebtorFinancialInstitution))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -2990,6 +3374,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="normalize-space(ram:IBANID) != '' or normalize-space(ram:ProprietaryID) != ''">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3004,6 +3391,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:IBANID) or (ram:ProprietaryID)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3032,6 +3422,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:PayeePartyCreditorFinancialAccount/ram:IBANID or ram:PayeePartyCreditorFinancialAccount/ram:ProprietaryID) and not(ram:PayeePartyCreditorFinancialAccount/ram:IBANID and ram:PayeePartyCreditorFinancialAccount/ram:ProprietaryID)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3059,6 +3452,9 @@
          <xsl:when test="ram:ApplicableTradeTax"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="ram:ApplicableTradeTax">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3087,6 +3483,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:BasisAmount -1 &lt;= (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'AE']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='AE']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='AE']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100)) and (../ram:BasisAmount +1 &gt; (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'AE']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='AE']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='AE']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3101,6 +3500,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="../ram:CalculatedAmount = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3115,6 +3517,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:ExemptionReason) or (../ram:ExemptionReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3143,6 +3548,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:BasisAmount - 1 &lt;= (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'E']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='E']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='E']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100)) and (../ram:BasisAmount + 1 &gt; (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'E']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='E']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='E']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3157,6 +3565,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="../ram:CalculatedAmount = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3171,6 +3582,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:ExemptionReason) or (../ram:ExemptionReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3199,6 +3613,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:BasisAmount -1 &lt;= (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'G']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='G']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='G']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100)) and (../ram:BasisAmount +1 &gt; (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'G']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='G']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='G']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3213,6 +3630,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="../ram:CalculatedAmount = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3227,6 +3647,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:ExemptionReason) or (../ram:ExemptionReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3255,6 +3678,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:BasisAmount - 1 &lt;= (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'K']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='K']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='K']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100)) and (../ram:BasisAmount + 1 &gt; (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'K']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='K']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='K']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3269,6 +3695,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="../ram:CalculatedAmount = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3283,6 +3712,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(../ram:ExemptionReason) or (../ram:ExemptionReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3297,6 +3729,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ActualDeliverySupplyChainEvent/ram:OccurrenceDateTime/udt:DateTimeString) or (../../ram:BillingSpecifiedPeriod/ram:StartDateTime) or (../../ram:BillingSpecifiedPeriod/ram:EndDateTime)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3311,6 +3746,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:CountryID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3339,6 +3777,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="every $rate in ../ram:RateApplicablePercent/xs:decimal(.) satisfies (../ram:BasisAmount = (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'L' and ram:ApplicableTradeTax/xs:decimal(ram:RateApplicablePercent) =$rate]/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount)) * 10 * 10) div 100 + round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='L' and ram:CategoryTradeTax/xs:decimal(ram:RateApplicablePercent)=$rate]/xs:decimal(ram:ActualAmount)) * 10 * 10) div 100 - round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='L' and ram:CategoryTradeTax/xs:decimal(ram:RateApplicablePercent)=$rate]/xs:decimal(ram:ActualAmount)) * 10 * 10) div 100))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3352,6 +3793,9 @@
          <xsl:when test="true()"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3366,6 +3810,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(ram:ExemptionReason) and not (ram:ExemptionReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3394,6 +3841,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="every $rate in ../ram:RateApplicablePercent/xs:decimal(.) satisfies (../ram:BasisAmount = (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'M' and ram:ApplicableTradeTax/xs:decimal(ram:RateApplicablePercent) =$rate]/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount)) * 10 * 10) div 100 + round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=true() and ram:CategoryTradeTax/ram:CategoryCode='M' and ram:CategoryTradeTax/xs:decimal(ram:RateApplicablePercent)=$rate]/xs:decimal(ram:ActualAmount)) * 10 * 10) div 100 - round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=false() and ram:CategoryTradeTax/ram:CategoryCode='M' and ram:CategoryTradeTax/xs:decimal(ram:RateApplicablePercent)=$rate]/xs:decimal(ram:ActualAmount)) * 10 * 10) div 100))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3407,6 +3857,9 @@
          <xsl:when test="true()"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3421,6 +3874,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(ram:ExemptionReason) and not (ram:ExemptionReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3449,6 +3905,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:BasisAmount = (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement[ram:ApplicableTradeTax/ram:CategoryCode = 'O']/ram:SpecifiedTradeSettlementLineMonetarySummation/xs:decimal(ram:LineTotalAmount))*10*10)div 100) + (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[(ram:ChargeIndicator/udt:Indicator cast as xs:boolean)=true() and ram:CategoryTradeTax/ram:CategoryCode='O']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100) - (round(sum(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge[(ram:ChargeIndicator/udt:Indicator cast as xs:boolean)=false() and ram:CategoryTradeTax/ram:CategoryCode='O']/xs:decimal(ram:ActualAmount[1]))*10*10)div 100)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3462,6 +3921,9 @@
          <xsl:when test="ram:CalculatedAmount = 0"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="ram:CalculatedAmount = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3476,6 +3938,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:ExemptionReason) or (ram:ExemptionReasonCode)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3490,6 +3955,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(//ram:ApplicableTradeTax[ram:CategoryCode != 'O'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3504,6 +3972,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(//ram:ApplicableTradeTax[ram:CategoryCode != 'O'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3518,6 +3989,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(//ram:CategoryTradeTax[ram:CategoryCode != 'O'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3532,6 +4006,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(//ram:CategoryTradeTax[ram:CategoryCode != 'O'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3560,6 +4037,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or //ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and (//ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'] or //ram:BuyerTradeParty/ram:SpecifiedLegalOrganization/ram:ID)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3574,6 +4054,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3602,6 +4085,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3616,6 +4102,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3644,6 +4133,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'] or //ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3658,6 +4150,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3686,6 +4181,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'] or //ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and //ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3700,6 +4198,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3728,6 +4229,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3742,6 +4246,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent &gt; 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3770,6 +4277,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3784,6 +4294,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent &gt;= 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3812,6 +4325,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and not (/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']) and not (//ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA'])">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3826,6 +4342,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(ram:RateApplicablePercent)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3854,6 +4373,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3868,6 +4390,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent &gt; 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3896,6 +4421,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = ('VA', 'FC')] or /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID[@schemeID = 'VA']">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3910,6 +4438,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="ram:RateApplicablePercent = 0">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3936,6 +4467,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="//ram:IncludedSupplyChainTradeLineItem">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3950,6 +4484,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID != '')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3964,6 +4501,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(rsm:ExchangedDocument/ram:ID !='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3978,6 +4518,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(rsm:ExchangedDocument/ram:IssueDateTime/udt:DateTimeString[@format='102']!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -3992,6 +4535,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(rsm:ExchangedDocument/ram:TypeCode!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4006,6 +4552,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4020,6 +4569,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:Name!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4034,6 +4586,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:Name!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4048,6 +4603,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="//ram:SellerTradeParty/ram:PostalTradeAddress">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4062,6 +4620,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="//ram:SellerTradeParty/ram:PostalTradeAddress/ram:CountryID!=''">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4076,6 +4637,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="//ram:BuyerTradeParty/ram:PostalTradeAddress">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4090,6 +4654,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="//ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CountryID!=''">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4104,6 +4671,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="normalize-space(rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:URIUniversalCommunication[1]/ram:URIID/@schemeID) != '' or not (rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:URIUniversalCommunication)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4118,6 +4688,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="normalize-space(rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:URIUniversalCommunication[1]/ram:URIID/@schemeID) != '' or not (rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:URIUniversalCommunication)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4132,6 +4705,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="((count(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='S']) + count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='S'])) &gt;=2 or not (//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='S'])) and ((count(//ram:CategoryTradeTax[ram:CategoryCode='S']) + count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='S'])) &gt;=2 or not (//ram:CategoryTradeTax[ram:CategoryCode='S']))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4146,6 +4722,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='Z'])=0 and count(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='Z'])=0 and count(//ram:CategoryTradeTax[ram:CategoryCode='Z'])=0) or ( count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='Z'])=1 and (exists(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='Z']) or exists(//ram:CategoryTradeTax[ram:CategoryCode='Z'])))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4160,6 +4739,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='E'])=0 and count(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='E'])=0 and count(//ram:CategoryTradeTax[ram:CategoryCode='E'])=0) or ( count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='E'])=1 and (exists(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='E']) or exists(//ram:CategoryTradeTax[ram:CategoryCode='E'])))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4174,6 +4756,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='AE'])=0 and count(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='AE'])=0 and count(//ram:CategoryTradeTax[ram:CategoryCode='AE'])=0) or ( count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='AE'])=1 and (exists(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='AE']) or exists(//ram:CategoryTradeTax[ram:CategoryCode='AE'])))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4188,6 +4773,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='K'])=0 and count(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='K'])=0 and count(//ram:CategoryTradeTax[ram:CategoryCode='K'])=0) or ( count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='K'])=1 and (exists(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='K']) or exists(//ram:CategoryTradeTax[ram:CategoryCode='K'])))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4202,6 +4790,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='G'])=0 and count(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='G'])=0 and count(//ram:CategoryTradeTax[ram:CategoryCode='G'])=0) or ( count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='G'])=1 and (exists(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='G']) or exists(//ram:CategoryTradeTax[ram:CategoryCode='G'])))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4216,6 +4807,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='O']) or ( count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='O'])=1 and (exists(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='O']) or exists(//ram:CategoryTradeTax[ram:CategoryCode='O'])))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4230,6 +4824,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="((count(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='L']) + count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='L'])) &gt;=2 or not (//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='L'])) and ((count(//ram:CategoryTradeTax[ram:CategoryCode='L']) + count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='L'])) &gt;=2 or not (//ram:CategoryTradeTax[ram:CategoryCode='L']))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4244,6 +4841,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="((count(//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='M']) + count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='M'])) &gt;=2 or not (//ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='M'])) and ((count(//ram:CategoryTradeTax[ram:CategoryCode='M']) + count(//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax[ram:CategoryCode='M'])) &gt;=2 or not (//ram:CategoryTradeTax[ram:CategoryCode='M']))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4258,6 +4858,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(not(//ram:CountryID != 'IT') and //ram:CategoryCode ='B') or (not(//ram:CategoryCode ='B'))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4272,6 +4875,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(//ram:CategoryCode ='B' and (not(//ram:CategoryCode ='S'))) or (not(//ram:CategoryCode ='B'))">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4300,6 +4906,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(ram:SellerTradeParty/ram:DefinedTradeContact/ram:PersonName and ram:SellerTradeParty/ram:DefinedTradeContact/ram:DepartmentName)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4314,6 +4923,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="not(ram:BuyerTradeParty/ram:DefinedTradeContact/ram:PersonName and ram:BuyerTradeParty/ram:DefinedTradeContact/ram:DepartmentName)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4328,6 +4940,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SellerTradeParty)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4342,6 +4957,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:BuyerTradeParty)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4370,6 +4988,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:ShipToTradeParty/ram:PostalTradeAddress and ram:ShipToTradeParty/ram:PostalTradeAddress/ram:CountryID!='') or not (ram:ShipToTradeParty/ram:PostalTradeAddress)">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4398,6 +5019,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="(ram:IssuerAssignedID!='')">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4412,6 +5036,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4439,6 +5066,9 @@
          <xsl:when test="count(ram:ID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4452,6 +5082,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4471,6 +5104,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4491,6 +5127,9 @@
          <xsl:when test="count(ram:Content)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Content)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4505,6 +5144,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SubjectCode)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4528,6 +5170,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue4)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=4]/enumeration[@value=$codeValue4]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4539,6 +5184,9 @@
       <!--REPORT -->
       <xsl:if test="@listID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4549,6 +5197,9 @@
       <!--REPORT -->
       <xsl:if test="@listVersionID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listVersionID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4569,6 +5220,9 @@
          <xsl:when test="@format"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@format">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4584,6 +5238,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue3)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=3]/enumeration[@value=$codeValue3]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4607,6 +5264,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue2)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=2]/enumeration[@value=$codeValue2]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4629,6 +5289,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:BusinessProcessSpecifiedDocumentContextParameter)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4643,6 +5306,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:GuidelineSpecifiedDocumentContextParameter)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4664,6 +5330,9 @@
          <xsl:when test="count(ram:ID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4683,6 +5352,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4703,6 +5375,9 @@
          <xsl:when test="count(ram:ID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4726,6 +5401,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue1)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=1]/enumeration[@value=$codeValue1]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4737,6 +5415,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4758,6 +5439,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IncludedSupplyChainTradeLineItem)&gt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4777,6 +5461,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4798,6 +5485,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4811,6 +5501,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4830,6 +5523,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4848,6 +5544,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4866,6 +5565,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4884,6 +5586,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4902,6 +5607,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4924,6 +5632,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue14)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=14]/enumeration[@value=$codeValue14]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4947,6 +5658,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue23)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=23]/enumeration[@value=$codeValue23]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -4966,6 +5680,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -4987,6 +5704,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5000,6 +5720,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5019,6 +5742,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5037,6 +5763,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5055,6 +5784,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5073,6 +5805,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5091,6 +5826,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5109,6 +5847,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5131,6 +5872,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue22)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=22]/enumeration[@value=$codeValue22]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5150,6 +5894,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5171,6 +5918,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5184,6 +5934,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5197,6 +5950,9 @@
          <xsl:when test="count(ram:Name)&lt;=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Name)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5211,6 +5967,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:AttachmentBinaryObject)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5232,6 +5991,9 @@
          <xsl:when test="@mimeCode"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@mimeCode">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5247,6 +6009,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue21)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=21]/enumeration[@value=$codeValue21]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5260,6 +6025,9 @@
          <xsl:when test="@filename"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@filename">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5279,6 +6047,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5297,6 +6068,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5315,6 +6089,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5333,6 +6110,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5355,6 +6135,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue20)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=20]/enumeration[@value=$codeValue20]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5374,6 +6157,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5395,6 +6181,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5414,6 +6203,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5432,6 +6224,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5450,6 +6245,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5468,6 +6266,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5486,6 +6287,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5504,6 +6308,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5522,6 +6329,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5540,6 +6350,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5560,6 +6373,9 @@
          <xsl:when test="count(ram:ID)&lt;=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5573,6 +6389,9 @@
          <xsl:when test="count(ram:GlobalID)&lt;=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:GlobalID)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5586,6 +6405,9 @@
          <xsl:when test="count(ram:Name)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Name)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5600,6 +6422,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:DefinedTradeContact)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5614,6 +6439,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:PostalTradeAddress)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5628,6 +6456,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:URIUniversalCommunication)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5642,6 +6473,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedTaxRegistration)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5663,6 +6497,9 @@
          <xsl:when test="count(ram:URIID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:URIID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5682,6 +6519,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5700,6 +6540,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5721,6 +6564,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CompleteNumber)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5740,6 +6586,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5758,6 +6607,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5778,6 +6630,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5793,6 +6648,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue15)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=15]/enumeration[@value=$codeValue15]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5812,6 +6670,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5832,6 +6693,9 @@
          <xsl:when test="count(ram:CountryID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:CountryID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5846,6 +6710,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CountrySubDivisionName)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5869,6 +6736,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue7)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=7]/enumeration[@value=$codeValue7]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5888,6 +6758,9 @@
       <!--REPORT -->
       <xsl:if test="@listID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5898,6 +6771,9 @@
       <!--REPORT -->
       <xsl:if test="@listVersionID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listVersionID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -5920,6 +6796,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue16)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=16]/enumeration[@value=$codeValue16]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5941,6 +6820,9 @@
          <xsl:when test="count(ram:ID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5962,6 +6844,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5977,6 +6862,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue18)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=18]/enumeration[@value=$codeValue18]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -5998,6 +6886,9 @@
          <xsl:when test="count(ram:URIID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:URIID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6017,6 +6908,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6037,6 +6931,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6052,6 +6949,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue17)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=17]/enumeration[@value=$codeValue17]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6074,6 +6974,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6093,6 +6996,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6111,6 +7017,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6129,6 +7038,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6147,6 +7059,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6165,6 +7080,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6183,6 +7101,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6201,6 +7122,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6219,6 +7143,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6240,6 +7167,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6259,6 +7189,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6277,6 +7210,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6295,6 +7231,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6313,6 +7252,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6331,6 +7273,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6349,6 +7294,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6367,6 +7315,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6385,6 +7336,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6405,6 +7359,9 @@
          <xsl:when test="count(ram:Name)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Name)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6419,6 +7376,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:PostalTradeAddress)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6433,6 +7393,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedTaxRegistration)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6452,6 +7415,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6470,6 +7436,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6488,6 +7457,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6506,6 +7478,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6526,6 +7501,9 @@
          <xsl:when test="count(ram:CountryID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:CountryID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6540,6 +7518,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CountrySubDivisionName)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6563,6 +7544,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue7)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=7]/enumeration[@value=$codeValue7]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6582,6 +7566,9 @@
       <!--REPORT -->
       <xsl:if test="@listID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6592,6 +7579,9 @@
       <!--REPORT -->
       <xsl:if test="@listVersionID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listVersionID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6610,6 +7600,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6630,6 +7623,9 @@
          <xsl:when test="count(ram:ID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6651,6 +7647,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6666,6 +7665,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue19)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=19]/enumeration[@value=$codeValue19]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6685,6 +7687,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6705,6 +7710,9 @@
          <xsl:when test="count(ram:Name)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Name)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6719,6 +7727,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:Description)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6733,6 +7744,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:DefinedTradeContact)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6747,6 +7761,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:PostalTradeAddress)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6761,6 +7778,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:URIUniversalCommunication)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6775,6 +7795,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedTaxRegistration[ram:ID/@schemeID=&#34;VA&#34;])&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6789,6 +7812,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedTaxRegistration[ram:ID/@schemeID=&#34;FC&#34;])&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6810,6 +7836,9 @@
          <xsl:when test="count(ram:URIID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:URIID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6829,6 +7858,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6847,6 +7879,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6868,6 +7903,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CompleteNumber)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6887,6 +7925,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6907,6 +7948,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6922,6 +7966,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue15)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=15]/enumeration[@value=$codeValue15]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6941,6 +7988,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -6961,6 +8011,9 @@
          <xsl:when test="count(ram:CountryID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:CountryID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6975,6 +8028,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CountrySubDivisionName)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -6998,6 +8054,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue7)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=7]/enumeration[@value=$codeValue7]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7017,6 +8076,9 @@
       <!--REPORT -->
       <xsl:if test="@listID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7027,6 +8089,9 @@
       <!--REPORT -->
       <xsl:if test="@listVersionID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listVersionID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7049,6 +8114,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue16)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=16]/enumeration[@value=$codeValue16]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7068,6 +8136,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7088,6 +8159,9 @@
          <xsl:when test="count(ram:ID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7109,6 +8183,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7130,6 +8207,9 @@
          <xsl:when test="count(ram:ID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7151,6 +8231,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7172,6 +8255,9 @@
          <xsl:when test="count(ram:URIID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:URIID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7191,6 +8277,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7211,6 +8300,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7226,6 +8318,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue17)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=17]/enumeration[@value=$codeValue17]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7245,6 +8340,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7266,6 +8364,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:OccurrenceDateTime)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7287,6 +8388,9 @@
          <xsl:when test="@format"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@format">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7302,6 +8406,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue3)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=3]/enumeration[@value=$codeValue3]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7324,6 +8431,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7343,6 +8453,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7361,6 +8474,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7379,6 +8495,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7397,6 +8516,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7415,6 +8537,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7433,6 +8558,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7451,6 +8579,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7469,6 +8600,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7490,6 +8624,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7509,6 +8646,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7527,6 +8667,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7545,6 +8688,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7563,6 +8709,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7581,6 +8730,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7599,6 +8751,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7617,6 +8772,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7635,6 +8793,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7655,6 +8816,9 @@
          <xsl:when test="count(ram:ID)&lt;=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7668,6 +8832,9 @@
          <xsl:when test="count(ram:GlobalID)&lt;=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:GlobalID)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7687,6 +8854,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7705,6 +8875,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7725,6 +8898,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7740,6 +8916,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue15)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=15]/enumeration[@value=$codeValue15]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7759,6 +8938,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7779,6 +8961,9 @@
          <xsl:when test="count(ram:CountryID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:CountryID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7793,6 +8978,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CountrySubDivisionName)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7816,6 +9004,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue7)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=7]/enumeration[@value=$codeValue7]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7835,6 +9026,9 @@
       <!--REPORT -->
       <xsl:if test="@listID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7845,6 +9039,9 @@
       <!--REPORT -->
       <xsl:if test="@listVersionID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listVersionID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7863,6 +9060,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7881,6 +9081,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7899,6 +9102,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -7920,6 +9126,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:PaymentReference)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7934,6 +9143,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:InvoiceCurrencyCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7948,6 +9160,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ApplicableTradeTax)&gt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7962,6 +9177,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedTradePaymentTerms)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7976,6 +9194,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedTradeSettlementHeaderMonetarySummation)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -7990,6 +9211,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ReceivableSpecifiedTradeAccountingAccount)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8012,6 +9236,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CalculatedAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8025,6 +9252,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8038,6 +9268,9 @@
          <xsl:when test="count(ram:BasisAmount)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:BasisAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8052,6 +9285,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CategoryCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8071,6 +9307,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8089,6 +9328,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8111,6 +9353,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue10)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=10]/enumeration[@value=$codeValue10]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8134,6 +9379,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue28)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=28]/enumeration[@value=$codeValue28]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8157,6 +9405,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue26)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=26]/enumeration[@value=$codeValue26]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8168,6 +9419,9 @@
       <!--REPORT -->
       <xsl:if test="@listID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8178,6 +9432,9 @@
       <!--REPORT -->
       <xsl:if test="@listVersionID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listVersionID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8198,6 +9455,9 @@
          <xsl:when test="@format"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@format">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8213,6 +9473,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue27)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=27]/enumeration[@value=$codeValue27]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8236,6 +9499,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue9)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=9]/enumeration[@value=$codeValue9]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8257,6 +9523,9 @@
          <xsl:when test="@format"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@format">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8272,6 +9541,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue3)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=3]/enumeration[@value=$codeValue3]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8293,6 +9565,9 @@
          <xsl:when test="@format"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@format">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8308,6 +9583,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue3)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=3]/enumeration[@value=$codeValue3]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8327,6 +9605,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8349,6 +9630,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue24)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=24]/enumeration[@value=$codeValue24]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8368,6 +9652,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8388,6 +9675,9 @@
          <xsl:when test="@format"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@format">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8403,6 +9693,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue33)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=33]/enumeration[@value=$codeValue33]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8422,6 +9715,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8440,6 +9736,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8458,6 +9757,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8476,6 +9778,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8494,6 +9799,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8512,6 +9820,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8532,6 +9843,9 @@
          <xsl:when test="count(ram:ID)&lt;=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8545,6 +9859,9 @@
          <xsl:when test="count(ram:GlobalID)&lt;=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:GlobalID)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8558,6 +9875,9 @@
          <xsl:when test="count(ram:Name)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Name)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8577,6 +9897,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8595,6 +9918,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8615,6 +9941,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8630,6 +9959,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue15)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=15]/enumeration[@value=$codeValue15]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8649,6 +9981,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8667,6 +10002,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8689,6 +10027,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue16)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=16]/enumeration[@value=$codeValue16]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8708,6 +10049,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8726,6 +10070,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8744,6 +10091,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8762,6 +10112,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8780,6 +10133,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8801,6 +10157,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ChargeIndicator)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8815,6 +10174,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ActualAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8829,6 +10191,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CategoryTradeTax)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8848,6 +10213,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8866,6 +10234,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8886,6 +10257,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8900,6 +10274,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CategoryCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8919,6 +10296,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8937,6 +10317,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8959,6 +10342,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue10)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=10]/enumeration[@value=$codeValue10]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -8978,6 +10364,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -8996,6 +10385,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9014,6 +10406,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9032,6 +10427,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9054,6 +10452,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue9)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=9]/enumeration[@value=$codeValue9]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9077,6 +10478,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue29)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=29]/enumeration[@value=$codeValue29]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9099,6 +10503,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ChargeIndicator)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9113,6 +10520,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ActualAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9127,6 +10537,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CategoryTradeTax)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9146,6 +10559,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9164,6 +10580,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9184,6 +10603,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9198,6 +10620,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CategoryCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9217,6 +10642,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9235,6 +10663,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9257,6 +10688,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue10)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=10]/enumeration[@value=$codeValue10]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9276,6 +10710,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9294,6 +10731,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9312,6 +10752,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9330,6 +10773,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9352,6 +10798,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue9)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=9]/enumeration[@value=$codeValue9]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9371,6 +10820,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9393,6 +10845,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue30)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=30]/enumeration[@value=$codeValue30]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9415,6 +10870,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:Description)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9429,6 +10887,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:DirectDebitMandateID)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9448,6 +10909,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9468,6 +10932,9 @@
          <xsl:when test="@format"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@format">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9483,6 +10950,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue3)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=3]/enumeration[@value=$codeValue3]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9505,6 +10975,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:LineTotalAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9519,6 +10992,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ChargeTotalAmount)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9533,6 +11009,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:AllowanceTotalAmount)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9547,6 +11026,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:TaxBasisTotalAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9561,6 +11043,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:TaxTotalAmount[@currencyID=../../ram:InvoiceCurrencyCode])&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9575,6 +11060,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:TaxTotalAmount[@currencyID=../../ram:TaxCurrencyCode])&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9589,6 +11077,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:RoundingAmount)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9603,6 +11094,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:GrandTotalAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9617,6 +11111,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:TotalPrepaidAmount)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9631,6 +11128,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:DuePayableAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9650,6 +11150,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9668,6 +11171,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9686,6 +11192,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9704,6 +11213,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9722,6 +11234,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9740,6 +11255,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9758,6 +11276,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9776,6 +11297,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9798,6 +11322,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue31)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=31]/enumeration[@value=$codeValue31]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9821,6 +11348,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue32)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=32]/enumeration[@value=$codeValue32]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9840,6 +11370,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9860,6 +11393,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9874,6 +11410,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:Information)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9888,6 +11427,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:PayeePartyCreditorFinancialAccount)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9909,6 +11451,9 @@
          <xsl:when test="count(ram:ID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -9928,6 +11473,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9946,6 +11494,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9964,6 +11515,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -9984,6 +11538,9 @@
          <xsl:when test="count(ram:BICID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:BICID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10003,6 +11560,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10023,6 +11583,9 @@
          <xsl:when test="count(ram:IBANID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:IBANID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10042,6 +11605,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10064,6 +11630,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue25)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=25]/enumeration[@value=$codeValue25]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10087,6 +11656,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue24)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=24]/enumeration[@value=$codeValue24]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10109,6 +11681,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:AssociatedDocumentLineDocument)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10123,6 +11698,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedTradeProduct)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10137,6 +11715,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedLineTradeAgreement)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10151,6 +11732,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedLineTradeDelivery)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10172,6 +11756,9 @@
          <xsl:when test="count(ram:LineID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:LineID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10186,6 +11773,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IncludedNote)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10207,6 +11797,9 @@
          <xsl:when test="count(ram:Content)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Content)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10226,6 +11819,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10244,6 +11840,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10265,6 +11864,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:NetPriceProductTradePrice)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10284,6 +11886,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10302,6 +11907,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10320,6 +11928,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10338,6 +11949,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10356,6 +11970,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10374,6 +11991,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10392,6 +12012,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10410,6 +12033,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10431,6 +12057,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ChargeAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10445,6 +12074,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:AppliedTradeAllowanceCharge[ram:ChargeIndicator/udt:Indicator=&#34;false&#34;])&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10464,6 +12096,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10485,6 +12120,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ChargeIndicator)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10499,6 +12137,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ActualAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10518,6 +12159,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10536,6 +12180,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10554,6 +12201,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10572,6 +12222,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10590,6 +12243,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10608,6 +12264,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10630,6 +12289,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue8)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=8]/enumeration[@value=$codeValue8]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10649,6 +12311,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10670,6 +12335,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ChargeAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10689,6 +12357,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10711,6 +12382,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue8)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=8]/enumeration[@value=$codeValue8]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10730,6 +12404,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10751,6 +12428,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:BilledQuantity)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10774,6 +12454,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue8)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=8]/enumeration[@value=$codeValue8]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10796,6 +12479,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ApplicableTradeTax)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10810,6 +12496,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:SpecifiedTradeSettlementLineMonetarySummation)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10824,6 +12513,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:AdditionalReferencedDocument)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10838,6 +12530,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ReceivableSpecifiedTradeAccountingAccount)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10860,6 +12555,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:IssuerAssignedID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10873,6 +12571,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -10892,6 +12593,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10910,6 +12614,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10928,6 +12635,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10946,6 +12656,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10964,6 +12677,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -10986,6 +12702,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue14)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=14]/enumeration[@value=$codeValue14]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11009,6 +12728,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue13)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=13]/enumeration[@value=$codeValue13]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11028,6 +12750,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11048,6 +12773,9 @@
          <xsl:when test="count(ram:TypeCode)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:TypeCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11062,6 +12790,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:CategoryCode)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11081,6 +12812,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11099,6 +12833,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11121,6 +12858,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue10)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=10]/enumeration[@value=$codeValue10]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11140,6 +12880,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11158,6 +12901,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11176,6 +12922,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11194,6 +12943,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11216,6 +12968,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue9)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=9]/enumeration[@value=$codeValue9]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11237,6 +12992,9 @@
          <xsl:when test="@format"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@format">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11252,6 +13010,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue3)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=3]/enumeration[@value=$codeValue3]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11273,6 +13034,9 @@
          <xsl:when test="@format"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@format">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11288,6 +13052,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue3)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=3]/enumeration[@value=$codeValue3]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11307,6 +13074,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11325,6 +13095,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11346,6 +13119,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ChargeIndicator)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11360,6 +13136,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ActualAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11379,6 +13158,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11397,6 +13179,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11415,6 +13200,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11437,6 +13225,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue11)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=11]/enumeration[@value=$codeValue11]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11459,6 +13250,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ChargeIndicator)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11473,6 +13267,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:ActualAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11492,6 +13289,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11510,6 +13310,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11528,6 +13331,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11546,6 +13352,9 @@
       <!--REPORT -->
       <xsl:if test="true()">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="true()">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11568,6 +13377,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue12)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=12]/enumeration[@value=$codeValue12]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11590,6 +13402,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:LineTotalAmount)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11609,6 +13424,9 @@
       <!--REPORT -->
       <xsl:if test="@currencyID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@currencyID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11629,6 +13447,9 @@
          <xsl:when test="count(ram:Name)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Name)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11643,6 +13464,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="count(ram:Description)&lt;=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11664,6 +13488,9 @@
          <xsl:when test="count(ram:Description)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Description)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11677,6 +13504,9 @@
          <xsl:when test="count(ram:Value)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:Value)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11696,6 +13526,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
@@ -11716,6 +13549,9 @@
          <xsl:when test="@listID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@listID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11731,6 +13567,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue6)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=6]/enumeration[@value=$codeValue6]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11752,6 +13591,9 @@
          <xsl:when test="@schemeID"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11767,6 +13609,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue5)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=5]/enumeration[@value=$codeValue5]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11788,6 +13633,9 @@
          <xsl:when test="count(ram:ID)=1"/>
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="count(ram:ID)=1">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11811,6 +13659,9 @@
          <xsl:otherwise>
             <svrl:failed-assert xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
                                 test="string-length($codeValue7)=0 or document('Factur-X_1.09_EN16931_codedb.xml')/codedb/cl[@id=7]/enumeration[@value=$codeValue7]">
+               <xsl:attribute name="id">
+                  <xsl:value-of select="generate-id(.)"/>
+               </xsl:attribute>
                <xsl:attribute name="location">
                   <xsl:apply-templates select="." mode="schematron-select-full-path"/>
                </xsl:attribute>
@@ -11830,6 +13681,9 @@
       <!--REPORT -->
       <xsl:if test="@schemeID">
          <svrl:successful-report xmlns:svrl="http://purl.oclc.org/dsdl/svrl" test="@schemeID">
+            <xsl:attribute name="id">
+               <xsl:value-of select="generate-id(.)"/>
+            </xsl:attribute>
             <xsl:attribute name="location">
                <xsl:apply-templates select="." mode="schematron-select-full-path"/>
             </xsl:attribute>
