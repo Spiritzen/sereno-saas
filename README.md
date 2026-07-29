@@ -13,7 +13,7 @@
 
 ![Statut](https://img.shields.io/badge/MVP-conforme_validé-10b981?style=flat-square)
 ![Conformité](https://img.shields.io/badge/Factur--X-EN16931_+_France_CTC-7c3aed?style=flat-square)
-![Audit](https://img.shields.io/badge/audit-97.5%2F100_GREEN-10b981?style=flat-square)
+![Avoirs](https://img.shields.io/badge/Avoirs-381_+_BT--25_conformes-10b981?style=flat-square)
 ![Rails](https://img.shields.io/badge/Rails-8_API-CC0000?style=flat-square&logo=rubyonrails)
 ![React](https://img.shields.io/badge/React-18_+_TS-61DAFB?style=flat-square&logo=react)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
@@ -46,9 +46,9 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 
 ## ✅ Statut du projet — Juillet 2026
 
-> Phase actuelle : **couche transmission & cycle de vie complète (V1.1 terminée)** — socle légal gelé, conformité prouvée par validateurs officiels, transmission PA (sandbox), ingestion des statuts, polling automatique, webhook entrant sécurisé et supervision UI livrés. Prochaine étape : correction légale (avoirs, V1.2).
+> Phase actuelle : **correction légale livrée (V1.2 avoirs complets)** — au-dessus de la couche transmission (V1.1), le cycle des **avoirs (notes de crédit)** est désormais opérationnel de bout en bout : émission conforme (Factur-X TypeCode **381** + référence **BT-25** à la facture corrigée), API, journal append-only, transmission via PA, gestion des lignes et frontend dédié. Prochaine étape au choix : preuve de conformité en CI (B4), resserrement du polling, ou gestion des paiements.
 
-Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé conforme**. La note d'audit est de **97,5/100 (GREEN)** : socle légal gelé à 96/100 après quatre passages d'audit successifs et un delta conformité France CTC, puis capitalisation prouvée de la couche transmission (journal d'événements réel, transmission sandbox, pipeline d'ingestion, polling automatique) — audit delta du 22/07/2026. Voir [Conformité prouvée](#-conformité-prouvée).
+Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé conforme**, et son socle légal est **gelé** (\`tag v0.2.0-conformite-fr\`) : la frontière exacte du gel est documentée et versionnée dans [\`backend/SOCLE_GELE.md\`](./backend/SOCLE_GELE.md). Toute la couche transmission (transmission sandbox, ingestion des statuts, polling, webhook signé, rate limiting) et la brique des avoirs ont été construites **par-dessus** ce socle, sans jamais le modifier. Voir [Conformité prouvée](#-conformité-prouvée).
 
 | Couche | Statut | Détail |
 |--------|--------|--------|
@@ -76,11 +76,17 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | Frontend — Supervision transmission | ✅ **Complet** | Dernière/prochaine synchro, erreurs, badge \`requires_review\` persistant (monte et redescend), bouton de relance d'un polling en pause |
 | Frontend — Page Paramètres | ✅ **Complet** | Placeholder honnête (domaines à venir) |
 | CI/CD — GitHub Actions (RSpec, RuboCop, build) | ✅ **Complet** | Pipeline vert sur \`main\` (secrets de chiffrement injectés) |
-| Rate limiting de l'endpoint webhook | ⏳ **avant prod** | \`rack-attack\` à ajouter avant tout déploiement (dette connue) |
-| Validateurs de conformité en CI (veraPDF/Schematron) | ⏳ **B4** | Preuve de conformité automatisée à chaque push |
-| Avoirs (notes de crédit) | ⏳ **V1.2** | Rectification légale d'une facture émise |
+| Rate limiting de l'endpoint webhook | ✅ **Complet** | \`rack-attack\` 60 req/min par IP + par organisation, Solid Cache |
+| **Avoirs — émission conforme (381 + BT-25)** | ✅ **Complet** | Note de crédit Factur-X TypeCode 381, référence BT-25 à la facture, validée XSD |
+| **Avoirs — API + journal** | ✅ **Complet** | CRUD, policy rôle+tenant, journal \`evenement_avoir\` append-only |
+| **Avoirs — transmission PA** | ✅ **Complet** | Couloir d'ingestion rendu agnostique (facture ou avoir), sans duplication |
+| **Avoirs — lignes + PDF filigrané** | ✅ **Complet** | Gestion des lignes, filigrane « AVOIR » sur le PDF (compatible PDF/A-3) |
+| **Avoirs — frontend** | ✅ **Complet** | Création (montant à créditer par ligne), page détail, navigation croisée, DA ambre |
+| **Solde facture après avoirs** | ✅ **Complet** | Synthèse « reste dû » dérivée (TTC légal jamais modifié) |
+| Validateurs de conformité en CI (veraPDF/Schematron/Mustang) | ⏳ **B4** | Preuve de conformité automatisée à chaque push |
 | Relances automatiques | ⏳ **V1.2** | Jobs Solid Queue + e-mails |
 | E-reporting (B2C / international) | ⏳ **V1.2** | Lots de transmission |
+| Tests frontend (Vitest) | ⏳ **V1.2** | Harnais de test des composants (dette connue) |
 | Devis → facture · Portail destinataire | ⏳ **V1.3** | Conversion, suivi côté client |
 | Chorus Pro (B2G) · Abonnements SaaS | ⏳ **V1.4** | Adapter dédié · Plans Gratuit / Pro |
 | Déploiement production (Kamal 2) | ⏳ **V1.5** | VPS OVH/Hetzner + HTTPS + CI/CD |
@@ -137,8 +143,8 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | | Validation | veraPDF · XSD Factur-X 1.09 · Schematron EN 16931 · Mustang |
 | | Transmission | Plateforme Agréée (PA) via adapter |
 | | Secteur public | Chorus Pro (B2G) |
-| **Tests** | Backend | RSpec + FactoryBot + Faker (262 examples) |
-| | Frontend | ESLint + \`tsc\` (build) — _Vitest prévu (V1.2, non encore installé)_ |
+| **Tests** | Backend | RSpec + FactoryBot + Faker (334+ examples) |
+| | Frontend | ESLint + \`tsc\` (build) — _Vitest prévu (dette connue, non encore installé)_ |
 | **DevOps** | Conteneurs | Docker (multi-stage, Debian slim) |
 | | Déploiement | Kamal 2 |
 | | CI/CD | GitHub Actions |
@@ -155,8 +161,9 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 Auth & Tenant   → ORGANISATION · UTILISATEUR · SESSION · ABONNEMENT
 CRM             → CLIENT · CONTACT
 Catalogue       → PRODUIT · TAUX_TVA
-Facturation     → DEVIS · LIGNE_DEVIS · FACTURE · LIGNE_FACTURE · ACOMPTE · AVOIR
-Cycle de vie    → EVENEMENT_FACTURE · NUMEROTATION
+Facturation     → DEVIS · LIGNE_DEVIS · FACTURE · LIGNE_FACTURE · ACOMPTE
+                  AVOIR · LIGNE_AVOIR
+Cycle de vie    → EVENEMENT_FACTURE · EVENEMENT_AVOIR · NUMEROTATION
 Transmission    → PLATEFORME_AGREEE · TRANSMISSION_PA · E_REPORTING
 Paiement        → PAIEMENT · RELANCE
 \`\`\`
@@ -169,9 +176,11 @@ Paiement        → PAIEMENT · RELANCE
 | \`CLIENT\` | Le **destinataire** de la facture | Routage PA, type (entreprise / particulier / public) |
 | \`FACTURE\` | Document de facturation | **Immuable une fois émise** — corrigée uniquement par un AVOIR |
 | \`LIGNE_FACTURE\` | Détail (désignation, qté, PU, TVA) | — |
-| \`AVOIR\` | Note de crédit / rectification | Seul moyen légal de corriger une facture émise |
-| \`NUMEROTATION\` | Registre séquentiel par org / année / type | **Séquence continue, sans trou** |
-| \`EVENEMENT_FACTURE\` | Journal append-only du cycle de vie | Trace d'audit des statuts officiels |
+| \`AVOIR\` | Note de crédit / rectification (TypeCode 381) | Seul moyen légal de corriger une facture émise · référence BT-25 obligatoire · somme des avoirs ≤ TTC facture |
+| \`LIGNE_AVOIR\` | Détail crédité (repris de la facture) | Immuable une fois l'avoir émis |
+| \`NUMEROTATION\` | Registre séquentiel par org / année / type | **Séquence continue, sans trou** (compteurs facture et avoir indépendants) |
+| \`EVENEMENT_FACTURE\` | Journal append-only du cycle de vie facture | Trace d'audit des statuts officiels |
+| \`EVENEMENT_AVOIR\` | Journal append-only du cycle de vie avoir | Table miroir, mêmes garanties d'inaltérabilité |
 | \`PLATEFORME_AGREEE\` | Config de la PA connectée | — |
 | \`TRANSMISSION_PA\` | Envoi via la PA + accusés | Statuts officiels de la réforme |
 
@@ -215,6 +224,7 @@ BROUILLON → ÉMISE → DÉPOSÉE (PA) → REÇUE → MISE À DISPOSITION
 - La **transmission via PA (sandbox)** dépose la facture, reçoit un accusé et fait passer la facture à \`DÉPOSÉE\` ; les statuts remontés (reçue, mise à disposition, approuvée…) alimentent le journal.
 - Les statuts entrants passent par **un couloir d'ingestion unique**, quelle que soit la porte : bouton manuel, **polling automatique** (backoff), ou **webhook temps réel signé**. Trois portes, une seule règle métier.
 - Une **garde temporelle** rejette tout statut plus ancien que le dernier appliqué ; les contradictions sont classées \`requires_review\` et signalées par un **badge persistant** dans l'UI.
+- La **correction d'une facture émise** passe par un **avoir** (note de crédit conforme, TypeCode 381) : il reprend tout ou partie des lignes de la facture, référence celle-ci (BT-25), suit son propre cycle de vie (journal \`evenement_avoir\`), se transmet via la même PA, et fait apparaître un **« reste dû »** sur la facture — sans jamais modifier son montant légal, qui reste immuable.
 
 > Principe conservé : **Sereno conserve tout ce que la PA affirme, n'applique que ce que sa machine métier peut accepter sans mentir, et jamais un fait plus ancien que ce qu'il sait déjà.**
 
@@ -227,8 +237,8 @@ BROUILLON → ÉMISE → DÉPOSÉE (PA) → REÇUE → MISE À DISPOSITION
 - **\`Current.organisation\`** — \`id_organisation\` extrait du JWT, injecté dans chaque requête ; **tous les scopes filtrent par organisation** (isolation explicite, pas de \`default_scope\` global — choix assumé pour une isolation testable et lisible)
 - **Pundit** — autorisation fine par rôle
 - **RGPD** — aucune fuite de données entre organisations possible ; l'isolation est **testée** (accès cross-tenant → 404, aucune donnée exposée)
-- **Immutabilité légale** — une facture émise ne peut **jamais** être modifiée ni supprimée ; toute correction passe par un \`AVOIR\` (garde au niveau modèle via \`statut_in_database\`)
-- **Journal append-only** — les événements de facture ne sont ni modifiables ni supprimables ; l'API ne les expose qu'en lecture (acteur limité à \`id\` + \`display_name\`, jamais l'email ni les URLs de fichiers)
+- **Immutabilité légale** — une facture émise ne peut **jamais** être modifiée ni supprimée ; toute correction passe par un \`AVOIR\` (note de crédit conforme, garde au niveau modèle via \`statut_in_database\`). Un avoir émis est lui aussi immuable.
+- **Journal append-only** — les événements de facture **et d'avoir** ne sont ni modifiables ni supprimables ; l'API ne les expose qu'en lecture (acteur limité à \`id\` + \`display_name\`, jamais l'email ni les URLs de fichiers)
 - **Numérotation sans trou** — advisory lock PostgreSQL + verrou de ligne sur un compteur dédié, dans la transaction d'émission (jamais de \`count + 1\`)
 - **Secrets PA chiffrés au repos** — \`credentials_chiffres\` et le secret de signature webhook sont chiffrés via \`ActiveRecord::Encryption\` (clés en variables d'environnement, jamais versionnées) ; le chiffré au repos est **prouvé par un test lisant la colonne en SQL brut**
 - **Webhook entrant sécurisé** — endpoint public sans JWT, mais protégé par **signature HMAC-SHA256 sur le corps brut** (comparaison à temps constant), **anti-rejeu temporel** (fenêtre) en plus de la déduplication, et **rattachement scopé organisation** prouvé étanche entre tenants
@@ -250,78 +260,128 @@ BROUILLON → ÉMISE → DÉPOSÉE (PA) → REÇUE → MISE À DISPOSITION
 ## 🏗 Architecture Backend (Rails 8 — API)
 
 \`\`\`
-app/
-├── controllers/
-│   └── api/v1/    Auth · Clients · Contacts · Produits · Devis
-│                  Factures · Avoirs · Transmissions · Paiements
-│                  Dashboard · Webhooks (PA)
-├── models/        22 modèles ActiveRecord + concerns
-├── services/      FactureConformiteService · FactureEmissionService
-│                  FacturXXmlService · FacturePdfService · FacturXPackageService
-│                  NumerotationService · FactureTotalsService
-│                  TransmissionPaOrchestrationService · PaStatusIngestionService
-│                  PaStatusMapper · PaInboundNotificationResolver
-│                  PaWebhookSignatureVerifier · PaRequiresReviewCounter
-│                  PaPollingRelanceService
-├── serializers/   Blueprinter — sérialisation JSON
-├── policies/      Pundit — une policy par ressource
-├── jobs/          PaPollingScannerJob · PaPollTransmissionJob (polling + backoff)
-├── adapters/
-│   └── pa/        BaseAdapter · <Provider>Adapter · ChorusProAdapter
-├── vendor/
-│   └── facturx/   XSD 1.09 · Schematron EN16931 · profil ICC sRGB (vendorés)
-└── current.rb     ActiveSupport::CurrentAttributes (organisation, utilisateur)
-config/
-├── initializers/  cors · jwt · pundit
-└── routes.rb      namespace api/v1 + namespace webhooks (endpoint public signé)
+backend/
+├── SOCLE_GELE.md              ⭐ Frontière du socle légal gelé (versionnée)
+│
+├── app/
+│   ├── controllers/api/v1/    Auth · Clients · Contacts · Produits · Devis
+│   │   │                      Factures · Avoirs · LignesAvoir
+│   │   │                      Transmissions · AvoirTransmissionsPa
+│   │   │                      EvenementsFacture · EvenementsAvoir · Dashboard
+│   │   └── webhooks/          PaController (endpoint public signé)
+│   │
+│   ├── models/                Modèles ActiveRecord (Facture, Avoir,
+│   │                          LigneAvoir, EvenementFacture, EvenementAvoir…)
+│   │
+│   ├── services/
+│   │   ├── [SOCLE GELÉ]       FacturXXmlService · FacturXPackageService
+│   │   │                      FactureConformiteService · FactureEmissionService
+│   │   │                      FactureTotalsService
+│   │   ├── [avoirs, voie b]   AvoirXmlService · AvoirPdfService
+│   │   │                      AvoirTotalsService · AvoirConformiteService
+│   │   │                      AvoirEmissionService · AvoirXmlStorageService
+│   │   ├── [numérotation]     NumerotationService (générique facture/avoir)
+│   │   ├── [stockage]         FacturXStorageService · FacturePdfService
+│   │   └── [transmission]     TransmissionPaOrchestrationService (agnostique)
+│   │                          PaStatusIngestionService · PaStatusMapper
+│   │                          PaInboundNotificationResolver
+│   │                          PaWebhookSignatureVerifier
+│   │                          PaRequiresReviewCounter · PaPollingRelanceService
+│   │                          FactureStatusTransitionPolicy
+│   │
+│   ├── serializers/           Blueprinter (Facture, Avoir, LigneAvoir,
+│   │                          EvenementAvoir…) — acteur sans email
+│   ├── policies/              Pundit — une policy par ressource (rôle + tenant)
+│   ├── jobs/                  PaPollingScannerJob · PaPollTransmissionJob
+│   ├── adapters/pa/           BaseAdapter · <Provider>Adapter · ChorusProAdapter
+│   └── current.rb             ActiveSupport::CurrentAttributes (organisation…)
+│
+├── config/
+│   ├── initializers/          cors · jwt · pundit · rack_attack (rate limiting)
+│   ├── facturx/               [SOCLE GELÉ] profil ICC sRGB
+│   └── routes.rb              namespace api/v1 + namespace webhooks
+│
+├── vendor/facturx/            [SOCLE GELÉ] XSD 1.09 · Schematron EN16931
+└── storage/<env>/             Archives PDF/A-3 + XML, cloisonnées par environnement
+    ├── factures/<id>/         (storage/development/, storage/test/…)
+    └── avoirs/<id>/
 \`\`\`
+
+> **Convention de nommage** : modèles en français · certaines tables au singulier
+> avec \`self.table_name\` (\`transmission_pa\`, \`evenement_facture\`,
+> \`evenement_avoir\`) · \`app/policies/\` réservé à Pundit (les machines d'état
+> métier vivent dans \`app/services/\`).
 
 ---
 
 ## 🎨 Frontend — Architecture
 
 \`\`\`
-src/
-├── api/           axios.ts · endpoints.ts · queryClient.ts
-│                  evenementsFactureApi.ts
-├── types/         auth · client · facture · devis · transmission · dashboard
-├── hooks/         useFactures · useClients · useDevis · useDashboard
-│                  useTransmissions · useConformite
-├── context/       AuthContext
-├── lib/           schemas.ts (Zod) · formatters.ts (€, dates, SIRET)
+frontend/src/
+├── api/                axios.ts · endpoints.ts · queryClient.ts
+│                       facturesApi · lignesFactureApi · evenementsFactureApi
+│                       transmissionPaApi
+│                       avoirsApi · lignesAvoirApi · evenementsAvoirApi
+│                       avoirTransmissionPaApi
+│
+├── types/              auth · client · facture · devis · transmission · dashboard
+│                       avoir · ligneAvoir · evenementAvoir
+│
+├── hooks/              useFactures · useClients · useDevis · useDashboard
+│                       useTransmissions · useConformite
+│
+├── context/            AuthContext
+├── lib/                schemas.ts (Zod) · formatters.ts (€, dates, SIRET)
+│
 ├── components/
-│   ├── landing/   Navbar · Hero · ProblemeSection · ConformiteSection · CtaFinal
-│   ├── facture/   FactureForm · LigneFactureRow · ConformitePanel · TotauxBlock
-│   │              InvoiceDetailHeader · InvoiceLifecycleTimeline · InvoiceEventHistory
-│   ├── modals/    ModalShell · ConfirmModal · LoginModal · RegisterModal · ClientModal
-│   └── layout/    Sidebar · TopBar · AppShell
+│   ├── landing/        Navbar · Hero · ProblemeSection · ConformiteSection · CtaFinal
+│   ├── facture/        FactureForm · LigneFactureRow · ConformitePanel · TotauxBlock
+│   │                   InvoiceDetailHeader · InvoiceLifecycleTimeline
+│   │                   InvoiceEventHistory · InvoiceTransmissionSection
+│   ├── avoir/          CreditNoteLifecycleTimeline · CreditNoteEventHistory
+│   ├── modals/         ModalShell · ConfirmModal · LoginModal · RegisterModal
+│   └── layout/         Sidebar · TopBar · AppShell
+│
 ├── pages/
-│   ├── HomePage.tsx           (route "/")
-│   ├── DashboardPage.tsx      (route "/app")
-│   ├── ClientsPage.tsx        (route "/app/clients")
-│   ├── FacturesPage.tsx       (route "/app/factures")
-│   ├── NewInvoicePage.tsx     (route "/app/factures/new")
-│   ├── FactureDetailPage.tsx  (route "/app/factures/:id")
-│   ├── DevisPage.tsx          (route "/app/devis")
-│   └── ParametresPage.tsx     (route "/app/parametres")
-└── index.css
+│   ├── HomePage                "/"
+│   ├── DashboardPage           "/app"
+│   ├── ClientsPage             "/app/clients"
+│   ├── FacturesPage            "/app/factures"
+│   ├── NewInvoicePage          "/app/factures/new"
+│   ├── FactureDetailPage       "/app/factures/:id"   (+ bloc « Avoirs » + reste dû)
+│   ├── NewCreditNotePage       création d'un avoir depuis une facture émise
+│   ├── AvoirDetailPage         "/app/avoirs/:id"
+│   ├── DevisPage               "/app/devis"
+│   └── ParametresPage          "/app/parametres"
+│
+└── styles/             tokens.css (design tokens) · global.css
 \`\`\`
+
+> Les composants de la page détail facture (header, timeline, historique,
+> transmission) sont **réutilisés ou généralisés** pour la page détail avoir —
+> pas de duplication de logique, seulement un élargissement de type.
 
 ### DA (Direction Artistique)
 
-| Token | Valeur |
-|-------|--------|
-| Fond principal | \`#09090f\` |
-| Fond card | \`rgba(255,255,255,0.02)\` |
-| Border | \`rgba(255,255,255,0.06)\` |
-| Violet (marque) | \`#7c3aed\` |
-| Vert (conformité) | \`#10b981\` |
-| Orange (attente) | \`#f59e0b\` |
-| Rouge (retard) | \`#ef4444\` |
-| Bleu (info) | \`#3b82f6\` |
-| Texte primaire | \`#f1f5f9\` |
-| Texte secondaire | \`#94a3b8\` |
-| Texte muted | \`#475569\` |
+| Token | Valeur | Usage |
+|-------|--------|-------|
+| Fond principal | \`#09090f\` | Fond de l'application |
+| Fond card | \`rgba(255,255,255,0.02)\` | Cartes, panneaux |
+| Border | \`rgba(255,255,255,0.06)\` | Séparateurs |
+| Violet (marque) | \`#7c3aed\` | Identité Sereno, accents |
+| **Ambre (avoir)** | \`--color-avoir\` | **Type de document « avoir » (badge, accents)** |
+| Vert (conformité) | \`#10b981\` | Statut conforme / succès |
+| Orange (attente) | \`#f59e0b\` | Statut en attente |
+| Rouge (retard) | \`#ef4444\` | Statut en retard / erreur |
+| Bleu (info) | \`#3b82f6\` | Information |
+| Texte primaire | \`#f1f5f9\` | Titres, valeurs |
+| Texte secondaire | \`#94a3b8\` | Labels |
+| Texte muted | \`#475569\` | Mentions discrètes |
+
+> **Distinction facture / avoir** : le violet est l'identité de Sereno, l'**ambre**
+> signale un document de type *avoir*. Un avoir se distingue d'une facture par trois
+> signaux dosés : couleur ambre, badge « AVOIR », et filigrane sur le PDF — sans
+> jamais détourner les couleurs de statut.
 
 ---
 
@@ -365,16 +425,27 @@ Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »
 - [x] Polling automatique (backoff + jitter, pause/stop, base source de vérité)
 - [x] Webhook PA entrant sécurisé (signature HMAC, anti-rejeu, rattachement scopé)
 - [x] Supervision UI (badge \`requires_review\` persistant, relance d'un polling en pause)
-- [ ] Rate limiting de l'endpoint webhook (\`rack-attack\`) — **à ajouter avant tout déploiement prod**
+- [x] Rate limiting de l'endpoint webhook (\`rack-attack\`, 60 req/min par IP + organisation)
+
+### ✅ V1.2 — Correction légale : les avoirs *(terminée)*
+- [x] Émission d'un avoir conforme — Factur-X **TypeCode 381** + référence **BT-25** à la facture corrigée, validé XSD
+- [x] Conformité avoir (référence facture obligatoire, cohérence des montants cumulés)
+- [x] API avoir + journal \`evenement_avoir\` append-only (isolation multi-tenant testée)
+- [x] Transmission de l'avoir via PA (couloir d'ingestion rendu agnostique, sans duplication)
+- [x] Gestion des lignes d'avoir + filigrane « AVOIR » sur le PDF (compatible PDF/A-3)
+- [x] Frontend avoir (création par montant à créditer/ligne, page détail, navigation croisée, DA ambre)
+- [x] Solde facture reflétant les avoirs émis (« reste dû » dérivé, TTC légal jamais modifié)
+- [x] Stockage des archives cloisonné par environnement (fiabilité de l'archivage)
 
 ### ⏳ B4 — Preuve de conformité automatisée en CI
 - [ ] Validateurs officiels (veraPDF + Schematron + Mustang) **bloquants à chaque push**
 
-### ⏳ V1.2 — Correction légale & automatisation
-- [ ] Avoirs (notes de crédit / rectification, type 381)
+### ⏳ V1.2+ — Automatisation
 - [ ] Relances automatiques (jobs + e-mails)
 - [ ] E-reporting B2C / international
 - [ ] Exports comptables (FEC)
+- [ ] Tests frontend (Vitest + Testing Library)
+- [ ] Gestion des paiements (« payé / reste à payer », distinct du dû après avoirs)
 
 ### ⏳ V1.3 — Cycle commercial complet
 - [ ] Devis → conversion en facture
@@ -430,18 +501,18 @@ Org      : Studio Démo
 
 | Contrôle | Statut |
 |----------|--------|
-| Tests backend (RSpec) | ✅ verts — 262 examples, 0 failure |
+| Tests backend (RSpec) | ✅ verts — 334+ examples, 0 failure |
 | Lint backend (RuboCop) | ✅ no offenses |
 | Audit dépendances (bundler-audit) | ✅ clean |
 | Analyse statique sécurité (Brakeman) | ✅ 0 erreur |
 | Lint + build frontend | ✅ verts |
 | PDF/A-3b (veraPDF) | ✅ VALID (146/146) |
-| XML CII (XSD 1.09) | ✅ VALID |
+| XML CII (XSD 1.09) | ✅ VALID — factures **et** avoirs (380 / 381) |
 | Schematron EN 16931 | ✅ 0 failed-assert |
 | France CTC / Flux 2 (Mustang) | ✅ 0 BR-FR restante |
-| Isolation multi-tenant (API journal + webhook) | ✅ testée (cross-tenant → 404 / rejet signé) |
+| Isolation multi-tenant (API journal + webhook + avoirs) | ✅ testée (cross-tenant → 404 / rejet signé) |
 | Chiffrement des secrets au repos | ✅ prouvé (lecture SQL brute ≠ clair) |
-| **Audit** | ✅ **97,5/100 — GREEN** |
+| Socle légal gelé | ✅ frontière versionnée (\`SOCLE_GELE.md\`), contrôle de non-régression à chaque sprint |
 
 ---
 
