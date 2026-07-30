@@ -106,17 +106,18 @@ jobs:
           bundle exec rails db:test:prepare
           bundle exec rspec
 
-  # B4 etage 1, partie B : preuve de conformite REJOUEE a chaque push/PR --
-  # XSD + Schematron EN 16931 (Mustang / KoSIT Validator) sur une facture
-  # (380) ET un avoir (381) dessus, en TVA STANDARD et en FRANCHISE en base
-  # de TVA (art. 293 B du CGI), avec un auto-test negatif permanent (un
-  # artefact volontairement corrompu doit rester rejete).
+  # B4 etage 1 (partie B) + etage 2 : preuve de conformite REJOUEE a chaque
+  # push/PR -- XSD + Schematron EN 16931 (Mustang / KoSIT Validator) ET
+  # PDF/A-3b (veraPDF) sur une facture (380) ET un avoir (381) dessus, en TVA
+  # STANDARD et en FRANCHISE en base de TVA (art. 293 B du CGI), avec deux
+  # auto-tests negatifs permanents (un XML et un PDF volontairement non
+  # conformes doivent rester rejetes).
   #
-  # Ce job couvre 2 DES 4 niveaux de conformite Factur-X vises par B4 :
-  # structure (XSD) + regles metier (Schematron EN 16931). Il NE couvre PAS
-  # encore veraPDF (PDF/A-3b -- etage 2, a venir) ni les regles France CTC /
-  # BR-FR (aucun scenario Mustang officiel n'existe a ce jour pour ce
-  # profil). Ne pas presenter ce job comme une preuve de conformite complete.
+  # Ce job couvre 3 DES 4 niveaux de conformite Factur-X vises par B4 :
+  # structure (XSD) + regles metier (Schematron EN 16931) + PDF/A-3b
+  # (veraPDF). Il NE couvre PAS les regles France CTC / BR-FR (aucun
+  # scenario Mustang officiel n'existe a ce jour pour ce profil). Ne pas
+  # presenter ce job comme une preuve de conformite complete.
   #
   # Le job consomme le scenario Mustang + le XSLT Schematron DEJA compile et
   # committes dans backend/vendor/facturx_validation_tooling/ -- il ne
@@ -139,10 +140,11 @@ jobs:
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
 
     env:
-      # Version EPINGLEE de Mustang (KoSIT Validator) -- release officielle
-      # itplr-kosit/validator. Ne pas suivre "latest" : une preuve de
-      # conformite doit rester reproductible d'un run a l'autre.
+      # Versions EPINGLEES -- releases officielles (itplr-kosit/validator,
+      # org.verapdf sur Maven Central). Ne jamais suivre "latest" : une
+      # preuve de conformite doit rester reproductible d'un run a l'autre.
       MUSTANG_VERSION: "1.6.2"
+      VERAPDF_VERSION: "1.30.2"
 
     steps:
       - name: Checkout code
@@ -177,6 +179,24 @@ jobs:
           curl -sSfL -o tmp/conformite_tools/mustang-validator.jar \
             "https://github.com/itplr-kosit/validator/releases/download/v${MUSTANG_VERSION}/validator-${MUSTANG_VERSION}-standalone.jar"
 
+      - name: Cache veraPDF CLI
+        id: cache-verapdf
+        uses: actions/cache@v4
+        with:
+          path: backend/tmp/conformite_tools/verapdf-cli.jar
+          key: verapdf-cli-${{ env.VERAPDF_VERSION }}
+
+      # Jamais l'installeur GUI officiel (IzPack) : resiste a l'automatisation
+      # headless (constate a l'etage 2). org.verapdf.apps:cli sur Maven
+      # Central publie un jar-with-dependencies autonome (Main-Class dans le
+      # manifeste), utilisable directement en `java -jar`.
+      - name: Download veraPDF CLI (Maven Central, jar autonome, version epinglee)
+        if: steps.cache-verapdf.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p tmp/conformite_tools
+          curl -sSfL -o tmp/conformite_tools/verapdf-cli.jar \
+            "https://repo1.maven.org/maven2/org/verapdf/apps/cli/${VERAPDF_VERSION}/cli-${VERAPDF_VERSION}.jar"
+
       - name: Prepare test database
         env:
           RAILS_ENV: test
@@ -187,7 +207,7 @@ jobs:
           SERENO_AR_ENCRYPTION_KEY_DERIVATION_SALT: ${{ secrets.SERENO_AR_ENCRYPTION_KEY_DERIVATION_SALT }}
         run: bundle exec rails db:test:prepare
 
-      - name: Gate de conformite EN 16931 (XSD + Schematron)
+      - name: Gate de conformite EN 16931 + PDF/A-3b (XSD + Schematron + veraPDF)
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
@@ -196,4 +216,5 @@ jobs:
           SERENO_AR_ENCRYPTION_DETERMINISTIC_KEY: ${{ secrets.SERENO_AR_ENCRYPTION_DETERMINISTIC_KEY }}
           SERENO_AR_ENCRYPTION_KEY_DERIVATION_SALT: ${{ secrets.SERENO_AR_ENCRYPTION_KEY_DERIVATION_SALT }}
           MUSTANG_JAR_PATH: tmp/conformite_tools/mustang-validator.jar
+          VERAPDF_JAR_PATH: tmp/conformite_tools/verapdf-cli.jar
         run: bundle exec rails conformite:valider
