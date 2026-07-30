@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Gate de conformite EN 16931 (B4 etage 1, partie B) — XSD + Schematron via
-# Mustang (KoSIT Validator). Consomme les artefacts DEJA compiles/committes
-# dans backend/vendor/facturx_validation_tooling/ (scenario, XSLT Schematron
+# Gate de conformite EN 16931 + PDF/A-3b (B4 etage 1 partie B + etage 2) —
+# XSD + Schematron via Mustang (KoSIT Validator), et PDF/A-3b via veraPDF.
+# Consomme les artefacts DEJA compiles/committes dans
+# backend/vendor/facturx_validation_tooling/ (scenario, XSLT Schematron
 # compile+patche, codelist) : ce gate ne recompile RIEN (voir la tache
 # conformite:compiler_schematron, outil DEV separe, jamais invoquee ici ni
 # par la CI).
@@ -15,30 +16,40 @@
 #                      Defaut : backend/tmp/conformite_tools/mustang-validator.jar
 #                      (c'est la que le job CI le telecharge). En local,
 #                      pointer vers votre propre copie du JAR.
+#   VERAPDF_JAR_PATH  chemin vers le JAR autonome veraPDF CLI
+#                      (org.verapdf.apps:cli, classifie "jar-with-dependencies"
+#                      publie sans classifier distinct sur Maven Central).
+#                      Defaut : backend/tmp/conformite_tools/verapdf-cli.jar
 #   JAVA_CMD          commande java a invoquer. Defaut : "java".
 #
 # Ce que ce gate prouve, a chaque appel :
 #   - une facture (380) ET un avoir (381) dessus, EN TVA STANDARD, valident
 #     XSD + Schematron EN 16931 -> ACCEPTABLE, 0 failed-assert ;
 #   - la MEME chose en FRANCHISE EN BASE DE TVA (art. 293 B du CGI) ;
-#   - un artefact volontairement CORROMPU (devise invalide) est bien REJETE
-#     -> preuve que le validateur sait encore dire "non" (sinon ce gate ne
-#     prouverait plus rien).
+#   - les 4 PDF correspondants sont conformes PDF/A-3b (veraPDF, profil "3b") ;
+#   - un artefact XML volontairement CORROMPU (devise invalide) est REJETE
+#     par Mustang, ET un PDF volontairement NON-PDF/A est REJETE par veraPDF
+#     -> preuve que les DEUX validateurs savent encore dire "non" (sinon ce
+#     gate ne prouverait plus rien).
 #
 # Ce gate echoue (exit non-zero) si :
-#   - un outil est introuvable (JRE, JAR Mustang, scenario, XSLT, codelist)
-#     -> ERREUR D'INFRASTRUCTURE, jamais avalee en succes silencieux ;
-#   - un des 4 artefacts valides n'est pas ACCEPTABLE ou a >= 1 failed-assert ;
-#   - l'auto-test negatif N'EST PAS rejete.
+#   - un outil est introuvable (JRE, JAR Mustang, JAR veraPDF, scenario,
+#     XSLT, codelist) -> ERREUR D'INFRASTRUCTURE, jamais avalee en succes
+#     silencieux ;
+#   - un des 4 artefacts XML valides n'est pas ACCEPTABLE ou a >= 1
+#     failed-assert ;
+#   - un des 4 PDF valides n'est pas conforme PDF/A-3b ;
+#   - l'un des deux auto-tests negatifs (XML ou PDF) N'EST PAS rejete.
 #
-# Hors perimetre (etage 2 / hors scenario existant) : veraPDF (PDF/A-3b),
-# France CTC / BR-FR (aucun scenario Mustang France n'existe a ce jour).
+# Hors perimetre : France CTC / BR-FR (aucun scenario Mustang France
+# n'existe a ce jour -- dette tracee, pas de solution de contournement).
 
 require "fileutils"
 require "open3"
 require "timeout"
 require "tmpdir"
 require "nokogiri"
+require "hexapdf"
 
 module ConformiteGate
   # Erreur d'infrastructure : outil absent, JVM inutilisable, timeout, sortie
@@ -57,14 +68,18 @@ module ConformiteGate
   #     segment relatif dans -r fait echouer la resolution d'URI interne de
   #     Mustang ("is not within the configured repository").
   class Outillage
-    DUREE_MAX_PROCESSUS = 120 # secondes, par invocation Mustang
+    DUREE_MAX_PROCESSUS = 120 # secondes, par invocation (Mustang ou veraPDF)
+    PROFIL_PDFA = "3b"
 
-    attr_reader :java_cmd, :mustang_jar, :scenario, :repository
+    attr_reader :java_cmd, :mustang_jar, :verapdf_jar, :scenario, :repository
 
     def initialize
       @java_cmd = ENV.fetch("JAVA_CMD", "java")
       @mustang_jar = Pathname.new(
         ENV.fetch("MUSTANG_JAR_PATH", Rails.root.join("tmp", "conformite_tools", "mustang-validator.jar").to_s)
+      )
+      @verapdf_jar = Pathname.new(
+        ENV.fetch("VERAPDF_JAR_PATH", Rails.root.join("tmp", "conformite_tools", "verapdf-cli.jar").to_s)
       )
       @scenario = Rails.root.join("vendor", "facturx_validation_tooling", "scenarios.xml")
       @repository = Rails.root
@@ -74,6 +89,10 @@ module ConformiteGate
     def verifier!
       unless mustang_jar.exist?
         raise InfraError, "JAR Mustang introuvable : #{mustang_jar} (definir MUSTANG_JAR_PATH ?)"
+      end
+
+      unless verapdf_jar.exist?
+        raise InfraError, "JAR veraPDF introuvable : #{verapdf_jar} (definir VERAPDF_JAR_PATH ?)"
       end
 
       raise InfraError, "Scenario Mustang introuvable : #{scenario}" unless scenario.exist?
@@ -103,6 +122,25 @@ module ConformiteGate
       end
     rescue Timeout::Error
       raise InfraError, "Mustang n'a pas repondu en #{DUREE_MAX_PROCESSUS}s (fichiers : #{fichiers.join(', ')})"
+    end
+
+    # Retourne [stdout (rapport XML veraPDF), stderr, status]. Un seul appel
+    # peut valider plusieurs PDF -- le rapport contient un <job> par fichier,
+    # identifie par son chemin complet (cf RapportVeraPdf). Contrairement a
+    # Mustang, veraPDF n'a pas presente le bug isPiped au spike/etage 2 : le
+    # dummy stdin est neanmoins reutilise par coherence et innocuite.
+    def executer_verapdf(fichiers:)
+      commande = [
+        java_cmd, "-jar", verapdf_jar.to_s,
+        "-f", PROFIL_PDFA,
+        *fichiers.map(&:to_s)
+      ]
+
+      Timeout.timeout(DUREE_MAX_PROCESSUS) do
+        Open3.capture3(*commande, in: @dummy_stdin.to_s)
+      end
+    rescue Timeout::Error
+      raise InfraError, "veraPDF n'a pas repondu en #{DUREE_MAX_PROCESSUS}s (fichiers : #{fichiers.join(', ')})"
     end
   end
 
@@ -138,6 +176,48 @@ module ConformiteGate
     end
   end
 
+  # Lecture d'un rapport veraPDF (XML sur stdout) pour retrouver le resultat
+  # d'UN artefact PDF parmi ceux valides en un seul appel. Lecture seule.
+  class RapportVeraPdf
+    def initialize(sortie_xml)
+      @doc = Nokogiri::XML(sortie_xml)
+    end
+
+    # Retrouve le <job> dont <name> se termine par le nom du fichier -- le
+    # rapport veraPDF imprime le chemin complet tel que passe en argument
+    # (avec les separateurs de l'OS), comparer sur le basename evite toute
+    # ambiguite de format de chemin.
+    def pour(fichier)
+      nom = fichier.basename.to_s
+      job = @doc.xpath("//job").find { |j| j.at_xpath(".//name")&.text.to_s.end_with?(nom) }
+      return nil if job.nil?
+
+      Resultat.new(job.at_xpath(".//validationReport"))
+    end
+
+    class Resultat
+      def initialize(noeud_validation_report)
+        @noeud = noeud_validation_report
+      end
+
+      def conforme?
+        @noeud && @noeud["isCompliant"] == "true"
+      end
+
+      def regles_echouees
+        return [] if @noeud.nil?
+
+        @noeud.xpath(".//rule[@status='failed']").map do |regle|
+          {
+            specification: regle["specification"],
+            clause: regle["clause"],
+            message: regle.at_xpath(".//check/errorMessage")&.text
+          }
+        end
+      end
+    end
+  end
+
   # Orchestre : emission des 4 artefacts (standard/franchise x 380/381),
   # validation Mustang, auto-test negatif, gate. Toute donnee est produite
   # dans une transaction PostgreSQL explicitement annulee (jamais persistee).
@@ -149,9 +229,9 @@ module ConformiteGate
     end
 
     def call
-      puts "== Gate de conformite EN 16931 (XSD + Schematron, via Mustang) =="
+      puts "== Gate de conformite EN 16931 + PDF/A-3b (XSD+Schematron via Mustang, PDF/A-3b via veraPDF) =="
       @outillage.verifier!
-      puts "Outillage OK : java=#{@outillage.java_cmd} ; mustang_jar=#{@outillage.mustang_jar}"
+      puts "Outillage OK : java=#{@outillage.java_cmd} ; mustang_jar=#{@outillage.mustang_jar} ; verapdf_jar=#{@outillage.verapdf_jar}"
 
       FileUtils.rm_rf(@scratch)
       FileUtils.mkdir_p(@scratch)
@@ -162,9 +242,13 @@ module ConformiteGate
       comparer_regles_standard_vs_franchise(artefacts)
       valider_auto_test_negatif(artefacts.fetch(:standard).fetch(:facture))
 
+      valider_pdfs_conformes(artefacts)
+      valider_auto_test_negatif_pdf
+
       if @problemes.empty?
         puts
-        puts "== GATE VERT : 4 artefacts ACCEPTABLE + 0 failed-assert ; auto-test negatif bien REJECT =="
+        puts "== GATE VERT : 4 XML ACCEPTABLE + 0 failed-assert ; 4 PDF conformes PDF/A-3b ; " \
+             "les deux auto-tests negatifs (XML et PDF) bien REJECT =="
         0
       else
         puts
@@ -217,8 +301,12 @@ module ConformiteGate
         # la collision structurellement impossible.
         chemin_facture = dossier.join("#{regime}-380-facture.xml")
         chemin_avoir = dossier.join("#{regime}-381-avoir.xml")
+        chemin_facture_pdf = dossier.join("#{regime}-380-facture.pdf")
+        chemin_avoir_pdf = dossier.join("#{regime}-381-avoir.pdf")
         FileUtils.cp(Rails.root.join(facture_emise.xml_url), chemin_facture)
         FileUtils.cp(Rails.root.join(avoir_emis.xml_url), chemin_avoir)
+        FileUtils.cp(Rails.root.join(facture_emise.pdf_url), chemin_facture_pdf)
+        FileUtils.cp(Rails.root.join(avoir_emis.pdf_url), chemin_avoir_pdf)
 
         # Nettoyage du stockage cree par l'emission reelle (storage/<env>/...,
         # jamais storage/development/ en pratique puisque ce gate tourne en
@@ -230,6 +318,8 @@ module ConformiteGate
         resultat = {
           facture: chemin_facture,
           avoir: chemin_avoir,
+          facture_pdf: chemin_facture_pdf,
+          avoir_pdf: chemin_avoir_pdf,
           facture_numero: facture_emise.numero,
           avoir_numero: avoir_emis.numero
         }
@@ -301,6 +391,54 @@ module ConformiteGate
         puts "  OK  auto-test negatif : document corrompu bien REJECT (#{rapport.asserts_echouees.size} failed-assert : #{ids})"
       end
     end
+
+    # B4 etage 2 : PDF/A-3b des 4 memes artefacts, via veraPDF. Le 380 est
+    # attendu conforme (deja verifie manuellement au gel du socle) ; le 381
+    # (avoir, avec filigrane) ne l'avait JAMAIS ete -- c'est le point que cet
+    # etage tranche.
+    def valider_pdfs_conformes(artefacts)
+      fichiers = artefacts.values.flat_map { |paire| [ paire[:facture_pdf], paire[:avoir_pdf] ] }
+
+      stdout, _err, _status = @outillage.executer_verapdf(fichiers: fichiers)
+      rapport = RapportVeraPdf.new(stdout)
+
+      fichiers.each do |fichier|
+        resultat = rapport.pour(fichier)
+
+        if resultat.nil?
+          @problemes << "#{fichier} : aucun resultat veraPDF retrouve dans le rapport -- verdict indetermine, traite comme un echec"
+        elsif resultat.conforme?
+          puts "  OK  #{fichier.relative_path_from(@scratch)} : PDF/A-3b conforme"
+        else
+          details = resultat.regles_echouees.map { |r| "[#{r[:specification]} #{r[:clause]}] #{r[:message]}" }.join(" | ")
+          @problemes << "#{fichier} : PDF/A-3b NON conforme -- #{details}"
+        end
+      end
+    end
+
+    # AUTO-TEST NEGATIF PDF (obligatoire, cf. auto-test negatif XML) : un PDF
+    # bare, sans aucun marqueur PDF/A (pas d'OutputIntent, pas de metadonnees
+    # XMP), genere via HexaPDF -- la meme bibliotheque et la meme technique
+    # que le script de mise au point historique de FacturXPackageService
+    # (backend/tmp/*, jamais committe). DOIT etre REJECTED ; sinon veraPDF ne
+    # sait plus dire non et ce gate ne prouve plus rien pour le PDF/A-3b.
+    def valider_auto_test_negatif_pdf
+      document = HexaPDF::Document.new
+      document.pages.add
+      pdf_non_conforme = @scratch.join("pdf-non-conforme.pdf")
+      document.write(pdf_non_conforme.to_s)
+
+      stdout, _err, status = @outillage.executer_verapdf(fichiers: [ pdf_non_conforme ])
+      resultat = RapportVeraPdf.new(stdout).pour(pdf_non_conforme)
+
+      if status.success? || resultat.nil? || resultat.conforme?
+        @problemes << "AUTO-TEST NEGATIF PDF EN ECHEC : un PDF sans aucun marqueur PDF/A n'a PAS ete rejete " \
+                      "-- veraPDF ne sait plus dire non, ce gate ne prouve plus rien pour le PDF/A-3b"
+      else
+        puts "  OK  auto-test negatif PDF : document sans marqueur PDF/A bien REJECTED " \
+             "(#{resultat.regles_echouees.size} regle(s) echouee(s))"
+      end
+    end
   end
 
   # [DEV UNIQUEMENT -- jamais invoque par le gate ni par la CI]
@@ -356,7 +494,7 @@ module ConformiteGate
 end
 
 namespace :conformite do
-  desc "Gate EN16931 (XSD+Schematron via Mustang) : facture+avoir, standard+franchise, auto-test negatif. Exit non-zero si echec (B4)."
+  desc "Gate EN16931+PDF/A-3b (Mustang+veraPDF) : facture+avoir, standard+franchise, 2 auto-tests negatifs. Exit non-zero si echec (B4)."
   task valider: :environment do
     exit_code = ConformiteGate::Runner.new.call
     exit(exit_code)
