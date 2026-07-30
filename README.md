@@ -46,7 +46,7 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 
 ## ✅ Statut du projet — Juillet 2026
 
-> Phase actuelle : **correction légale livrée (V1.2 avoirs complets)** — au-dessus de la couche transmission (V1.1), le cycle des **avoirs (notes de crédit)** est désormais opérationnel de bout en bout : émission conforme (Factur-X TypeCode **381** + référence **BT-25** à la facture corrigée), API, journal append-only, transmission via PA, gestion des lignes et frontend dédié. Prochaine étape au choix : preuve de conformité en CI (B4), resserrement du polling, ou gestion des paiements.
+> Phase actuelle : **correction légale livrée (V1.2 avoirs complets)** — au-dessus de la couche transmission (V1.1), le cycle des **avoirs (notes de crédit)** est désormais opérationnel de bout en bout : émission conforme (Factur-X TypeCode **381** + référence **BT-25** à la facture corrigée), API, journal append-only, transmission via PA, gestion des lignes et frontend dédié. Dernier audit complet : **99/100** (28/07/2026, GREEN, socle intact). Depuis, **B4 est livré** : trois des quatre niveaux de conformité (XSD, Schematron EN 16931, PDF/A-3b) sont re-prouvés en CI à chaque commit, sur facture **et** avoir. Prochaine grande brique au choix : gestion des paiements (ou resserrement du polling).
 
 Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé conforme**, et son socle légal est **gelé** (\`tag v0.2.0-conformite-fr\`) : la frontière exacte du gel est documentée et versionnée dans [\`backend/SOCLE_GELE.md\`](./backend/SOCLE_GELE.md). Toute la couche transmission (transmission sandbox, ingestion des statuts, polling, webhook signé, rate limiting) et la brique des avoirs ont été construites **par-dessus** ce socle, sans jamais le modifier. Voir [Conformité prouvée](#-conformité-prouvée).
 
@@ -59,10 +59,10 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | Backend — Auth JWT multi-tenant | ✅ **Complet** | Login / Refresh / Logout + \`id_organisation\` dans le token |
 | Backend — CRUD Clients + Contacts | ✅ **Complet** | Destinataires, SIRET, TVA, routage PA |
 | Backend — Création de facture + lignes | ✅ **Complet** | Brouillon → émise, totaux HT/TVA/TTC (TVA agrégée par taux) |
-| Backend — Générateur Factur-X | ✅ **Complet** | PDF/A-3 + CII XML embarqué — **validé veraPDF / XSD / Schematron** |
+| Backend — Générateur Factur-X | ✅ **Complet** | PDF/A-3 + CII XML embarqué — **re-validé en CI à chaque commit** (veraPDF / XSD / Schematron), facture **et** avoir |
 | Backend — Numérotation séquentielle | ✅ **Complet** | Sans trou, protégée par advisory lock (concurrence) |
 | Backend — Moteur de conformité | ✅ **Complet** | Contrôle pré-émission bloquant |
-| Backend — Mentions France CTC (Flux 2) | ✅ **Complet** | BT-30/34/49, notes PMT/PMD/AAB, ProfileID, BusinessProcessID — **0 BR-FR restante (Mustang)** |
+| Backend — Mentions France CTC (Flux 2) | ✅ **Complet** | BT-30/34/49, notes PMT/PMD/AAB, ProfileID, BusinessProcessID — mentions implémentées ; **validation Mustang BR-FR manuelle au gel, non automatisée en CI** (aucun scénario France public, dette n°24) |
 | Backend — Journal d'événements + API historique | ✅ **Complet** | Événements \`créée\` / \`émise\` append-only, API lecture scopée organisation, testée multi-tenant |
 | Backend — Chiffrement des secrets PA | ✅ **Complet** | \`credentials_chiffres\` et secret webhook chiffrés (ActiveRecord::Encryption, clés en env) — chiffré au repos prouvé par test SQL brut |
 | Backend — Transmission PA (sandbox) | ✅ **Complet** | Adapter + orchestration 3 phases (réseau hors transaction), idempotence sortante, honnêteté \`source=sandbox\` |
@@ -75,15 +75,15 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | Frontend — Page détail facture (bandeau + timeline) | ✅ **Complet** | Bandeau premium + timeline cycle de vie + historique réel |
 | Frontend — Supervision transmission | ✅ **Complet** | Dernière/prochaine synchro, erreurs, badge \`requires_review\` persistant (monte et redescend), bouton de relance d'un polling en pause |
 | Frontend — Page Paramètres | ✅ **Complet** | Placeholder honnête (domaines à venir) |
-| CI/CD — GitHub Actions (RSpec, RuboCop, build) | ✅ **Complet** | Pipeline vert sur \`main\` (secrets de chiffrement injectés) |
+| CI/CD — GitHub Actions (RSpec, RuboCop, bundler-audit + gate conformité) | ✅ **Complet** | Pipeline vert sur \`main\` (secrets de chiffrement injectés) |
 | Rate limiting de l'endpoint webhook | ✅ **Complet** | \`rack-attack\` 60 req/min par IP + par organisation, Solid Cache |
-| **Avoirs — émission conforme (381 + BT-25)** | ✅ **Complet** | Note de crédit Factur-X TypeCode 381, référence BT-25 à la facture, validée XSD |
+| **Avoirs — émission conforme (381 + BT-25)** | ✅ **Complet** | Note de crédit Factur-X TypeCode 381, référence BT-25 à la facture, validée XSD + Schematron + PDF/A-3b **en CI** (comme la facture) |
 | **Avoirs — API + journal** | ✅ **Complet** | CRUD, policy rôle+tenant, journal \`evenement_avoir\` append-only |
 | **Avoirs — transmission PA** | ✅ **Complet** | Couloir d'ingestion rendu agnostique (facture ou avoir), sans duplication |
 | **Avoirs — lignes + PDF filigrané** | ✅ **Complet** | Gestion des lignes, filigrane « AVOIR » sur le PDF (compatible PDF/A-3) |
 | **Avoirs — frontend** | ✅ **Complet** | Création (montant à créditer par ligne), page détail, navigation croisée, DA ambre |
 | **Solde facture après avoirs** | ✅ **Complet** | Synthèse « reste dû » dérivée (TTC légal jamais modifié) |
-| Validateurs de conformité en CI (veraPDF/Schematron/Mustang) | ⏳ **B4** | Preuve de conformité automatisée à chaque push |
+| Validateurs de conformité en CI (XSD + Schematron + PDF/A-3b) | ✅ **Complet** | Re-prouvés à chaque push, facture **et** avoir (standard + franchise) ; France CTC hors CI, aucun scénario public (dette n°24) |
 | Relances automatiques | ⏳ **V1.2** | Jobs Solid Queue + e-mails |
 | E-reporting (B2C / international) | ⏳ **V1.2** | Lots de transmission |
 | Tests frontend (Vitest) | ⏳ **V1.2** | Harnais de test des composants (dette connue) |
@@ -95,14 +95,14 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 
 ## 🏅 Conformité prouvée
 
-> Chez Sereno, la conformité n'est pas *affirmée*, elle est **prouvée par les validateurs officiels** — les mêmes que ceux utilisés par les Plateformes Agréées. Un « PDF qui s'ouvre » ne suffit pas : chaque facture générée franchit quatre niveaux de validation.
+> Chez Sereno, la conformité n'est pas *affirmée*, elle est **prouvée par les validateurs officiels** — les mêmes que ceux utilisés par les Plateformes Agréées. Un « PDF qui s'ouvre » ne suffit pas : chaque facture **et chaque avoir** franchit quatre niveaux de validation — dont **trois sont désormais rejoués en CI à chaque commit**.
 
 | Niveau | Outil | Résultat |
 |--------|-------|----------|
-| **PDF/A-3b** (ISO 19005-3) | veraPDF | ✅ **VALID** — 146/146 règles |
-| **Structure XML** (CII D22B) | xmllint + XSD Factur-X 1.09 officiel | ✅ **VALID** |
-| **Règles métier EN 16931** | Schematron officiel vendoré (Saxon/SchXslt) | ✅ **0 failed-assert** |
-| **Profil France CTC / Flux 2** | Mustang CLI | ✅ **0 BR-FR restante** |
+| **PDF/A-3b** (ISO 19005-3) | veraPDF 1.30.2 | ✅ **146/146** — re-prouvé en CI, facture **et** avoir |
+| **Structure XML** (CII D22B) | XSD Factur-X 1.09 (via Mustang/KoSIT) | ✅ **VALID** — re-prouvé en CI |
+| **Règles métier EN 16931** | Schematron FeRD (Mustang/KoSIT) | ✅ **0 failed-assert** — re-prouvé en CI, facture **et** avoir |
+| **Profil France CTC / Flux 2** | Mustang (mentions implémentées) | ⚠️ **validé au gel — hors CI** (aucun scénario public, dette n°24) |
 
 **Garanties vérifiées automatiquement :**
 - **Round-trip** — le XML embarqué dans le PDF/A-3 est byte-identique au XML de référence (pas de pièce jointe vide ou divergente).
@@ -111,7 +111,7 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 - **Isolation multi-tenant testée** — l'API du journal d'événements est prouvée étanche : une organisation ne peut jamais lire les événements d'une autre (test d'isolation → 404, aucune donnée exposée).
 - **Artefacts vendorés** — profil ICC sRGB et schémas officiels versionnés dans le dépôt, pour une image de production reproductible et indépendante de l'hôte.
 
-> Le socle de conformité est **gelé** (\`tag v0.2.0-conformite-fr\`) : aucune modification du moteur légal sans re-validation par les quatre niveaux ci-dessus.
+> Le socle de conformité est **gelé** (\`tag v0.2.0-conformite-fr\`) : aucune modification du moteur légal sans re-validation par les quatre niveaux ci-dessus (les trois premiers étant désormais rejoués automatiquement en CI).
 
 ---
 
@@ -437,8 +437,8 @@ Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »
 - [x] Solde facture reflétant les avoirs émis (« reste dû » dérivé, TTC légal jamais modifié)
 - [x] Stockage des archives cloisonné par environnement (fiabilité de l'archivage)
 
-### ⏳ B4 — Preuve de conformité automatisée en CI
-- [ ] Validateurs officiels (veraPDF + Schematron + Mustang) **bloquants à chaque push**
+### ✅ B4 — Preuve de conformité automatisée en CI *(étages 1 & 2 livrés)*
+- [x] Validateurs officiels **en CI à chaque push** : XSD + Schematron EN 16931 (Mustang) + PDF/A-3b (veraPDF), facture **et** avoir (standard + franchise), auto-tests négatifs permanents — France CTC/BR-FR reste hors CI (aucun scénario public, dette n°24)
 
 ### ⏳ V1.2+ — Automatisation
 - [ ] Relances automatiques (jobs + e-mails)
@@ -505,11 +505,11 @@ Org      : Studio Démo
 | Lint backend (RuboCop) | ✅ no offenses |
 | Audit dépendances (bundler-audit) | ✅ clean |
 | Analyse statique sécurité (Brakeman) | ✅ 0 erreur |
-| Lint + build frontend | ✅ verts |
-| PDF/A-3b (veraPDF) | ✅ VALID (146/146) |
-| XML CII (XSD 1.09) | ✅ VALID — factures **et** avoirs (380 / 381) |
-| Schematron EN 16931 | ✅ 0 failed-assert |
-| France CTC / Flux 2 (Mustang) | ✅ 0 BR-FR restante |
+| Lint + build frontend | ✅ verts (en local — **pas en CI**, dette n°25) |
+| PDF/A-3b (veraPDF) | ✅ 146/146 — **re-prouvé en CI** (facture + avoir) |
+| XML CII (XSD 1.09) | ✅ VALID — **re-prouvé en CI**, factures **et** avoirs (380/381) |
+| Schematron EN 16931 | ✅ 0 failed-assert — **re-prouvé en CI** (facture + avoir, standard + franchise) |
+| France CTC / Flux 2 (Mustang) | ⚠️ validé au gel — **hors CI**, aucun scénario public (dette n°24) |
 | Isolation multi-tenant (API journal + webhook + avoirs) | ✅ testée (cross-tenant → 404 / rejet signé) |
 | Chiffrement des secrets au repos | ✅ prouvé (lecture SQL brute ≠ clair) |
 | Socle légal gelé | ✅ frontière versionnée (\`SOCLE_GELE.md\`), contrôle de non-régression à chaque sprint |
@@ -520,7 +520,7 @@ Org      : Studio Démo
 
 - **Build** — image Docker multi-stage (Ruby slim + assets précompilés + police & profil ICC vendorés)
 - **Deploy** — \`kamal deploy\` (zero-downtime, rollback intégré)
-- **CI/CD** — GitHub Actions : \`rspec\` + \`rubocop\` + build front → déploiement sur tag
+- **CI/CD** — GitHub Actions : \`rspec\` + \`rubocop\` + gate de conformité (XSD/Schematron/PDF-A) → déploiement sur tag
 - **HTTPS** — Traefik (Let's Encrypt automatique)
 - **Données** — PostgreSQL 16 + sauvegardes chiffrées quotidiennes
 - **Archivage légal** — bucket dédié (factures conservées 10 ans)
