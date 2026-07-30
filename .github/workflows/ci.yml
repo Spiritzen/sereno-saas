@@ -105,3 +105,95 @@ jobs:
         run: |
           bundle exec rails db:test:prepare
           bundle exec rspec
+
+  # B4 etage 1, partie B : preuve de conformite REJOUEE a chaque push/PR --
+  # XSD + Schematron EN 16931 (Mustang / KoSIT Validator) sur une facture
+  # (380) ET un avoir (381) dessus, en TVA STANDARD et en FRANCHISE en base
+  # de TVA (art. 293 B du CGI), avec un auto-test negatif permanent (un
+  # artefact volontairement corrompu doit rester rejete).
+  #
+  # Ce job couvre 2 DES 4 niveaux de conformite Factur-X vises par B4 :
+  # structure (XSD) + regles metier (Schematron EN 16931). Il NE couvre PAS
+  # encore veraPDF (PDF/A-3b -- etage 2, a venir) ni les regles France CTC /
+  # BR-FR (aucun scenario Mustang officiel n'existe a ce jour pour ce
+  # profil). Ne pas presenter ce job comme une preuve de conformite complete.
+  #
+  # Le job consomme le scenario Mustang + le XSLT Schematron DEJA compile et
+  # committes dans backend/vendor/facturx_validation_tooling/ -- il ne
+  # recompile rien (la recompilation, quand le squelette evolue, est un
+  # outil dev : `bundle exec rails conformite:compiler_schematron`).
+  conformite:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    env:
+      # Version EPINGLEE de Mustang (KoSIT Validator) -- release officielle
+      # itplr-kosit/validator. Ne pas suivre "latest" : une preuve de
+      # conformite doit rester reproductible d'un run a l'autre.
+      MUSTANG_VERSION: "1.6.2"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libvips
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Set up Java (pour Mustang / KoSIT Validator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Cache Mustang (KoSIT Validator)
+        id: cache-mustang
+        uses: actions/cache@v4
+        with:
+          path: backend/tmp/conformite_tools/mustang-validator.jar
+          key: mustang-validator-${{ env.MUSTANG_VERSION }}
+
+      - name: Download Mustang (KoSIT Validator, release officielle epinglee)
+        if: steps.cache-mustang.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p tmp/conformite_tools
+          curl -sSfL -o tmp/conformite_tools/mustang-validator.jar \
+            "https://github.com/itplr-kosit/validator/releases/download/v${MUSTANG_VERSION}/validator-${MUSTANG_VERSION}-standalone.jar"
+
+      - name: Prepare test database
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          SERENO_AR_ENCRYPTION_PRIMARY_KEY: ${{ secrets.SERENO_AR_ENCRYPTION_PRIMARY_KEY }}
+          SERENO_AR_ENCRYPTION_DETERMINISTIC_KEY: ${{ secrets.SERENO_AR_ENCRYPTION_DETERMINISTIC_KEY }}
+          SERENO_AR_ENCRYPTION_KEY_DERIVATION_SALT: ${{ secrets.SERENO_AR_ENCRYPTION_KEY_DERIVATION_SALT }}
+        run: bundle exec rails db:test:prepare
+
+      - name: Gate de conformite EN 16931 (XSD + Schematron)
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          SERENO_AR_ENCRYPTION_PRIMARY_KEY: ${{ secrets.SERENO_AR_ENCRYPTION_PRIMARY_KEY }}
+          SERENO_AR_ENCRYPTION_DETERMINISTIC_KEY: ${{ secrets.SERENO_AR_ENCRYPTION_DETERMINISTIC_KEY }}
+          SERENO_AR_ENCRYPTION_KEY_DERIVATION_SALT: ${{ secrets.SERENO_AR_ENCRYPTION_KEY_DERIVATION_SALT }}
+          MUSTANG_JAR_PATH: tmp/conformite_tools/mustang-validator.jar
+        run: bundle exec rails conformite:valider
