@@ -1,4 +1,4 @@
-# Outillage de validation Schematron EN 16931 — Sereno (B4 étage 1, parties A + A-bis)
+# Outillage de validation Schematron EN 16931 — Sereno (B4 étage 1, parties A + A-bis + B)
 
 Ce répertoire n'est PAS gelé (absent des 8 chemins `GELÉ STRICT` de
 `backend/SOCLE_GELE.md` — voir la commande de contrôle du socle, qui ignore ce
@@ -53,19 +53,24 @@ Sereno à partir du `.sch` gelé (lu, jamais modifié), via :
    Apache License 2.0 / MIT selon les fichiers du dépôt), **avec un patch
    Sereno minimal** (voir « Patch @id » ci-dessous)
 
-Commande de compilation (reproductible, à rejouer si `vendor/facturx/schematron/en16931/Factur-X_1.09_EN16931.sch`
-changeait un jour — ce qui ne devrait jamais arriver puisqu'il est gelé) :
+**Recompilation (B4 étage 1, partie B)** : `bundle exec rails conformite:compiler_schematron`
+— outil DEV, **jamais invoqué par le gate `conformite:valider` ni par la CI**
+(qui consomment le XSLT déjà committé). Cette tâche travaille sur une COPIE
+temporaire du `.sch` gelé (jamais l'original) et régénère
+`Factur-X_1.09_EN16931-compiled.xsl` à partir du squelette patché ci-dessous.
+Elle nécessite Saxon-HE 13.0 + `xmlresolver` 6.0.23 (JAR non vendorés — à
+télécharger, chemins configurables via `SAXON_JAR_PATH`/`XMLRESOLVER_JAR_PATH`,
+par défaut `backend/tmp/conformite_tools/`) :
+- Saxon-HE 13.0 : `https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/13.0/Saxon-HE-13.0.jar`
+- xmlresolver 6.0.23 : `https://repo1.maven.org/maven2/org/xmlresolver/xmlresolver/6.0.23/xmlresolver-6.0.23.jar`
 
-```
-java -cp "saxon-he.jar;xmlresolver.jar" net.sf.saxon.Transform \
-  -s:vendor/facturx/schematron/en16931/Factur-X_1.09_EN16931.sch \
-  -xsl:<squelette patché>/iso_svrl_for_xslt2_sereno_id_fix.xsl \
-  -o:Factur-X_1.09_EN16931-compiled.xsl
-```
+À ne relancer que si le squelette lui-même évolue (le `.sch` gelé, lui, ne
+changera jamais). Après recompilation, relire le diff produit et relancer
+`bundle exec rails conformite:valider` avant tout commit.
 
-Ce fichier n'est PAS à modifier à la main non plus (c'est un artefact généré),
-mais pour une raison différente du `.sch`/XSD/`codedb.xml` : le régénérer est
-sans risque et reproductible, l'éditer à la main ne le serait pas.
+Ce fichier compilé n'est PAS à modifier à la main non plus (c'est un artefact
+généré), mais pour une raison différente du `.sch`/XSD/`codedb.xml` : le
+régénérer est sans risque et reproductible, l'éditer à la main ne le serait pas.
 
 #### Patch `@id` (B4 étage 1, partie A-bis)
 
@@ -80,10 +85,17 @@ conforme) en `UNDEFINED` au lieu d'`ACCEPTABLE`, à cause d'une erreur de
 validation de SON PROPRE rapport (`cvc-complex-type.4`), pas d'un échec de
 règle métier.
 
-Fix retenu : une copie patchée du squelette
-(`iso_svrl_for_xslt2_sereno_id_fix.xsl`, dans `backend/tmp/b4-spike/schematron-skeleton/`,
-scratch réutilisable) où les deux templates concernés (`process-assert`,
-`process-report`) émettent désormais **toujours** un `@id` — celui de la
+Fix retenu : une copie patchée du squelette, rangée (B4 étage 1, partie B)
+dans `schematron_en16931/skeleton/` :
+- `skeleton/iso_svrl_for_xslt2.xsl` — squelette ISO **original, non modifié**
+  (conservé pour montrer le diff exact du patch) ;
+- `skeleton/iso_svrl_for_xslt2_sereno_id_fix.xsl` — la copie **patchée**,
+  réellement utilisée pour compiler `Factur-X_1.09_EN16931-compiled.xsl` ;
+- `skeleton/iso_schematron_skeleton_for_saxon.xsl` — dépendance importée par
+  les deux ci-dessus (non modifiée), nécessaire à la compilation.
+
+Dans les deux templates concernés (`process-assert`, `process-report`),
+l'émission de `@id` devient **toujours** inconditionnelle — celui de la
 source s'il existe, sinon `generate-id(.)` évalué à l'exécution sur le nœud
 du document instance en cours de validation. Aucune logique de test/assert
 n'est modifiée ; seul un attribut de libellé de rapport, absent de la source
@@ -107,3 +119,23 @@ Conforme au schéma officiel `scenarios.xsd` du validateur. Référence :
 Le scénario s'utilise avec `-r backend/` (racine du dépôt backend, ancêtre
 commun du XSD gelé et de ce dossier non gelé) et
 `-s backend/vendor/facturx_validation_tooling/scenarios.xml`.
+
+## Gate CI (B4 étage 1, partie B)
+
+`bundle exec rails conformite:valider` (`backend/lib/tasks/conformite.rake`) :
+émet une facture (380) et un avoir (381) dessus, en TVA standard ET en
+franchise en base de TVA (art. 293 B du CGI), chacun dans une transaction
+PostgreSQL explicitement annulée (rien n'est persisté), les valide via ce
+scénario, et exige `ACCEPTABLE` + 0 `failed-assert` sur les 4. Inclut un
+auto-test négatif permanent (un artefact corrompu doit rester `REJECTED`) :
+sans lui, une régression du validateur lui-même passerait inaperçue. Exit
+non-zéro dès qu'un artefact échoue, qu'une erreur d'infrastructure survient
+(JAR/JRE introuvable), ou que le négatif n'est plus rejeté.
+
+Lancé en CI par le job `conformite` de `.github/workflows/ci.yml`, qui
+télécharge Mustang (version épinglée, `MUSTANG_VERSION`) et le met en cache.
+**Ce job couvre 2 des 4 niveaux de conformité Factur-X** (structure XSD +
+règles métier Schematron EN 16931) — ni veraPDF (PDF/A-3b, étage 2 à venir)
+ni les règles France CTC/BR-FR (aucun scénario Mustang officiel n'existe à
+ce jour) ne sont couverts. Ne pas présenter ce job comme une preuve de
+conformité complète.
