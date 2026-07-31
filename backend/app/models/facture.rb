@@ -83,7 +83,17 @@ class Facture < ApplicationRecord
            foreign_key: :facture_id,
            dependent: :restrict_with_exception
 
-  has_many :paiements, dependent: :restrict_with_exception
+  # Paiements v1 (étage A) : nouveau modèle append-only (voir Paiement),
+  # aucun rapport avec l'ancien squelette mort retiré le 31/07/2026.
+  has_many :paiements,
+           class_name: "Paiement",
+           foreign_key: :facture_id,
+           dependent: :restrict_with_exception
+
+  has_many :evenements_paiement,
+           through: :paiements,
+           source: :evenements_paiement
+
   has_many :relances, dependent: :restrict_with_exception
 
   validates :type_document, presence: true, inclusion: { in: TYPES_DOCUMENT }

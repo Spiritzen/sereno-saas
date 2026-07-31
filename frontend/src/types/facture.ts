@@ -38,7 +38,6 @@ export type Facture = {
   total_ht: Money;
   total_tva: Money;
   total_ttc: Money;
-  montant_paye: Money;
   devise: string;
   format: "factur_x" | "ubl" | "cii";
   mentions: string | null;

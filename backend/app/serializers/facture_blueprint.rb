@@ -3,6 +3,12 @@
 class FactureBlueprint < Blueprinter::Base
   identifier :id
 
+  # montant_paye n'est PAS exposé ici (paiements v1, étage A, 31/07/2026) :
+  # la colonne reste en base à 0 en permanence (lue par le moteur GELÉ
+  # factur_x_xml_service.rb pour BT-113/BT-115, jamais mutée) — l'exposer
+  # laisserait croire qu'elle reflète les paiements réels. Le "payé" / "reste
+  # à payer" réels sont DÉRIVÉS par PaiementSyntheseService.
+
   fields :client_id,
          :devis_id,
          :numero,
@@ -11,7 +17,6 @@ class FactureBlueprint < Blueprinter::Base
          :total_ht,
          :total_tva,
          :total_ttc,
-         :montant_paye,
          :devise,
          :format,
          :mentions,

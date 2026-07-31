@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_27_153314) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_31_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -247,6 +247,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_27_153314) do
     t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'emise'::character varying, 'deposee'::character varying, 'recue'::character varying, 'mise_a_disposition'::character varying, 'approuvee'::character varying, 'refusee'::character varying, 'en_litige'::character varying, 'encaissee'::character varying, 'archivee'::character varying, 'annulee'::character varying]::text[])", name: "check_evenement_facture_statut"
   end
 
+  create_table "evenement_paiement", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.uuid "organisation_id", null: false
+    t.uuid "paiement_id", null: false
+    t.jsonb "payload"
+    t.string "source", limit: 20, default: "interne", null: false
+    t.string "statut", limit: 20, null: false
+    t.uuid "utilisateur_id"
+    t.index ["organisation_id", "created_at"], name: "index_evenement_paiement_on_org_and_created_at"
+    t.index ["organisation_id", "paiement_id"], name: "index_evenement_paiement_on_org_and_paiement"
+    t.index ["organisation_id"], name: "index_evenement_paiement_on_organisation_id"
+    t.index ["paiement_id", "created_at"], name: "index_evenement_paiement_on_paiement_and_created_at"
+    t.index ["paiement_id"], name: "index_evenement_paiement_on_paiement_id"
+    t.index ["utilisateur_id"], name: "index_evenement_paiement_on_utilisateur_id"
+    t.check_constraint "source::text = 'interne'::text", name: "check_evenement_paiement_source"
+    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'confirme'::character varying, 'annule'::character varying]::text[])", name: "check_evenement_paiement_statut"
+  end
+
   create_table "factures", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "client_id", null: false
     t.string "conditions_paiement"
@@ -396,19 +414,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_27_153314) do
 
   create_table "paiements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.date "date_paiement", null: false
+    t.date "date_encaissement", null: false
     t.uuid "facture_id", null: false
-    t.string "methode", limit: 20, null: false
+    t.string "methode_code", limit: 10, null: false
     t.decimal "montant", precision: 12, scale: 2, null: false
     t.uuid "organisation_id", null: false
     t.string "reference", limit: 100
+    t.string "statut", limit: 20, default: "brouillon", null: false
     t.datetime "updated_at", null: false
     t.index ["facture_id"], name: "index_paiements_on_facture_id"
-    t.index ["organisation_id", "date_paiement"], name: "index_paiements_on_org_and_date"
+    t.index ["organisation_id", "date_encaissement"], name: "index_paiements_on_org_and_date"
     t.index ["organisation_id", "facture_id"], name: "index_paiements_on_org_and_facture"
     t.index ["organisation_id"], name: "index_paiements_on_organisation_id"
-    t.check_constraint "methode::text = ANY (ARRAY['virement'::character varying, 'carte'::character varying, 'cheque'::character varying, 'especes'::character varying, 'prelevement'::character varying]::text[])", name: "check_paiements_methode"
+    t.check_constraint "methode_code::text = ANY (ARRAY['10'::character varying, '20'::character varying, '48'::character varying, '58'::character varying, '59'::character varying]::text[])", name: "check_paiements_methode_code"
     t.check_constraint "montant > 0::numeric", name: "check_paiements_montant_positive"
+    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'confirme'::character varying, 'annule'::character varying]::text[])", name: "check_paiements_statut"
   end
 
   create_table "plateformes_agreees", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -700,6 +720,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_27_153314) do
   add_foreign_key "evenement_facture", "factures"
   add_foreign_key "evenement_facture", "organisations"
   add_foreign_key "evenement_facture", "utilisateurs"
+  add_foreign_key "evenement_paiement", "organisations"
+  add_foreign_key "evenement_paiement", "paiements"
+  add_foreign_key "evenement_paiement", "utilisateurs"
   add_foreign_key "factures", "clients"
   add_foreign_key "factures", "devis", column: "devis_id"
   add_foreign_key "factures", "organisations"
