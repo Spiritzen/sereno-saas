@@ -1,34 +1,87 @@
-class Paiement < ApplicationRecord
-  METHODES = %w[virement carte cheque especes prelevement].freeze
+# frozen_string_literal: true
 
-  STATUTS_FACTURE_PAYABLES = %w[
-  emise
-  deposee
-  recue
-  mise_a_disposition
-  approuvee
-].freeze
+# Registre local des encaissements (v1 = suivi seul, aucune transmission).
+# Append-only après confirmation — miroir du patron Avoir (voie b) : un
+# paiement brouillon est librement éditable et destructible (il n'a encore
+# aucun effet réel) ; un paiement confirmé devient immuable pour ses champs
+# de contenu et ne peut plus être détruit ; l'annulation d'un paiement réel
+# est un changement de STATUT (confirme -> annule), jamais un destroy.
+#
+# ⚠️ Ce modèle N'ÉCRIT JAMAIS facture.statut ni facture.montant_paye — c'est
+# l'anti-pattern exact de l'ancien squelette mort (retiré le 31/07/2026, voir
+# la migration 20260731100000). Le "payé" / "reste à payer" se DÉRIVENT
+# (PaiementSyntheseService), ils ne se stockent jamais sur la facture. Le
+# statut "encaissee" de Facture/Avoir appartient à la machine de transmission
+# PA (confirmation de la plateforme acheteur) — strictement indépendant de ce
+# registre local, jamais posé par ce modèle.
+class Paiement < ApplicationRecord
+  STATUTS = %w[brouillon confirme annule].freeze
+
+  TRANSITIONS_AUTORISEES = {
+    "brouillon" => %w[confirme],
+    "confirme" => %w[annule],
+    "annule" => []
+  }.freeze
+
+  # Nomenclature UNTDID 4461 (BT-81 / PaymentMeansTypeCode). Le "virement" est
+  # aligné sur le code déjà émis par le moteur GELÉ (factur_x_xml_service.rb,
+  # PAYMENT_MEANS_TRANSFER_CODE = "58", virement SEPA) plutôt que sur le code
+  # générique "30" (virement non spécifié) : un même moyen de paiement doit
+  # porter le même code partout dans l'application. Décision à confirmer par
+  # Sébastien (voir rapport de ce sprint).
+  MOYENS = {
+    "10" => "Espèces",
+    "20" => "Chèque",
+    "48" => "Carte bancaire",
+    "58" => "Virement SEPA",
+    "59" => "Prélèvement SEPA"
+  }.freeze
+
+  CHAMPS_IMMUABLES_APRES_CONFIRMATION = %w[
+    organisation_id
+    facture_id
+    montant
+    methode_code
+    date_encaissement
+    reference
+  ].freeze
 
   belongs_to :organisation
   belongs_to :facture
 
-  validates :montant,
-            presence: true,
-            numericality: { greater_than: 0 }
+  has_many :evenements_paiement,
+           class_name: "EvenementPaiement",
+           foreign_key: :paiement_id,
+           dependent: :restrict_with_exception
 
-  validates :methode,
-            presence: true,
-            inclusion: { in: METHODES }
-
-  validates :date_paiement, presence: true
+  validates :statut, presence: true, inclusion: { in: STATUTS }
+  validates :montant, presence: true, numericality: { greater_than: 0 }
+  validates :methode_code, presence: true, inclusion: { in: MOYENS.keys }
+  validates :date_encaissement, presence: true
   validates :reference, length: { maximum: 100 }, allow_blank: true
 
   validate :facture_appartient_a_la_meme_organisation
-  validate :facture_doit_etre_emise
-  validate :montant_total_paye_ne_depasse_pas_total_ttc
+  validate :facture_eligible_au_paiement, on: :create
+  validate :transition_de_statut_autorisee, on: :update
+  validate :empecher_modification_contenu_apres_confirmation, on: :update
 
-  after_save :recalculer_montant_paye_de_la_facture
-  after_destroy :recalculer_montant_paye_de_la_facture
+  before_destroy :empecher_destruction_paiement_non_brouillon
+
+  def brouillon?
+    statut == "brouillon"
+  end
+
+  def confirme?
+    statut == "confirme"
+  end
+
+  def annule?
+    statut == "annule"
+  end
+
+  def libelle_moyen
+    MOYENS.fetch(methode_code, methode_code)
+  end
 
   private
 
@@ -40,40 +93,41 @@ class Paiement < ApplicationRecord
     end
   end
 
-  def facture_doit_etre_emise
-  return if facture.blank?
+  # Éligibilité définie explicitement (facture émise ET non annulée) — ne
+  # reprend PAS la liste erronée du mort, qui mélangeait les statuts de la
+  # machine de transmission PA avec la notion de payabilité.
+  def facture_eligible_au_paiement
+    return if facture.blank?
 
-  unless STATUTS_FACTURE_PAYABLES.include?(facture.statut)
-    errors.add(:facture, "doit avoir un statut payable pour recevoir un paiement")
-  end
-end
-
-  def montant_total_paye_ne_depasse_pas_total_ttc
-    return if facture.blank? || montant.blank?
-
-    total_deja_paye = facture.paiements.where.not(id: id).sum(:montant)
-    nouveau_total = total_deja_paye + montant
-
-    if nouveau_total > facture.total_ttc
-      errors.add(:montant, "ne peut pas dépasser le reste à payer de la facture")
+    if facture.brouillon? || facture.statut == "annulee"
+      errors.add(:facture, "doit être émise et non annulée pour recevoir un paiement")
     end
   end
 
-  def recalculer_montant_paye_de_la_facture
-    return if facture.blank?
+  def transition_de_statut_autorisee
+    return unless statut_changed?
 
-    total_paye = facture.paiements.sum(:montant)
+    autorisees = TRANSITIONS_AUTORISEES.fetch(statut_was, [])
 
-    nouveau_statut =
-      if total_paye >= facture.total_ttc
-        "encaissee"
-      else
-        facture.statut
-      end
+    unless autorisees.include?(statut)
+      errors.add(:statut, "transition de #{statut_was} vers #{statut} non autorisée")
+    end
+  end
 
-    facture.update!(
-      montant_paye: total_paye,
-      statut: nouveau_statut
-    )
+  def empecher_modification_contenu_apres_confirmation
+    return if statut_in_database == "brouillon"
+
+    champs_bloques_modifies = changed & CHAMPS_IMMUABLES_APRES_CONFIRMATION
+
+    if champs_bloques_modifies.any?
+      errors.add(:base, "Un paiement confirmé ou annulé est immuable pour ses champs de contenu")
+    end
+  end
+
+  def empecher_destruction_paiement_non_brouillon
+    return if statut_in_database == "brouillon"
+
+    errors.add(:base, "Un paiement confirmé ou annulé ne peut pas être détruit")
+    throw(:abort)
   end
 end
