@@ -106,6 +106,35 @@ jobs:
           bundle exec rails db:test:prepare
           bundle exec rspec
 
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build (inclut la verification TypeScript via tsc -b)
+        run: npm run build
+
+      - name: Tests (Vitest)
+        run: npm run test
+
   # B4 etage 1 (partie B) + etage 2 : preuve de conformite REJOUEE a chaque
   # push/PR -- XSD + Schematron EN 16931 (Mustang / KoSIT Validator) ET
   # PDF/A-3b (veraPDF) sur une facture (380) ET un avoir (381) dessus, en TVA
