@@ -16,6 +16,11 @@ export type FactureStatut =
   | "archivee"
   | "annulee";
 
+// Paiements v1 étage C — statut d'encaissement LOCAL, dérivé côté backend
+// (PaiementSyntheseService). Distinct de FactureStatut ci-dessus : ne JAMAIS
+// confondre avec le "encaissee" réglementaire (transmission PA).
+export type StatutEncaissementLocal = "non_payee" | "partielle" | "soldee";
+
 export type Facture = {
   id: string;
   client_id: string;
@@ -47,6 +52,11 @@ export type Facture = {
   emise_at: string | null;
   created_at?: string | null;
   lignes_facture?: LigneFacture[];
+  // Paiements v1 étage C — champs DÉRIVÉS exposés uniquement par la vue
+  // détaillée (GET /factures/:id). Ne jamais recalculer côté front (cf.
+  // PaiementSyntheseService, arrondi au centime déjà fait par le backend).
+  reste_a_payer?: Money;
+  statut_encaissement_local?: StatutEncaissementLocal;
 };
 
 export type FactureInput = {

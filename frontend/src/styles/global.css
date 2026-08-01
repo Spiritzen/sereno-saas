@@ -557,6 +557,63 @@ h1 {
 }
 
 /* =========================
+   PAIEMENT — accent de type de document (paiements v1, étage C)
+   Distinct de .status ET de .badge-avoir : un encaissement local n'est ni un
+   statut de cycle de vie, ni un avoir. Porte le statut d'encaissement local
+   (non payée / partielle / soldée) ou le mot "Paiement", jamais l'ambre.
+========================= */
+
+.badge-paiement {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  width: fit-content;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--color-paiement-soft);
+  color: var(--color-paiement);
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-paiement--annule {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-muted);
+  border-color: var(--color-border-strong);
+}
+
+.paiement-btn {
+  background: var(--color-paiement-soft);
+  color: var(--color-paiement);
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.paiement-btn:hover:not(:disabled) {
+  background: rgba(13, 148, 136, 0.24);
+}
+
+.paiement-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.paiement-row--annule {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+/* =========================
    NEW INVOICE
 ========================= */
 
@@ -1599,6 +1656,13 @@ h1 {
   justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
+  /* Paiements v1 (étage C, finitions) : cette ligne (ex. "Créer un avoir",
+     "Historique"/"Annuler" par paiement) n'avait aucune respiration propre,
+     ne comptant que sur l'espacement de son conteneur parent — absent quand
+     elle est nichée plus profondément (une ligne de paiement, dans
+     .invoice-lines-table). Padding vertical propre, cohérent avec le reste
+     de la page, qu'elle soit en fin de section ou nichée dans une ligne. */
+  padding: 12px 0;
 }
 
 .secondary-btn {
@@ -2803,7 +2867,17 @@ h1 {
   border-radius: var(--radius-md);
   background: var(--color-bg-card);
   padding: 22px 24px;
-  margin-bottom: 18px;
+  /* Paiements v1 (étage C, finitions) : même patron que
+     .invoice-builder-card (colonne + gap), pour que ses enfants directs
+     (liste/état vide, formulaire, ligne d'actions) respirent d'eux-mêmes au
+     lieu d'être collés — jusqu'ici seul .invoice-transmission-section__header
+     portait sa propre marge, rien ne séparait le reste. margin-bottom retiré :
+     l'espacement entre cette section et la suivante (Avoirs -> Paiements,
+     Paiements -> reste de la page) vient désormais du gap de .new-invoice-page
+     ci-dessus, comme pour tous les autres blocs de la page. */
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .invoice-transmission-section__header {
