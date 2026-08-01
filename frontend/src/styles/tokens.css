@@ -25,6 +25,15 @@
   --color-avoir: #d97706;
   --color-avoir-soft: rgba(217, 119, 6, 0.16);
 
+  /* Paiements v1 étage C — accent de TYPE DE DOCUMENT (paiement), même
+     logique que --color-avoir ci-dessus : jamais un badge de statut
+     (success/warning/danger/info), un sigle distinct pour ne jamais
+     confondre un encaissement local avec le statut réglementaire de la
+     facture (dont le "encaissee" PA, lui, reste en --color-success). Teal,
+     délibérément éloigné de l'ambre avoir ET de l'émeraude success. */
+  --color-paiement: #0d9488;
+  --color-paiement-soft: rgba(13, 148, 136, 0.16);
+
   --color-text-primary: #f1f5f9;
   --color-text-secondary: #94a3b8;
   --color-text-muted: #475569;
