@@ -104,13 +104,19 @@ class Paiement < ApplicationRecord
     end
   end
 
+  # Un brouillon peut être resauvegardé librement TANT QU'il reste brouillon
+  # (édition de contenu, pas une transition). Dès qu'il n'est plus brouillon,
+  # toute sauvegarde doit être une transition explicitement autorisée par la
+  # table — y compris re-confirmer un paiement déjà confirmé (rejeté : ce
+  # n'est pas dans TRANSITIONS_AUTORISEES["confirme"]), pas seulement les
+  # changements de valeur détectés par Rails (statut_changed?).
   def transition_de_statut_autorisee
-    return unless statut_changed?
+    return if statut_in_database == "brouillon" && !statut_changed?
 
-    autorisees = TRANSITIONS_AUTORISEES.fetch(statut_was, [])
+    autorisees = TRANSITIONS_AUTORISEES.fetch(statut_in_database, [])
 
     unless autorisees.include?(statut)
-      errors.add(:statut, "transition de #{statut_was} vers #{statut} non autorisée")
+      errors.add(:statut, "transition de #{statut_in_database} vers #{statut} non autorisée")
     end
   end
 

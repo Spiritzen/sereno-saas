@@ -20,8 +20,7 @@
 Tout le code sensible n'a pas le même statut. On distingue :
 
 - **GELÉ STRICT** — toute modification EXIGE de re-passer la validation de
-  conformité (XSD aujourd'hui ; veraPDF / Schematron / Mustang quand ils seront
-  câblés) ou casse une preuve déjà testée. On n'y touche pas sans re-validation
+  conformité (XSD, Schematron EN 16931 et PDF/A-3b via veraPDF — désormais câblés en CI depuis B4 ; France CTC / Mustang restant hors CI) ou casse une preuve déjà testée. On n'y touche pas sans re-validation
   complète et décision explicite de Sébastien.
 - **SENSIBLE** — protégé par un invariant légal (immutabilité, append-only,
   numérotation sans trou). Modifiable avec rigueur et tests, mais ne déclenche
@@ -86,6 +85,18 @@ mais porte un invariant légal à préserver.
   sans incident (ex. ajout de `has_many :evenements_entrants_pa`) — ce qui
   confirme le statut « sensible » et non « gelé strict ».
 
+- **⚠️ Colonne `factures.montant_paye` — gelée EN PRATIQUE**
+  Cette colonne ne figure pas dans les 8 chemins stricts, mais elle est **lue
+  par le moteur gelé** `factur_x_xml_service.rb` pour poser BT-113
+  (TotalPrepaidAmount) et BT-115 (DuePayableAmount = `total_ttc − montant_paye`).
+  Invariants : **ne jamais la supprimer** (la retirer casserait le moteur gelé)
+  ni **la muter** (elle reste à `0` — aucun prépaiement dans le flux actuel ; le
+  XML est un instantané figé à l'émission). Le suivi des paiements (v1) ne
+  l'utilise pas comme cache : le « payé / reste à payer » est entièrement
+  **dérivé** du journal des paiements, jamais stocké sur la facture. (Le squelette
+  « paiement v0 » mort qui mutait cette colonne a été retiré à l'étage A des
+  paiements v1.)
+
 - **`backend/app/models/ligne_facture.rb`**
   Même famille d'invariant : une ligne devient immuable dès que la facture n'est
   plus en brouillon.
@@ -106,12 +117,17 @@ mais porte un invariant légal à préserver.
   convention de chemin casserait ce test — régression fonctionnelle, pas
   non-conformité.
 
-- **`backend/app/services/facture_pdf_service.rb`** — ⚠️ statut évolutif
-  Génère le PDF visuel. Aujourd'hui aucun test n'examine son rendu (seulement
-  `File.size > 0`), donc pas encore couvert par une preuve de conformité.
-  **Bascule en GELÉ STRICT le jour où veraPDF sera câblé** : c'est lui qui produit
-  la structure PDF de base que `FacturXPackageService` enveloppe en PDF/A-3 ; un
-  PDF de base malformé casserait la conformité même avec une enveloppe correcte.
+- **`backend/app/services/facture_pdf_service.rb`** — ⚠️ promotion DUE (veraPDF câblé)
+  Génère le PDF visuel de base que `FacturXPackageService` enveloppe en PDF/A-3 ;
+  un PDF de base malformé casserait la conformité PDF/A même avec une enveloppe
+  correcte. **Son déclencheur de promotion est atteint : veraPDF est désormais
+  câblé en CI** (B4 étage 2 — PDF/A-3b re-prouvé à chaque commit, facture ET avoir).
+  Il DEVRAIT donc passer en GELÉ STRICT.
+  ⚠️ À trancher avant de l'ajouter à la commande de contrôle : ce fichier a été
+  **modifié depuis `2079ad2`** (fix stockage, cloisonnement par environnement),
+  donc l'ajouter avec `2079ad2` comme référence la ferait échouer à tort. La
+  promotion propre passe par un **re-tag du `main` actuel** comme nouvelle
+  référence de gel (idéalement pour tout le socle désormais re-prouvé en CI).
 
 ---
 
@@ -125,6 +141,7 @@ Pour prouver l'absence de sur-gel, ces fichiers ont été évalués et exclus :
   pas une facture déjà émise (dont le XML/PDF est un instantané figé).
 - **`backend/app/models/avoir.rb`**, **`backend/app/models/ligne_avoir.rb`** —
   jamais consommés par le moteur XML à ce jour ; totalement libres.
+- **`backend/app/models/paiement.rb`**, **`backend/app/models/evenement_paiement.rb`**, et l'API des paiements (contrôleur / policy / blueprints / `PaiementService`, `PaiementSyntheseService`) — nouveau registre de suivi (paiements v1), append-only, dérivé, jamais consommé par le moteur XML ; libres.
 - Tout **`backend/app/controllers/`**, **`backend/app/policies/`**,
   **`backend/app/serializers/`** liés à Facture — orchestration
   HTTP / autorisation / sérialisation, ne touchent jamais à la génération.

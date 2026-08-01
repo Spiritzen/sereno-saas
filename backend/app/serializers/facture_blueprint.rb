@@ -59,5 +59,19 @@ class FactureBlueprint < Blueprinter::Base
   view :with_details do
     association :client, blueprint: ClientBlueprint
     association :lignes_facture, blueprint: LigneFactureBlueprint
+
+    # Paiements v1 étage B : champs DÉRIVÉS (jamais stockés sur Facture),
+    # calculés à la volée par PaiementSyntheseService — même service que celui
+    # posé et testé à l'étage A, aucune logique dupliquée ici.
+    # statut_encaissement_local ne doit JAMAIS être confondu avec le champ
+    # `statut` ci-dessus (cycle de vie/transmission, dont le "encaissee" de la
+    # PA) : ce sont deux notions strictement distinctes.
+    field :reste_a_payer do |facture|
+      PaiementSyntheseService.new(facture: facture).call.reste_a_payer
+    end
+
+    field :statut_encaissement_local do |facture|
+      PaiementSyntheseService.new(facture: facture).call.statut_encaissement_local
+    end
   end
 end
