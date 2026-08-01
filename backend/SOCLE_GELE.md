@@ -5,10 +5,17 @@
 > précaution. Toute session de développement (humaine ou assistée) doit le
 > consulter avant de toucher au backend.
 >
-> **Référence de gel** : tag `v0.2.0-conformite-fr` (objet annoté `0acd4d9`),
+> **Référence de gel initiale** : tag `v0.2.0-conformite-fr` (objet annoté `0acd4d9`),
 > pointant sur le commit `2079ad2` (« chore: close post-audit validation items »,
 > 10 juillet 2026). Message du tag : *« Sereno v0.2.0 - Factur-X EN16931 and
 > France CTC compliance validated »*.
+>
+> **Référence de gel COURANTE** (celle de la commande de contrôle ci-dessous) : tag
+> `v0.3.0-conformite-fr`, posé le 01/08/2026 sur `main` après B4 (socle re-prouvé en
+> CI à chaque commit) et la promotion de `facture_pdf_service.rb` en GELÉ STRICT. Les
+> 8 chemins d'origine sont identiques entre `2079ad2` et ce tag ; le 9e chemin
+> (`facture_pdf_service.rb`, modifié après `2079ad2` par le fix stockage) est gelé à
+> partir de `v0.3.0-conformite-fr`.
 >
 > À cette date, le moteur légal complet existait déjà et était prouvé conforme
 > (PDF/A-3 + CII validés). Ce fichier gèle cet état de référence.
@@ -72,6 +79,13 @@ Ne jamais modifier sans re-validation de conformité et accord explicite.
   Modifier ce fichier reviendrait à changer la preuve elle-même plutôt qu'à la
   faire passer.
 
+- **`backend/app/services/facture_pdf_service.rb`** — promu GELÉ STRICT le 01/08/2026
+  Génère le PDF visuel de base que `FacturXPackageService` enveloppe en PDF/A-3 ;
+  un PDF de base malformé casserait la conformité PDF/A. Promotion effective depuis
+  que veraPDF est câblé en CI (B4 étage 2 — PDF/A-3b re-prouvé à chaque commit,
+  facture ET avoir). Sa version gelée est celle du tag `v0.3.0-conformite-fr` (il
+  avait été modifié après `2079ad2` par le fix stockage).
+
 ---
 
 ## SENSIBLE
@@ -86,7 +100,7 @@ mais porte un invariant légal à préserver.
   confirme le statut « sensible » et non « gelé strict ».
 
 - **⚠️ Colonne `factures.montant_paye` — gelée EN PRATIQUE**
-  Cette colonne ne figure pas dans les 8 chemins stricts, mais elle est **lue
+  Cette colonne ne figure pas dans les 9 chemins stricts, mais elle est **lue
   par le moteur gelé** `factur_x_xml_service.rb` pour poser BT-113
   (TotalPrepaidAmount) et BT-115 (DuePayableAmount = `total_ttc − montant_paye`).
   Invariants : **ne jamais la supprimer** (la retirer casserait le moteur gelé)
@@ -117,18 +131,6 @@ mais porte un invariant légal à préserver.
   convention de chemin casserait ce test — régression fonctionnelle, pas
   non-conformité.
 
-- **`backend/app/services/facture_pdf_service.rb`** — ⚠️ promotion DUE (veraPDF câblé)
-  Génère le PDF visuel de base que `FacturXPackageService` enveloppe en PDF/A-3 ;
-  un PDF de base malformé casserait la conformité PDF/A même avec une enveloppe
-  correcte. **Son déclencheur de promotion est atteint : veraPDF est désormais
-  câblé en CI** (B4 étage 2 — PDF/A-3b re-prouvé à chaque commit, facture ET avoir).
-  Il DEVRAIT donc passer en GELÉ STRICT.
-  ⚠️ À trancher avant de l'ajouter à la commande de contrôle : ce fichier a été
-  **modifié depuis `2079ad2`** (fix stockage, cloisonnement par environnement),
-  donc l'ajouter avec `2079ad2` comme référence la ferait échouer à tort. La
-  promotion propre passe par un **re-tag du `main` actuel** comme nouvelle
-  référence de gel (idéalement pour tout le socle désormais re-prouvé en CI).
-
 ---
 
 ## Explicitement LIBRES (non gelés)
@@ -157,19 +159,20 @@ Pour prouver l'absence de sur-gel, ces fichiers ont été évalués et exclus :
 strict intact.
 
 ```bash
-git diff --stat 2079ad2..HEAD -- \
+git diff --stat v0.3.0-conformite-fr..HEAD -- \
   backend/app/services/factur_x_xml_service.rb \
   backend/app/services/factur_x_package_service.rb \
   backend/app/services/facture_conformite_service.rb \
   backend/app/services/facture_emission_service.rb \
   backend/app/services/facture_totals_service.rb \
+  backend/app/services/facture_pdf_service.rb \
   backend/vendor/facturx/ \
   backend/config/facturx/sRGB.icc \
   backend/spec/integration/facturx_generation_spec.rb
 ```
 
 > Note : les sprints B1→R6 utilisaient une version incomplète de cette commande
-> (seuls 4 des 8 chemins étaient contrôlés). Cette version complète corrige
+> (seuls 4 des chemins gelés étaient contrôlés). Cette version complète corrige
 > l'oubli — à utiliser désormais.
 
 ---
