@@ -34,6 +34,17 @@ resources :factures do
     post :synchroniser, on: :collection
     post :relancer, on: :collection
   end
+
+  # Paiements v1 étage B — NICHÉS sous factures (décision Sébastien, cf.
+  # rapport de reconnaissance du 31/07/2026) : un paiement n'a de sens
+  # qu'attaché à une facture précise. Pas de show/update/destroy (cf.
+  # PaiementsController).
+  resources :paiements, only: [ :index, :create ] do
+    post :confirmer, on: :member
+    post :annuler, on: :member
+
+    resources :evenements_paiement, path: "evenements", only: [ :index ]
+  end
 end
 
       # Organisation-scopée (pas liée à une facture précise) : badge B3.2.
