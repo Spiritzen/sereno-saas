@@ -9,14 +9,16 @@ class LigneDevis < ApplicationRecord
 
   belongs_to :produit, optional: true
 
-  before_validation :calculer_total_ht
+  before_validation :calculer_montants
 
   validates :designation, presence: true
 
   validates :quantite, presence: true, numericality: { greater_than: 0 }
   validates :prix_unitaire_ht, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :taux_tva, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :montant_tva, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :total_ht, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :total_ttc, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
   validate :devis_appartient_a_la_meme_organisation
   validate :produit_appartient_a_la_meme_organisation
@@ -26,10 +28,23 @@ class LigneDevis < ApplicationRecord
 
   private
 
-  def calculer_total_ht
-    return if quantite.blank? || prix_unitaire_ht.blank?
+  # Miroir exact de LigneFacture#calculer_montants : FactureTotalsService est
+  # GELÉ STRICT, on APPELLE sa méthode de classe pure (calculer_ligne), on ne
+  # la modifie jamais. C'est ce qui garantit qu'un devis et la facture qui en
+  # découlerait affichent le même total au centime (même conventions
+  # BigDecimal / ROUND_HALF_UP).
+  def calculer_montants
+    return if quantite.blank? || prix_unitaire_ht.blank? || taux_tva.blank?
 
-    self.total_ht = quantite * prix_unitaire_ht
+    montants = FactureTotalsService.calculer_ligne(
+      quantite: quantite,
+      prix_unitaire_ht: prix_unitaire_ht,
+      taux_tva: taux_tva
+    )
+
+    self.total_ht = montants[:total_ht]
+    self.montant_tva = montants[:montant_tva]
+    self.total_ttc = montants[:total_ttc]
   end
 
   def devis_appartient_a_la_meme_organisation

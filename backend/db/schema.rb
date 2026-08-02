@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_31_100002) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_02_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -200,6 +200,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_31_100002) do
     t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'emise'::character varying, 'deposee'::character varying, 'recue'::character varying, 'mise_a_disposition'::character varying, 'approuvee'::character varying, 'refusee'::character varying, 'en_litige'::character varying, 'encaissee'::character varying, 'archivee'::character varying, 'annulee'::character varying]::text[])", name: "check_evenement_avoir_statut"
   end
 
+  create_table "evenement_devis", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.uuid "devis_id", null: false
+    t.uuid "organisation_id", null: false
+    t.jsonb "payload"
+    t.string "source", limit: 20, default: "interne", null: false
+    t.string "statut", limit: 20, null: false
+    t.uuid "utilisateur_id"
+    t.index ["devis_id", "created_at"], name: "index_evenement_devis_on_devis_and_created_at"
+    t.index ["devis_id"], name: "index_evenement_devis_on_devis_id"
+    t.index ["organisation_id", "created_at"], name: "index_evenement_devis_on_org_and_created_at"
+    t.index ["organisation_id", "devis_id"], name: "index_evenement_devis_on_org_and_devis"
+    t.index ["organisation_id"], name: "index_evenement_devis_on_organisation_id"
+    t.index ["utilisateur_id"], name: "index_evenement_devis_on_utilisateur_id"
+    t.check_constraint "source::text = 'interne'::text", name: "check_evenement_devis_source"
+    t.check_constraint "statut::text = ANY (ARRAY['brouillon'::character varying, 'envoye'::character varying, 'accepte'::character varying, 'refuse'::character varying]::text[])", name: "check_evenement_devis_statut"
+  end
+
   create_table "evenement_entrant_pa", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "avoir_id"
     t.string "cle_deduplication", null: false
@@ -327,6 +345,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_31_100002) do
     t.datetime "created_at", null: false
     t.string "designation", null: false
     t.uuid "devis_id", null: false
+    t.decimal "montant_tva", precision: 12, scale: 2, default: "0.0", null: false
     t.uuid "organisation_id", null: false
     t.integer "position", default: 0, null: false
     t.decimal "prix_unitaire_ht", precision: 12, scale: 2, null: false
@@ -334,16 +353,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_31_100002) do
     t.decimal "quantite", precision: 10, scale: 2, default: "1.0", null: false
     t.decimal "taux_tva", precision: 5, scale: 2, null: false
     t.decimal "total_ht", precision: 12, scale: 2, null: false
+    t.decimal "total_ttc", precision: 12, scale: 2, default: "0.0", null: false
     t.datetime "updated_at", null: false
     t.index ["devis_id", "position"], name: "index_ligne_devis_on_devis_id_and_position"
     t.index ["devis_id"], name: "index_ligne_devis_on_devis_id"
     t.index ["organisation_id", "devis_id"], name: "index_ligne_devis_on_organisation_id_and_devis_id"
     t.index ["organisation_id"], name: "index_ligne_devis_on_organisation_id"
     t.index ["produit_id"], name: "index_ligne_devis_on_produit_id"
+    t.check_constraint "montant_tva >= 0::numeric", name: "check_ligne_devis_montant_tva_positive"
     t.check_constraint "prix_unitaire_ht >= 0::numeric", name: "check_ligne_devis_prix_unitaire_ht_positive"
     t.check_constraint "quantite > 0::numeric", name: "check_ligne_devis_quantite_positive"
     t.check_constraint "taux_tva >= 0::numeric", name: "check_ligne_devis_taux_tva_positive"
     t.check_constraint "total_ht >= 0::numeric", name: "check_ligne_devis_total_ht_positive"
+    t.check_constraint "total_ttc >= 0::numeric", name: "check_ligne_devis_total_ttc_positive"
   end
 
   create_table "ligne_facture", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -713,6 +735,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_31_100002) do
   add_foreign_key "evenement_avoir", "avoirs"
   add_foreign_key "evenement_avoir", "organisations"
   add_foreign_key "evenement_avoir", "utilisateurs"
+  add_foreign_key "evenement_devis", "devis", column: "devis_id"
+  add_foreign_key "evenement_devis", "organisations"
+  add_foreign_key "evenement_devis", "utilisateurs"
   add_foreign_key "evenement_entrant_pa", "avoirs"
   add_foreign_key "evenement_entrant_pa", "factures"
   add_foreign_key "evenement_entrant_pa", "organisations"
