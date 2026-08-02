@@ -19,6 +19,20 @@ Rails.application.routes.draw do
 
       resources :contacts, only: [ :show, :update, :destroy ]
 
+      # Devis→facture v1.3 étage B — routes À PLAT (décision Sébastien),
+      # comme les avoirs : un devis a sa propre page de détail. Lignes
+      # NICHÉES (comme lignes_avoir) : pas de route à plat séparée, le
+      # frontend connaît déjà le devis_id.
+      resources :devis do
+        post :envoyer, on: :member
+        post :accepter, on: :member
+        post :refuser, on: :member
+        post :convertir, on: :member
+
+        resources :evenements_devis, path: "evenements", only: [ :index ]
+        resources :lignes_devis, path: "lignes", only: [ :create, :update, :destroy ]
+      end
+
 resources :factures do
   post :emettre, on: :member
   get :conformite, on: :member

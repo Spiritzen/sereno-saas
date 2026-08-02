@@ -22,9 +22,12 @@ class LigneDevis < ApplicationRecord
 
   validate :devis_appartient_a_la_meme_organisation
   validate :produit_appartient_a_la_meme_organisation
+  validate :devis_modifiable
 
   after_save :recalculer_totaux_du_devis
   after_destroy :recalculer_totaux_du_devis
+
+  before_destroy :empecher_suppression_si_devis_non_brouillon
 
   private
 
@@ -61,6 +64,22 @@ class LigneDevis < ApplicationRecord
     if produit.organisation_id != organisation_id
       errors.add(:produit, "doit appartenir à la même organisation que la ligne")
     end
+  end
+
+  # Miroir de LigneAvoir#avoir_modifiable / LigneFacture#facture_modifiable :
+  # une fois le devis envoyé, ses lignes sont figées (§3 étage B).
+  def devis_modifiable
+    return if devis.blank?
+    return if devis.brouillon?
+
+    errors.add(:devis, "ne peut plus être modifié après envoi")
+  end
+
+  def empecher_suppression_si_devis_non_brouillon
+    return if devis.blank? || devis.brouillon?
+
+    errors.add(:devis, "ne peut plus être modifié après envoi")
+    throw(:abort)
   end
 
   def recalculer_totaux_du_devis
