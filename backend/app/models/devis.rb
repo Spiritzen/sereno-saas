@@ -10,6 +10,21 @@ class Devis < ApplicationRecord
   # des statuts nommés dans la roadmap métier, même celui qui est dérivé.
   STATUTS = %w[brouillon envoye accepte refuse expire].freeze
 
+  # Champs de contenu bloqués dès que le devis n'est plus brouillon. Miroir
+  # de Facture::CHAMPS_IMMUABLES_APRES_EMISSION : `statut` et `numero` sont
+  # DÉLIBÉRÉMENT absents de cette liste, car DevisStatutService doit pouvoir
+  # les écrire pendant les transitions (brouillon -> envoye notamment, où le
+  # numéro est tiré) — seul le CONTENU métier (client, objet, dates, montant)
+  # est figé une fois le devis envoyé.
+  CHAMPS_IMMUABLES_APRES_ENVOI = %w[
+    organisation_id
+    client_id
+    objet
+    date_emission
+    date_validite
+    conditions
+  ].freeze
+
   belongs_to :organisation, inverse_of: :devis
   belongs_to :client, inverse_of: :devis
 
@@ -42,6 +57,13 @@ class Devis < ApplicationRecord
             numericality: { greater_than_or_equal_to: 0 }
 
   validate :client_appartient_a_la_meme_organisation
+  validate :empecher_modification_document_non_brouillon, on: :update
+
+  before_destroy :empecher_suppression_si_non_brouillon
+
+  def brouillon?
+    statut == "brouillon"
+  end
 
   # Réutilise UNIQUEMENT les méthodes de classe pures et gelées de
   # FactureTotalsService (decimal / arrondir_centimes / arrondir_taux) —
@@ -120,5 +142,29 @@ class Devis < ApplicationRecord
     if client.organisation_id != organisation_id
       errors.add(:client, "doit appartenir à la même organisation que le devis")
     end
+  end
+
+  # Miroir de Facture#empecher_modification_document_emis : une fois le
+  # devis envoyé, son CONTENU est figé (policy = rôle+tenant uniquement,
+  # cette règle d'état vit ici, jamais dans DevisPolicy — pas de dette n°21).
+  def empecher_modification_document_non_brouillon
+    return if statut_in_database == "brouillon"
+
+    champs_bloques_modifies = changed & CHAMPS_IMMUABLES_APRES_ENVOI
+
+    if champs_bloques_modifies.any?
+      errors.add(:base, "Un devis envoyé est figé pour ses champs de contenu")
+    end
+  end
+
+  # Miroir de LigneFacture#empecher_suppression_si_facture_emise, mais porté
+  # directement sur Devis (pas de policy state check, cf. commentaire
+  # ci-dessus). Un devis converti (has_many :factures, restrict_with_exception)
+  # est de toute façon protégé même s'il était encore brouillon.
+  def empecher_suppression_si_non_brouillon
+    return if brouillon?
+
+    errors.add(:base, "Un devis non brouillon ne peut pas être supprimé")
+    throw(:abort)
   end
 end

@@ -14,3 +14,12 @@
 # ActiveSupport::Inflector.inflections(:en) do |inflect|
 #   inflect.acronym "RESTful"
 # end
+
+# "devis" est invariable en français (singulier = pluriel). Sans cette
+# règle, l'inflecteur anglais le traite comme le pluriel régulier de "devi"
+# (retrait du "s"), ce qui casse le nom du paramètre des routes nichées
+# (:devi_id au lieu de :devis_id attendu par DevisController et consorts) et
+# les noms de helpers de route.
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.uncountable "devis"
+end
