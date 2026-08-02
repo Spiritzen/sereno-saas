@@ -15,6 +15,10 @@ class Organisation < ApplicationRecord
          class_name: "LigneDevis",
          foreign_key: :organisation_id,
          dependent: :restrict_with_exception
+  has_many :evenements_devis,
+         class_name: "EvenementDevis",
+         foreign_key: :organisation_id,
+         dependent: :restrict_with_exception
   has_many :factures, dependent: :restrict_with_exception
   has_many :lignes_facture,
          class_name: "LigneFacture",
