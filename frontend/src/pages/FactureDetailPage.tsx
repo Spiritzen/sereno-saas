@@ -6,7 +6,6 @@ import {
   Send,
   ShieldCheck,
   Trash2,
-  Wallet,
 } from "lucide-react";
 import { useEffect, useState, type FormEventHandler } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -19,19 +18,12 @@ import {
 } from "../api/facturesApi";
 import { listAvoirs, sommeAvoirsDejaEmis } from "../api/avoirsApi";
 import { listEvenementsFacture } from "../api/evenementsFactureApi";
-import { listEvenementsPaiement } from "../api/evenementsPaiementApi";
 import { getApiErrorMessage } from "../api/http";
 import {
   createLigneFacture,
   deleteLigneFacture,
   listLignesFacture,
 } from "../api/lignesFactureApi";
-import {
-  annulerPaiement,
-  confirmerPaiement,
-  createPaiement,
-  listPaiements,
-} from "../api/paiementsApi";
 import {
   getRequiresReviewCount,
   getTransmissionFromError,
@@ -44,26 +36,19 @@ import { ConfirmModal } from "../components/ConfirmModal";
 import { InvoiceDetailHeader } from "../components/InvoiceDetailHeader";
 import { InvoiceEventHistory } from "../components/InvoiceEventHistory";
 import { InvoiceLifecycleTimeline } from "../components/InvoiceLifecycleTimeline";
+import { InvoicePaymentsSection } from "../components/InvoicePaymentsSection";
 import { InvoiceTransmissionSection } from "../components/InvoiceTransmissionSection";
 import type { Avoir } from "../types/avoir";
 import type { ConformiteResult } from "../types/conformite";
 import type { EvenementFacture } from "../types/evenementFacture";
-import type { EvenementPaiement } from "../types/evenementPaiement";
 import type { Facture, StatutEncaissementLocal } from "../types/facture";
 import type { LigneFacture } from "../types/ligneFacture";
-import { MOYENS_PAIEMENT, type Paiement, type PaiementMethodeCode } from "../types/paiement";
 import type { PaSyncResult, TransmissionPa } from "../types/transmissionPa";
 
 const STATUT_ENCAISSEMENT_LABELS: Record<StatutEncaissementLocal, string> = {
   non_payee: "Non payée",
   partielle: "Partielle",
   soldee: "Soldée",
-};
-
-const PAIEMENT_STATUT_LABELS: Record<Paiement["statut"], string> = {
-  brouillon: "Brouillon",
-  confirme: "Confirmé",
-  annule: "Annulé",
 };
 
 // Miroir de FactureStatusTransitionPolicy::TERMINAUX (backend) : une facture
@@ -154,41 +139,6 @@ export function FactureDetailPage() {
   const [avoirs, setAvoirs] = useState<Avoir[]>([]);
   const [isLoadingAvoirs, setIsLoadingAvoirs] = useState(Boolean(id));
   const [avoirsError, setAvoirsError] = useState<string | null>(null);
-
-  // Paiements v1 étage C.
-  const [paiements, setPaiements] = useState<Paiement[]>([]);
-  const [isLoadingPaiements, setIsLoadingPaiements] = useState(Boolean(id));
-  const [paiementsError, setPaiementsError] = useState<string | null>(null);
-
-  const [montantPaiement, setMontantPaiement] = useState("");
-  const [methodePaiement, setMethodePaiement] =
-    useState<PaiementMethodeCode>("58");
-  const [datePaiement, setDatePaiement] = useState(() =>
-    new Date().toISOString().slice(0, 10),
-  );
-  const [referencePaiement, setReferencePaiement] = useState("");
-  const [isRegisteringPaiement, setIsRegisteringPaiement] = useState(false);
-  const [paiementError, setPaiementError] = useState<string | null>(null);
-
-  const [confirmingPaiementId, setConfirmingPaiementId] = useState<
-    string | null
-  >(null);
-  const [cancelingPaiementId, setCancelingPaiementId] = useState<
-    string | null
-  >(null);
-  const [paiementToCancel, setPaiementToCancel] = useState<Paiement | null>(
-    null,
-  );
-
-  const [expandedPaiementId, setExpandedPaiementId] = useState<string | null>(
-    null,
-  );
-  const [paiementEvents, setPaiementEvents] = useState<
-    Record<string, EvenementPaiement[]>
-  >({});
-  const [loadingPaiementEventsId, setLoadingPaiementEventsId] = useState<
-    string | null
-  >(null);
 
   const isDraft = facture?.statut === "brouillon";
 
@@ -381,36 +331,6 @@ export function FactureDetailPage() {
       .finally(() => {
         if (!ignore) {
           setIsLoadingAvoirs(false);
-        }
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [id]);
-
-  useEffect(() => {
-    if (!id) {
-      return;
-    }
-
-    let ignore = false;
-
-    void listPaiements(id)
-      .then((paiementsData) => {
-        if (!ignore) {
-          setPaiements(paiementsData);
-          setPaiementsError(null);
-        }
-      })
-      .catch((apiError) => {
-        if (!ignore) {
-          setPaiementsError(getApiErrorMessage(apiError));
-        }
-      })
-      .finally(() => {
-        if (!ignore) {
-          setIsLoadingPaiements(false);
         }
       });
 
@@ -718,149 +638,6 @@ export function FactureDetailPage() {
     }
   }
 
-  const handleRegisterPaiement: FormEventHandler<HTMLFormElement> = async (
-    event,
-  ) => {
-    event.preventDefault();
-
-    if (!facture) {
-      setPaiementError("Facture introuvable.");
-      return;
-    }
-
-    const montant = parseDecimal(montantPaiement);
-
-    if (montant <= 0) {
-      setPaiementError("Le montant doit être supérieur à 0.");
-      return;
-    }
-
-    if (!datePaiement) {
-      setPaiementError("La date d’encaissement est requise.");
-      return;
-    }
-
-    setPaiementError(null);
-    setIsRegisteringPaiement(true);
-
-    try {
-      // Flux v1 : create (brouillon) PUIS confirmer, en une seule action
-      // utilisateur — le paiement apparaît directement confirmé. Aucun
-      // endpoint update/discard n'existe (cf. rapport, dette à consigner) :
-      // si confirmer échoue, le brouillon résiduel reste visible avec son
-      // propre bouton "Confirmer" pour réessayer.
-      const brouillon = await createPaiement(facture.id, {
-        montant,
-        methode_code: methodePaiement,
-        date_encaissement: datePaiement,
-        reference: referencePaiement.trim() || undefined,
-      });
-
-      const confirme = await confirmerPaiement(facture.id, brouillon.id);
-
-      setPaiements((previous) => [
-        confirme,
-        ...previous.filter((paiement) => paiement.id !== confirme.id),
-      ]);
-
-      await refreshFactureApresPaiement(facture.id);
-
-      setMontantPaiement("");
-      setReferencePaiement("");
-      setDatePaiement(new Date().toISOString().slice(0, 10));
-    } catch (apiError) {
-      setPaiementError(getApiErrorMessage(apiError));
-
-      const paiementsData = await listPaiements(facture.id).catch(() => null);
-      if (paiementsData) {
-        setPaiements(paiementsData);
-      }
-    } finally {
-      setIsRegisteringPaiement(false);
-    }
-  };
-
-  async function handleConfirmPaiement(paiement: Paiement) {
-    if (!facture) {
-      return;
-    }
-
-    setConfirmingPaiementId(paiement.id);
-    setPaiementError(null);
-
-    try {
-      const confirme = await confirmerPaiement(facture.id, paiement.id);
-
-      setPaiements((previous) =>
-        previous.map((item) => (item.id === confirme.id ? confirme : item)),
-      );
-
-      await refreshFactureApresPaiement(facture.id);
-    } catch (apiError) {
-      setPaiementError(getApiErrorMessage(apiError));
-    } finally {
-      setConfirmingPaiementId(null);
-    }
-  }
-
-  function handleAskCancelPaiement(paiement: Paiement) {
-    setPaiementToCancel(paiement);
-  }
-
-  async function handleConfirmCancelPaiement() {
-    if (!facture || !paiementToCancel) {
-      return;
-    }
-
-    setCancelingPaiementId(paiementToCancel.id);
-    setPaiementError(null);
-
-    try {
-      const annule = await annulerPaiement(facture.id, paiementToCancel.id);
-
-      setPaiements((previous) =>
-        previous.map((item) => (item.id === annule.id ? annule : item)),
-      );
-
-      await refreshFactureApresPaiement(facture.id);
-      setPaiementToCancel(null);
-    } catch (apiError) {
-      setPaiementError(getApiErrorMessage(apiError));
-      setPaiementToCancel(null);
-    } finally {
-      setCancelingPaiementId(null);
-    }
-  }
-
-  async function handleToggleHistoriquePaiement(paiement: Paiement) {
-    if (!facture) {
-      return;
-    }
-
-    if (expandedPaiementId === paiement.id) {
-      setExpandedPaiementId(null);
-      return;
-    }
-
-    setExpandedPaiementId(paiement.id);
-
-    if (paiementEvents[paiement.id]) {
-      return;
-    }
-
-    setLoadingPaiementEventsId(paiement.id);
-
-    try {
-      const events = await listEvenementsPaiement(facture.id, paiement.id);
-      setPaiementEvents((previous) => ({ ...previous, [paiement.id]: events }));
-    } catch {
-      // Sobre (cf. prompt §5) : un historique indisponible n'est pas
-      // bloquant, on n'affiche simplement rien de plus.
-    } finally {
-      setLoadingPaiementEventsId(null);
-    }
-  }
-
   return (
     <section className="new-invoice-page">
       <div className="page-heading">
@@ -1069,218 +846,13 @@ export function FactureDetailPage() {
       )}
 
       {!isLoading && facture && facture.statut !== "brouillon" && (
-        <section
-          className="invoice-transmission-section"
-          aria-labelledby="facture-paiements-title"
-        >
-          <div className="invoice-transmission-section__header">
-            <div className="invoice-transmission-section__heading-row">
-              <h2
-                id="facture-paiements-title"
-                className="invoice-transmission-section__title"
-              >
-                Paiements
-              </h2>
-            </div>
-            <p className="invoice-transmission-section__subtitle">
-              {formatCurrency(montantPaye)} encaissés sur{" "}
-              {formatCurrency(resteDu)} dus après avoirs — reste{" "}
-              {formatCurrency(resteAPayer)} à payer.
-            </p>
-          </div>
-
-          {isLoadingPaiements && (
-            <p className="invoice-transmission-section__loading">
-              Chargement des paiements...
-            </p>
-          )}
-
-          {!isLoadingPaiements && paiementsError && (
-            <p className="invoice-transmission-section__error">
-              {paiementsError}
-            </p>
-          )}
-
-          {!isLoadingPaiements && !paiementsError && paiements.length === 0 && (
-            <p className="invoice-transmission-section__empty">
-              Aucun paiement n’a encore été enregistré pour cette facture.
-            </p>
-          )}
-
-          {!isLoadingPaiements && paiements.length > 0 && (
-            <div className="invoice-lines-table">
-              <div className="invoice-lines-header">
-                <span>Date</span>
-                <span>Moyen</span>
-                <span>Référence</span>
-                <span>Montant</span>
-                <span>Statut</span>
-              </div>
-
-              {paiements.map((paiement) => (
-                <div key={paiement.id}>
-                  <div
-                    className={`invoice-lines-row ${
-                      paiement.statut === "annule" ? "paiement-row--annule" : ""
-                    }`}
-                  >
-                    <span>{formatDate(paiement.date_encaissement)}</span>
-                    <span>{paiement.methode_libelle}</span>
-                    <span>{paiement.reference || "—"}</span>
-                    <strong>{formatCurrency(toNumber(paiement.montant))}</strong>
-                    <span
-                      className={`badge-paiement ${
-                        paiement.statut === "annule"
-                          ? "badge-paiement--annule"
-                          : ""
-                      }`}
-                    >
-                      {PAIEMENT_STATUT_LABELS[paiement.statut]}
-                    </span>
-                  </div>
-
-                  <div className="invoice-actions-row">
-                    <button
-                      type="button"
-                      className="table-action-btn"
-                      onClick={() => {
-                        void handleToggleHistoriquePaiement(paiement);
-                      }}
-                    >
-                      {expandedPaiementId === paiement.id
-                        ? "Masquer l’historique"
-                        : "Historique"}
-                    </button>
-
-                    {paiement.statut === "brouillon" && (
-                      <button
-                        type="button"
-                        className="paiement-btn"
-                        disabled={confirmingPaiementId === paiement.id}
-                        onClick={() => {
-                          void handleConfirmPaiement(paiement);
-                        }}
-                      >
-                        {confirmingPaiementId === paiement.id
-                          ? "Confirmation..."
-                          : "Confirmer"}
-                      </button>
-                    )}
-
-                    {paiement.statut === "confirme" && (
-                      <button
-                        type="button"
-                        className="table-action-btn danger"
-                        disabled={cancelingPaiementId === paiement.id}
-                        onClick={() => handleAskCancelPaiement(paiement)}
-                      >
-                        {cancelingPaiementId === paiement.id
-                          ? "Annulation..."
-                          : "Annuler"}
-                      </button>
-                    )}
-                  </div>
-
-                  {expandedPaiementId === paiement.id && (
-                    <div className="state-card">
-                      {loadingPaiementEventsId === paiement.id
-                        ? "Chargement de l’historique..."
-                        : (paiementEvents[paiement.id]?.length ?? 0) > 0
-                          ? (
-                            <ul>
-                              {paiementEvents[paiement.id].map((evenement) => (
-                                <li key={evenement.id}>
-                                  {formatDate(evenement.created_at)} —{" "}
-                                  {PAIEMENT_STATUT_LABELS[evenement.statut]}
-                                  {evenement.actor
-                                    ? ` (${evenement.actor.display_name})`
-                                    : ""}
-                                </li>
-                              ))}
-                            </ul>
-                          )
-                          : "Aucun événement."}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          <form className="line-form" onSubmit={handleRegisterPaiement}>
-            <div className="line-form-grid">
-              <label>
-                Montant
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={montantPaiement}
-                  placeholder="500"
-                  onChange={(event) => setMontantPaiement(event.target.value)}
-                />
-              </label>
-
-              <label>
-                Moyen
-                <select
-                  value={methodePaiement}
-                  onChange={(event) =>
-                    setMethodePaiement(
-                      event.target.value as PaiementMethodeCode,
-                    )
-                  }
-                >
-                  {MOYENS_PAIEMENT.map((moyen) => (
-                    <option key={moyen.code} value={moyen.code}>
-                      {moyen.libelle}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                Date d’encaissement
-                <input
-                  type="date"
-                  value={datePaiement}
-                  onChange={(event) => setDatePaiement(event.target.value)}
-                />
-              </label>
-
-              <label>
-                Référence (optionnel)
-                <input
-                  type="text"
-                  value={referencePaiement}
-                  placeholder="VIR-2026-001"
-                  onChange={(event) =>
-                    setReferencePaiement(event.target.value)
-                  }
-                />
-              </label>
-            </div>
-
-            <div className="invoice-actions-row">
-              <button
-                type="submit"
-                className="paiement-btn"
-                disabled={isRegisteringPaiement}
-              >
-                <Wallet size={16} />
-                {isRegisteringPaiement
-                  ? "Enregistrement..."
-                  : "Enregistrer un paiement"}
-              </button>
-            </div>
-          </form>
-
-          {paiementError && (
-            <p className="invoice-transmission-section__error">
-              {paiementError}
-            </p>
-          )}
-        </section>
+        <InvoicePaymentsSection
+          factureId={facture.id}
+          montantPaye={montantPaye}
+          resteDu={resteDu}
+          resteAPayer={resteAPayer}
+          onFactureMutated={() => refreshFactureApresPaiement(facture.id)}
+        />
       )}
 
       {!isLoading && facture && (
@@ -1517,28 +1089,6 @@ export function FactureDetailPage() {
         onCancel={() => setIsEmitConfirmOpen(false)}
         onConfirm={() => {
           void handleConfirmEmitFacture();
-        }}
-      />
-
-      <ConfirmModal
-        open={Boolean(paiementToCancel)}
-        title="Annuler ce paiement ?"
-        message={
-          paiementToCancel
-            ? `Le paiement de ${formatCurrency(
-                toNumber(paiementToCancel.montant),
-              )} (${paiementToCancel.methode_libelle}) sera annulé. Le reste à payer sera recalculé.`
-            : ""
-        }
-        cancelLabel="Annuler"
-        confirmLabel={
-          cancelingPaiementId ? "Annulation en cours…" : "Annuler le paiement"
-        }
-        destructive
-        isLoading={Boolean(cancelingPaiementId)}
-        onCancel={() => setPaiementToCancel(null)}
-        onConfirm={() => {
-          void handleConfirmCancelPaiement();
         }}
       />
 

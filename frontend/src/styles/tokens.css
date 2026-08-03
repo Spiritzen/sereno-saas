@@ -34,6 +34,15 @@
   --color-paiement: #0d9488;
   --color-paiement-soft: rgba(13, 148, 136, 0.16);
 
+  /* Devis v1.3 étage C — accent de TYPE DE DOCUMENT (devis), même logique
+     que --color-avoir/--color-paiement ci-dessus : jamais un badge de statut,
+     un sigle distinct pour ne jamais confondre un devis (sans valeur légale)
+     avec la facture qu'il produira. Indigo, délibérément distinct du violet
+     de marque (--color-brand, #7c3aed), de l'ambre avoir et du teal
+     paiement — un neutre/froid sobre, cohérent avec la DA. */
+  --color-devis: #6366f1;
+  --color-devis-soft: rgba(99, 102, 241, 0.16);
+
   --color-text-primary: #f1f5f9;
   --color-text-secondary: #94a3b8;
   --color-text-muted: #475569;

@@ -586,6 +586,57 @@ h1 {
   border-color: var(--color-border-strong);
 }
 
+/* =========================
+   DEVIS — accent de type de document (v1.3 étage C)
+   Distinct de .status, .badge-avoir ET .badge-paiement : un devis n'a aucune
+   valeur légale, jamais une couleur déjà porteuse d'un sens financier/statut.
+   Toujours le mot "DEVIS", jamais un statut.
+========================= */
+
+.badge-devis {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  width: fit-content;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--color-devis-soft);
+  color: var(--color-devis);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.devis-accent-text {
+  color: var(--color-devis);
+  font-weight: 700;
+}
+
+.devis-btn {
+  background: var(--color-devis-soft);
+  color: var(--color-devis);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.devis-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.24);
+}
+
+.devis-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .paiement-btn {
   background: var(--color-paiement-soft);
   color: var(--color-paiement);
