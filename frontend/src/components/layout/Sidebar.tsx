@@ -31,15 +31,15 @@ const menuItems = [
     end: true,
   },
   {
-    to: "/app/clients",
-    label: "Clients",
-    icon: Users,
-    end: true,
-  },
-  {
     to: "/app/factures",
     label: "Factures",
     icon: WalletCards,
+    end: true,
+  },
+  {
+    to: "/app/clients",
+    label: "Clients",
+    icon: Users,
     end: true,
   },
   {
