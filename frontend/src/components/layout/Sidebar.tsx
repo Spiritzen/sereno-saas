@@ -2,6 +2,7 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   FileText,
   Settings,
   Users,
@@ -24,15 +25,21 @@ const menuItems = [
     end: true,
   },
   {
-    to: "/app/clients",
-    label: "Clients",
-    icon: Users,
+    to: "/app/devis",
+    label: "Devis",
+    icon: ClipboardList,
     end: true,
   },
   {
     to: "/app/factures",
     label: "Factures",
     icon: WalletCards,
+    end: true,
+  },
+  {
+    to: "/app/clients",
+    label: "Clients",
+    icon: Users,
     end: true,
   },
   {

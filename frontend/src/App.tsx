@@ -4,10 +4,13 @@ import { AppShell } from "./components/layout/AppShell";
 import { AvoirDetailPage } from "./pages/AvoirDetailPage";
 import { ClientsPage } from "./pages/ClientsPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { DevisDetailPage } from "./pages/DevisDetailPage";
+import { DevisPage } from "./pages/DevisPage";
 import { FactureDetailPage } from "./pages/FactureDetailPage";
 import { FacturesPage } from "./pages/FacturesPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NewCreditNotePage } from "./pages/NewCreditNotePage";
+import { NewDevisPage } from "./pages/NewDevisPage";
 import { NewInvoicePage } from "./pages/NewInvoicePage";
 import { ParametresPage } from "./pages/ParametresPage";
 
@@ -79,6 +82,39 @@ export default function App() {
           <ProtectedRoute>
             <AppShell>
               <AvoirDetailPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/devis"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <DevisPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/devis/new"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <NewDevisPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/app/devis/:id"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <DevisDetailPage />
             </AppShell>
           </ProtectedRoute>
         }
