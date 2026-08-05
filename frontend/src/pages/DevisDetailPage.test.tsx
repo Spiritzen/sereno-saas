@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import * as devisApi from "../api/devisApi";
 import * as evenementsDevisApi from "../api/evenementsDevisApi";
 import type { Devis } from "../types/devis";
@@ -103,5 +104,70 @@ describe("DevisDetailPage — visibilité du bouton Convertir", () => {
     expect(
       screen.queryByRole("button", { name: "Convertir en facture" }),
     ).not.toBeInTheDocument();
+  });
+});
+
+// §8 du palier V2-A : le panneau "accepté non converti" doit rester violet
+// (statut par défaut, pas de modificateur --success) — le vert n'apparaît
+// que sur la facture réellement générée.
+describe("DevisDetailPage — sémantique violet/vert du panneau de décision (§8)", () => {
+  beforeEach(() => {
+    vi.mocked(evenementsDevisApi.listEvenementsDevis).mockResolvedValue([]);
+  });
+
+  it("accepté non converti : panneau violet par défaut, jamais l'état succès", async () => {
+    vi.mocked(devisApi.getDevis).mockResolvedValue(
+      buildDevis({ statut: "accepte", converti: false }),
+    );
+
+    renderDetailPage("devis-1");
+
+    const intro = await screen.findByText("Accord enregistré");
+    const panel = intro.closest(".devis-decision-panel");
+
+    expect(panel).not.toBeNull();
+    expect(panel).not.toHaveClass("devis-decision-panel--success");
+    expect(screen.queryByText("Facture générée")).not.toBeInTheDocument();
+  });
+
+  it("refusé : aucune action primaire, jamais rouge", async () => {
+    vi.mocked(devisApi.getDevis).mockResolvedValue(
+      buildDevis({ statut: "refuse", converti: false }),
+    );
+
+    renderDetailPage("devis-1");
+
+    await screen.findByText("Refus enregistré");
+
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
+  });
+
+  it("conversion en cours : l'action Convertir est désactivée, aucune redirection automatique", async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(devisApi.getDevis).mockResolvedValue(
+      buildDevis({ statut: "accepte", converti: false }),
+    );
+    vi.mocked(devisApi.convertirDevis).mockReturnValue(new Promise(() => {}));
+
+    renderDetailPage("devis-1");
+
+    await user.click(
+      await screen.findByRole("button", { name: "Convertir en facture" }),
+    );
+
+    await user.click(
+      await screen.findByRole("button", { name: "Créer la facture" }),
+    );
+
+    expect(
+      await screen.findByRole("button", {
+        name: "Création de la facture conforme…",
+      }),
+    ).toBeDisabled();
+
+    expect(
+      screen.getByRole("button", { name: "Conversion..." }),
+    ).toBeDisabled();
   });
 });

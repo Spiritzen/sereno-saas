@@ -13,7 +13,7 @@ import {
   UploadCloud,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useStickyCompact } from "../hooks/useStickyCompact";
 import type { AvoirStatut } from "../types/avoir";
 
 // Duplication délibérée de InvoiceLifecycleTimeline (voie b, cohérente avec
@@ -205,79 +205,8 @@ export function CreditNoteLifecycleTimeline({
       ? EXCEPTION_META[status].label
       : status;
 
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const [isStuck, setIsStuck] = useState(false);
-  const [isEligibleForSticky, setIsEligibleForSticky] = useState(false);
-
-  useEffect(() => {
-    function evaluerEligibilite() {
-      const hauteurViewport = window.innerHeight;
-      const hauteurDocument = document.documentElement.scrollHeight;
-
-      setIsEligibleForSticky(hauteurDocument > hauteurViewport * 2);
-    }
-
-    evaluerEligibilite();
-
-    const resizeObserver = new ResizeObserver(evaluerEligibilite);
-    resizeObserver.observe(document.body);
-    window.addEventListener("resize", evaluerEligibilite);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", evaluerEligibilite);
-    };
-  }, []);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-
-    if (!sentinel) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsStuck(isEligibleForSticky && !entry.isIntersecting),
-      { threshold: 0, rootMargin: "-1px 0px 0px 0px" },
-    );
-
-    observer.observe(sentinel);
-
-    return () => observer.disconnect();
-  }, [isEligibleForSticky]);
-
-  const isCompact = isEligibleForSticky && isStuck;
-
-  const fullHeightRef = useRef(0);
-  const [spacerHeight, setSpacerHeight] = useState(0);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-
-    if (!section) {
-      return;
-    }
-
-    function mesurer() {
-      const hauteurActuelle = section!.offsetHeight;
-
-      if (!isCompact) {
-        fullHeightRef.current = hauteurActuelle;
-        setSpacerHeight(0);
-        return;
-      }
-
-      setSpacerHeight(Math.max(0, fullHeightRef.current - hauteurActuelle));
-    }
-
-    mesurer();
-
-    const resizeObserver = new ResizeObserver(mesurer);
-    resizeObserver.observe(section);
-
-    return () => resizeObserver.disconnect();
-  }, [isCompact]);
+  const { sentinelRef, sectionRef, isEligibleForSticky, isCompact, spacerHeight } =
+    useStickyCompact();
 
   return (
     <>
