@@ -346,7 +346,13 @@ export function NewInvoicePage() {
                         <div>
                           <strong>{client.raison_sociale}</strong>
                           <span>{formatClientLegalLine(client)}</span>
-                          <small>{formatClientRouting(client)}</small>
+                          <small
+                            className={
+                              client.identifiant_routage_pa ? "routed" : ""
+                            }
+                          >
+                            {formatClientRouting(client)}
+                          </small>
                         </div>
                       </button>
                     ))}

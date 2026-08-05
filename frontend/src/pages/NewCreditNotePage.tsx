@@ -477,23 +477,30 @@ export function NewCreditNotePage() {
 
           {emitError && <div className="state-card error">{emitError}</div>}
 
-          <div className="invoice-actions-row">
-            <button
-              type="button"
-              className="avoir-btn"
-              disabled={isEmitting}
-              onClick={() => setIsEmitConfirmOpen(true)}
-            >
-              <Send size={16} />
-              {isEmitting ? "Émission..." : "Émettre l’avoir"}
-            </button>
+          <div className="devis-decision-panel">
+            <div className="devis-decision-panel__intro">
+              <strong>Brouillon prêt</strong>
+              <p>Cet avoir peut devenir définitif, sans ressaisie.</p>
+            </div>
 
-            {avoirCree.pdf_url && (
-              <button type="button" className="secondary-btn" onClick={handleOpenPdf}>
-                <ExternalLink size={16} />
-                Ouvrir PDF
+            <div className="invoice-actions-row">
+              <button
+                type="button"
+                className="avoir-btn"
+                disabled={isEmitting}
+                onClick={() => setIsEmitConfirmOpen(true)}
+              >
+                <Send size={16} />
+                {isEmitting ? "Émission..." : "Émettre l’avoir"}
               </button>
-            )}
+
+              {avoirCree.pdf_url && (
+                <button type="button" className="secondary-btn" onClick={handleOpenPdf}>
+                  <ExternalLink size={16} />
+                  Ouvrir PDF
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

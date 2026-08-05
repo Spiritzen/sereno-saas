@@ -126,8 +126,11 @@ export function DevisDetailPage() {
   const [isConverting, setIsConverting] = useState(false);
   const [convertConfirmOpen, setConvertConfirmOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  // Après succès, on NAVIGUE vers la facture créée (FactureBlueprint) — le
-  // devis n'a pas besoin d'être resynchronisé localement, on quitte la page.
+  // Le panneau "Facture générée" (§8) doit rester vrai après un rechargement
+  // de page, pas seulement juste après la conversion en session : dérivé de
+  // devis.converti/facture_generee (déjà chargés), jamais d'un second appel
+  // API. convertedFactureId reste la source la plus fraîche juste après un
+  // succès (avant tout re-fetch de `devis`).
   const [convertedFactureId, setConvertedFactureId] = useState<string | null>(
     null,
   );
@@ -136,6 +139,12 @@ export function DevisDetailPage() {
   const isDraft = devis?.statut === "brouillon";
   const isEnvoye = devis?.statut === "envoye";
   const isAccepte = devis?.statut === "accepte";
+  const isRefuse = devis?.statut === "refuse";
+
+  const factureGenereeId =
+    convertedFactureId ??
+    (devis?.converti ? (devis.facture_generee?.id ?? null) : null);
+  const factureGenereeNumero = devis?.facture_generee?.numero ?? null;
 
   useEffect(() => {
     if (!id) {
@@ -395,19 +404,21 @@ export function DevisDetailPage() {
         <div className="state-card">Devis introuvable.</div>
       )}
 
-      {convertedFactureId && (
-        <div className="conformite-result-card success">
-          <strong>Devis converti avec succès</strong>
-          <p>
-            La facture a été créée, numérotée et émise à partir des lignes de
-            ce devis.
-          </p>
+      {factureGenereeId && (
+        <div className="devis-decision-panel devis-decision-panel--success">
+          <div className="devis-decision-panel__intro">
+            <strong>Facture générée</strong>
+            <p>Cette proposition est devenue une facture conforme.</p>
+            {factureGenereeNumero && (
+              <p className="eyebrow">
+                {factureGenereeNumero} ·{" "}
+                {formatCurrency(toNumber(devis?.total_ttc))}
+              </p>
+            )}
+          </div>
           <div className="invoice-actions-row">
-            <Link
-              to={`/app/factures/${convertedFactureId}`}
-              className="primary-btn"
-            >
-              Voir la facture
+            <Link to={`/app/factures/${factureGenereeId}`} className="primary-btn">
+              Voir la facture →
             </Link>
           </div>
         </div>
@@ -582,43 +593,59 @@ export function DevisDetailPage() {
         </div>
       )}
 
-      {!isLoading && devis && (
+      {!isLoading && devis && isDraft && (
         <div className="invoice-actions-row">
-          {isDraft && (
+          <button
+            type="button"
+            className="devis-btn"
+            disabled={isSending}
+            onClick={() => setSendConfirmOpen(true)}
+          >
+            <Send size={16} />
+            {isSending ? "Envoi..." : "Envoyer le devis"}
+          </button>
+        </div>
+      )}
+
+      {/* "Une lumière = une décision" (§3.4) : la zone d'action active seule
+          reçoit une surface + un halo — jamais toute la page. */}
+      {!isLoading && devis && isEnvoye && (
+        <div className="devis-decision-panel">
+          <div className="devis-decision-panel__intro">
+            <strong>Réponse du client</strong>
+            <p>Réponse enregistrée manuellement dans Sereno.</p>
+          </div>
+
+          <div className="invoice-actions-row">
             <button
               type="button"
-              className="devis-btn"
-              disabled={isSending}
-              onClick={() => setSendConfirmOpen(true)}
+              className="primary-btn"
+              disabled={isAccepting}
+              onClick={() => setAcceptConfirmOpen(true)}
             >
-              <Send size={16} />
-              {isSending ? "Envoi..." : "Envoyer le devis"}
+              {isAccepting ? "Enregistrement..." : "Enregistrer l’accord du client"}
             </button>
-          )}
 
-          {isEnvoye && (
-            <>
-              <button
-                type="button"
-                className="primary-btn"
-                disabled={isAccepting}
-                onClick={() => setAcceptConfirmOpen(true)}
-              >
-                {isAccepting ? "Enregistrement..." : "Enregistrer l’accord du client"}
-              </button>
+            <button
+              type="button"
+              className="secondary-btn"
+              disabled={isRefusing}
+              onClick={() => setRefuseConfirmOpen(true)}
+            >
+              {isRefusing ? "Enregistrement..." : "Enregistrer le refus du client"}
+            </button>
+          </div>
+        </div>
+      )}
 
-              <button
-                type="button"
-                className="secondary-btn"
-                disabled={isRefusing}
-                onClick={() => setRefuseConfirmOpen(true)}
-              >
-                {isRefusing ? "Enregistrement..." : "Enregistrer le refus du client"}
-              </button>
-            </>
-          )}
+      {!isLoading && devis && isAccepte && !devis.converti && (
+        <div className="devis-decision-panel">
+          <div className="devis-decision-panel__intro">
+            <strong>Accord enregistré</strong>
+            <p>Ce devis peut devenir une facture définitive, sans ressaisie.</p>
+          </div>
 
-          {isAccepte && !devis?.converti && (
+          <div className="invoice-actions-row">
             <button
               type="button"
               className="primary-btn"
@@ -627,7 +654,16 @@ export function DevisDetailPage() {
             >
               {isConverting ? "Conversion..." : "Convertir en facture"}
             </button>
-          )}
+          </div>
+        </div>
+      )}
+
+      {!isLoading && devis && isRefuse && (
+        <div className="devis-decision-panel devis-decision-panel--neutral">
+          <div className="devis-decision-panel__intro">
+            <strong>Refus enregistré</strong>
+            <p>Cette proposition est close. Son historique reste disponible.</p>
+          </div>
         </div>
       )}
 
@@ -700,7 +736,9 @@ export function DevisDetailPage() {
         title="Convertir ce devis en facture définitive ?"
         message="Sereno créera une facture à partir des lignes du devis, recalculera les montants, vérifiera sa conformité, lui attribuera un numéro définitif et l’émettra. Cette facture sera définitive et le devis restera archivé comme trace, non modifiable."
         cancelLabel="Annuler"
-        confirmLabel={isConverting ? "Conversion en cours…" : "Convertir en facture"}
+        confirmLabel={
+          isConverting ? "Création de la facture conforme…" : "Créer la facture"
+        }
         isLoading={isConverting}
         onCancel={() => setConvertConfirmOpen(false)}
         onConfirm={() => {

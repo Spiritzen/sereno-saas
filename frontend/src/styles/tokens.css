@@ -1,6 +1,12 @@
 :root {
-  --color-bg-main: #09090f;
-  --color-bg-elevated: #12121a;
+  /* Celestial Quiet Command — fond « profond, légèrement bleuté, jamais noir
+     pur plat » (§4.1). Décalage mesuré depuis l'ancien #09090f (quasi-noir,
+     teinte bleue imperceptible) vers un bleu-nuit profond mais toujours
+     très sombre : même ambition de calme/profondeur, teinte perceptible.
+     --color-bg-elevated dérive du même écart pour rester cohérent (les deux
+     étaient proches de #09090f/#12121a, l'écart relatif est conservé). */
+  --color-bg-main: #0a0e1a;
+  --color-bg-elevated: #10141f;
   --color-bg-card: rgba(255, 255, 255, 0.02);
   --color-bg-card-hover: rgba(255, 255, 255, 0.04);
   --color-border: rgba(255, 255, 255, 0.06);
@@ -53,4 +59,68 @@
   --radius-xl: 28px;
 
   --shadow-card: 0 24px 80px rgba(0, 0, 0, 0.35);
+
+  /* Celestial Quiet Command — échelle typographique NOMMÉE (§4.2). Aucune
+     nouvelle police : seule la discipline change. Chaque page compose déjà
+     avec des tailles proches de ces paliers (h1 ~26px, h2 de section
+     ~18-20px, .page-kicker/.eyebrow ~13-14px) — ces tokens formalisent la
+     hiérarchie existante pour que le prochain écran s'y range plutôt que
+     d'inventer une taille de plus. */
+  --text-eyebrow-size: 13px;
+  --text-eyebrow-weight: 700;
+  --text-eyebrow-tracking: 0.02em;
+
+  --text-title-size: 26px;
+  --text-title-weight: 800;
+  --text-title-tracking: -0.04em;
+
+  --text-subtitle-size: 18px;
+  --text-subtitle-weight: 700;
+  --text-subtitle-tracking: -0.02em;
+
+  --text-value-size: 26px;
+  --text-value-weight: 900;
+  --text-value-tracking: -0.04em;
+
+  --text-label-size: 13px;
+  --text-label-weight: 700;
+
+  --text-meta-size: 12px;
+  --text-meta-weight: 500;
+
+  --text-aide-size: 13px;
+  --text-aide-weight: 400;
+
+  /* Celestial Quiet Command — durées de mouvement disciplinées (§4.5),
+     jamais de bounce/pulse continu/shimmer. Les transitions existantes
+     (boutons, sidebar, nav) étaient déjà dans ces fourchettes ; ces tokens
+     évitent qu'un futur ajout invente une durée hors gamme. */
+  --motion-hover: 160ms ease;
+  --motion-panel: 200ms ease;
+  --motion-state: 220ms ease;
+  --motion-success: 260ms ease;
+
+  /* Celestial Quiet Command — 3 primitives de surface (§4.3/§16 : « pas de
+     nouvelle variante de carte sans besoin réel »). La quasi-totalité des
+     cartes existantes (kpi-card, state-card, quick-step-card,
+     invoice-builder-card...) utilisaient déjà ces mêmes valeurs de façon
+     répétée sans le déclarer : ces tokens documentent ce qui existait
+     implicitement, pour que toute nouvelle carte compose l'une des trois
+     plutôt que d'inventer un panneau de plus.
+     1) "quiet"    — contenu dense, discret (bg-card + radius-md).
+     2) "content"  — bloc de contenu principal (bg-card + radius-lg).
+     3) "elevated" — surface flottante (modale, shell, login) : fond plus
+        clair + bordure forte + ombre + flou. */
+  --surface-quiet-bg: var(--color-bg-card);
+  --surface-quiet-border: var(--color-border);
+  --surface-quiet-radius: var(--radius-md);
+
+  --surface-content-bg: var(--color-bg-card);
+  --surface-content-border: var(--color-border);
+  --surface-content-radius: var(--radius-lg);
+
+  --surface-elevated-bg: rgba(16, 20, 31, 0.72);
+  --surface-elevated-border: var(--color-border-strong);
+  --surface-elevated-radius: var(--radius-xl);
+  --surface-elevated-shadow: var(--shadow-card);
 }

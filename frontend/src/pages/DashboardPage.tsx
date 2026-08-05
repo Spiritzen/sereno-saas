@@ -3,11 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listClients } from "../api/clientsApi";
 import { listFactures } from "../api/facturesApi";
+import { SectionHeading } from "../components/SectionHeading";
 import { useAuth } from "../context/useAuth";
 import type { Client } from "../types/client";
 import type { Facture, FactureStatut } from "../types/facture";
 
 const RECENT_FACTURES_LIMIT = 5;
+const ECHEANCES_LIMIT = 5;
 const ECHEANCE_RECEPTION_ELECTRONIQUE = new Date("2026-09-01T00:00:00");
 
 const STATUS_LABELS: Record<FactureStatut, string> = {
@@ -83,6 +85,14 @@ export function DashboardPage() {
     [factures],
   );
 
+  // Calendrier d'échéances — DÉRIVÉ des factures déjà chargées (date_echeance
+  // réelle), jamais une donnée inventée : aucun endpoint d'agrégation dédié
+  // n'existe, mais rien n'est nécessaire ici, tout est déjà en mémoire.
+  const echeancesAVenir = useMemo(
+    () => buildEcheancesAVenir(factures),
+    [factures],
+  );
+
   const joursAvantEcheance = useMemo(
     () => computeJoursRestants(ECHEANCE_RECEPTION_ELECTRONIQUE),
     [],
@@ -90,66 +100,116 @@ export function DashboardPage() {
 
   return (
     <>
-      <section className="hero-row">
-        <div>
+      {/* Zone 1 — Command Strip (§5.1) : salutation réelle, contexte de
+          conformité réel (aucune donnée inventée), action principale réelle,
+          alerte réelle (échéance réglementaire connue). */}
+      <section className="command-strip">
+        <div className="command-strip__intro">
           <p className="eyebrow">{formatToday()}</p>
           <h1>{buildGreeting(utilisateur?.prenom)}</h1>
-          <p className="eyebrow">Votre cockpit conformité est prêt.</p>
+          <p className="command-strip__meta">
+            <CheckCircle2 size={16} aria-hidden="true" />
+            Réception électronique active · émission prête au format Factur-X
+          </p>
         </div>
 
-        <Link to="/app/factures/new" className="primary-btn">
-          <Plus size={16} /> Nouvelle facture conforme
-        </Link>
-      </section>
+        <div className="command-strip__actions">
+          <Link to="/app/factures/new" className="primary-btn">
+            <Plus size={16} /> Nouvelle facture conforme
+          </Link>
 
-      <section className="compliance-banner">
-        <div className="compliance-left">
-          <div className="compliance-icon">
-            <CheckCircle2 size={20} />
+          <div className="deadline">
+            {joursAvantEcheance > 0 ? `J-${joursAvantEcheance}` : "Échéance atteinte"}
+            <br />
+            <small>1er sept. 2026</small>
           </div>
-
-          <div>
-            <strong>Pré-contrôles activés</strong>
-            <p className="eyebrow">
-              Réception électronique active · émission prête au format Factur-X
-            </p>
-          </div>
-        </div>
-
-        <div className="deadline">
-          {joursAvantEcheance > 0 ? `J-${joursAvantEcheance}` : "Échéance atteinte"}
-          <br />
-          <small>1er sept. 2026</small>
         </div>
       </section>
 
-      <section className="kpi-grid">
-        <article className="kpi-card">
+      {/* Zone 2 — Indicateurs prioritaires (§5.2) : un indicateur primaire
+          (Encaissé, l'accomplissement réel) + des indicateurs secondaires de
+          poids visuel moindre — jamais 4 cartes clonées. Conformité ne
+          s'affiche en vert que si elle vaut réellement 100 % (§7 : le vert
+          est réservé à l'accomplissement réel, jamais un pourcentage partiel). */}
+      <section className="metric-cluster" aria-label="Indicateurs prioritaires">
+        <article className="metric-primary">
           <span>Encaissé · réel</span>
           <strong>{formatCurrency(kpis.encaisse)}</strong>
         </article>
 
-        <article className="kpi-card">
-          <span>En attente</span>
-          <strong>{formatCurrency(kpis.enAttente)}</strong>
-        </article>
+        <div className="metric-secondary-list">
+          <div className={`metric-secondary-row${kpis.enRetard > 0 ? " danger" : ""}`}>
+            <span>En retard</span>
+            <strong>{formatCurrency(kpis.enRetard)}</strong>
+          </div>
 
-        <article className="kpi-card danger">
-          <span>En retard</span>
-          <strong>{formatCurrency(kpis.enRetard)}</strong>
-        </article>
+          <div className="metric-secondary-row">
+            <span>En attente</span>
+            <strong>{formatCurrency(kpis.enAttente)}</strong>
+          </div>
 
-        <article className="kpi-card success">
-          <span>Conformité</span>
-          <strong>{kpis.conformite}%</strong>
-        </article>
+          <div className={`metric-secondary-row${kpis.conformite === 100 ? " success" : ""}`}>
+            <span>Conformité</span>
+            <strong>{kpis.conformite}%</strong>
+          </div>
+        </div>
       </section>
 
+      {/* Zone 3 — Échéances/Attention (§5.3), élevée : données réelles,
+          priorité visuelle retard réel > échéance proche (déjà portée par
+          .status.danger/.status.warning, rouge réservé au vrai retard). */}
       <section>
-        <div className="section-title">
-          <h2>Factures récentes</h2>
-          <span>Suivi du cycle de vie en temps réel</span>
-        </div>
+        <SectionHeading
+          title="Échéances à venir"
+          subtitle="Dérivées de vos factures en attente de règlement"
+        />
+
+        {!isLoading && !error && echeancesAVenir.length === 0 && (
+          <div className="state-card">
+            Aucune échéance à suivre pour le moment.
+          </div>
+        )}
+
+        {!isLoading && !error && echeancesAVenir.length > 0 && (
+          <div className="invoice-list">
+            {echeancesAVenir.map(({ facture, enRetard }) => (
+              <div className="invoice-row" key={facture.id}>
+                <div>
+                  <strong>{getClientName(facture, clientsById)}</strong>
+
+                  <span className="invoice-meta">
+                    {facture.numero ?? "Brouillon"}
+                  </span>
+                </div>
+
+                <div className="amount">
+                  {formatCurrency(getFactureTotalTtc(facture))}
+                </div>
+
+                <div className={`status ${enRetard ? "danger" : "warning"}`}>
+                  {enRetard
+                    ? "En retard"
+                    : formatEcheanceLabel(facture.date_echeance)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Zone 4 — Flux utile (§5.4) : seule donnée réelle disponible pour
+          cette zone (factures récentes déjà chargées) — pas de flux
+          d'activité inventé, pas d'agrégat cross-document fictif. */}
+      <section>
+        <SectionHeading
+          title="Factures récentes"
+          subtitle="Suivi du cycle de vie en temps réel"
+          action={
+            <Link to="/app/factures" className="section-action-link">
+              Voir tout →
+            </Link>
+          }
+        />
 
         {isLoading && (
           <div className="state-card">Chargement des factures...</div>
@@ -226,6 +286,47 @@ function buildDashboardKpis(factures: Facture[]) {
     enRetard,
     conformite,
   };
+}
+
+type EcheanceItem = {
+  facture: Facture;
+  enRetard: boolean;
+};
+
+// Dérivé uniquement (§F6) : filtre les factures métier en attente de
+// règlement qui portent une date_echeance réelle, trie par échéance la plus
+// proche, limite l'affichage. Aucun calcul financier réinventé — les
+// helpers isFactureEnAttente/isFactureEnRetard sont ceux déjà utilisés par
+// les KPI ci-dessus, pas une nouvelle logique parallèle.
+function hasDateEcheance(
+  facture: Facture,
+): facture is Facture & { date_echeance: string } {
+  return Boolean(facture.date_echeance);
+}
+
+function buildEcheancesAVenir(factures: Facture[]): EcheanceItem[] {
+  return factures
+    .filter(isFactureMetier)
+    .filter(isFactureEnAttente)
+    .filter(hasDateEcheance)
+    .sort(
+      (a, b) =>
+        new Date(a.date_echeance).getTime() -
+        new Date(b.date_echeance).getTime(),
+    )
+    .slice(0, ECHEANCES_LIMIT)
+    .map((facture) => ({ facture, enRetard: isFactureEnRetard(facture) }));
+}
+
+function formatEcheanceLabel(value: string | null) {
+  if (!value) {
+    return "Échéance";
+  }
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(value));
 }
 
 function isFactureMetier(facture: Facture) {

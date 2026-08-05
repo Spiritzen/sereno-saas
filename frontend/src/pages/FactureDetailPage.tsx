@@ -1049,16 +1049,26 @@ export function FactureDetailPage() {
           )}
 
           {canEmit && (
-            <div className="invoice-actions-row">
-              <button
-                type="button"
-                className="primary-btn"
-                disabled={isEmitting}
-                onClick={() => setIsEmitConfirmOpen(true)}
-              >
-                <Send size={16} aria-hidden="true" />
-                {isEmitting ? "Émission..." : "Émettre"}
-              </button>
+            <div className="devis-decision-panel">
+              <div className="devis-decision-panel__intro">
+                <strong>Prête à émettre</strong>
+                <p>
+                  Cette facture sera numérotée et deviendra définitive,
+                  conforme Factur-X.
+                </p>
+              </div>
+
+              <div className="invoice-actions-row">
+                <button
+                  type="button"
+                  className="primary-btn"
+                  disabled={isEmitting}
+                  onClick={() => setIsEmitConfirmOpen(true)}
+                >
+                  <Send size={16} aria-hidden="true" />
+                  {isEmitting ? "Émission..." : "Émettre"}
+                </button>
+              </div>
             </div>
           )}
         </div>
