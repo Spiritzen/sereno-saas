@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_02_100001) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_12_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -490,20 +490,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_100001) do
   create_table "relances", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "canal", limit: 20, default: "email", null: false
     t.datetime "created_at", null: false
-    t.date "date_planifiee", null: false
+    t.date "date_planifiee"
+    t.string "destinataire_email"
     t.datetime "envoyee_at"
     t.uuid "facture_id", null: false
+    t.string "mode_livraison", limit: 20
     t.integer "niveau", limit: 2, default: 1, null: false
+    t.string "objet"
     t.uuid "organisation_id", null: false
+    t.string "origine", limit: 20, default: "manuel", null: false
     t.string "statut", limit: 20, default: "planifiee", null: false
     t.datetime "updated_at", null: false
+    t.uuid "utilisateur_id"
     t.index ["facture_id", "niveau"], name: "index_relances_on_facture_and_niveau"
     t.index ["facture_id"], name: "index_relances_on_facture_id"
     t.index ["organisation_id", "facture_id"], name: "index_relances_on_org_and_facture"
     t.index ["organisation_id", "statut"], name: "index_relances_on_org_and_statut"
     t.index ["organisation_id"], name: "index_relances_on_organisation_id"
+    t.index ["utilisateur_id"], name: "index_relances_on_utilisateur_id"
     t.check_constraint "canal::text = ANY (ARRAY['email'::character varying, 'courrier'::character varying]::text[])", name: "check_relances_canal"
     t.check_constraint "niveau >= 1 AND niveau <= 3", name: "check_relances_niveau"
+    t.check_constraint "origine::text = ANY (ARRAY['manuel'::character varying, 'planifie'::character varying]::text[])", name: "check_relances_origine"
     t.check_constraint "statut::text = ANY (ARRAY['planifiee'::character varying, 'envoyee'::character varying, 'echec'::character varying]::text[])", name: "check_relances_statut"
   end
 
@@ -720,7 +727,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_100001) do
 
   add_foreign_key "abonnements", "organisations"
   add_foreign_key "acomptes", "clients"
-  add_foreign_key "acomptes", "devis", column: "devis_id"
+  add_foreign_key "acomptes", "devis"
   add_foreign_key "acomptes", "factures"
   add_foreign_key "acomptes", "organisations"
   add_foreign_key "avoirs", "clients"
@@ -735,7 +742,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_100001) do
   add_foreign_key "evenement_avoir", "avoirs"
   add_foreign_key "evenement_avoir", "organisations"
   add_foreign_key "evenement_avoir", "utilisateurs"
-  add_foreign_key "evenement_devis", "devis", column: "devis_id"
+  add_foreign_key "evenement_devis", "devis"
   add_foreign_key "evenement_devis", "organisations"
   add_foreign_key "evenement_devis", "utilisateurs"
   add_foreign_key "evenement_entrant_pa", "avoirs"
@@ -749,11 +756,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_100001) do
   add_foreign_key "evenement_paiement", "paiements"
   add_foreign_key "evenement_paiement", "utilisateurs"
   add_foreign_key "factures", "clients"
-  add_foreign_key "factures", "devis", column: "devis_id"
+  add_foreign_key "factures", "devis"
   add_foreign_key "factures", "organisations"
   add_foreign_key "ligne_avoir", "avoirs"
   add_foreign_key "ligne_avoir", "organisations"
-  add_foreign_key "ligne_devis", "devis", column: "devis_id"
+  add_foreign_key "ligne_devis", "devis"
   add_foreign_key "ligne_devis", "organisations"
   add_foreign_key "ligne_devis", "produits"
   add_foreign_key "ligne_facture", "factures"
@@ -767,6 +774,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_02_100001) do
   add_foreign_key "produits", "taux_tvas"
   add_foreign_key "relances", "factures"
   add_foreign_key "relances", "organisations"
+  add_foreign_key "relances", "utilisateurs"
   add_foreign_key "sessions", "organisations"
   add_foreign_key "sessions", "utilisateurs"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

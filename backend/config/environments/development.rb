@@ -32,6 +32,12 @@ Rails.application.configure do
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
 
+  # Relances v1a — le mail s'OUVRE dans un onglet du navigateur, jamais
+  # délivré (letter_opener). RelanceService lit ce réglage pour enregistrer
+  # mode_livraison = "letter_opener" sur la Relance : c'est la VÉRITÉ de ce
+  # qui s'est passé, jamais un faux "délivré" (cf. §2.6 honnêteté produit).
+  config.action_mailer.delivery_method = :letter_opener
+
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 

@@ -37,6 +37,7 @@ import { InvoiceDetailHeader } from "../components/InvoiceDetailHeader";
 import { InvoiceEventHistory } from "../components/InvoiceEventHistory";
 import { InvoiceLifecycleTimeline } from "../components/InvoiceLifecycleTimeline";
 import { InvoicePaymentsSection } from "../components/InvoicePaymentsSection";
+import { InvoiceRelanceSection } from "../components/InvoiceRelanceSection";
 import { InvoiceTransmissionSection } from "../components/InvoiceTransmissionSection";
 import type { Avoir } from "../types/avoir";
 import type { ConformiteResult } from "../types/conformite";
@@ -852,6 +853,16 @@ export function FactureDetailPage() {
           resteDu={resteDu}
           resteAPayer={resteAPayer}
           onFactureMutated={() => refreshFactureApresPaiement(facture.id)}
+        />
+      )}
+
+      {!isLoading && facture && facture.statut !== "brouillon" && (
+        <InvoiceRelanceSection
+          factureId={facture.id}
+          relancable={facture.relancable === true}
+          derniereRelanceAt={facture.derniere_relance_at}
+          relancesCount={facture.relances_count}
+          onFactureMutated={setFacture}
         />
       )}
 
