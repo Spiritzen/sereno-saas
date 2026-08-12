@@ -49,6 +49,15 @@
   --color-devis: #6366f1;
   --color-devis-soft: rgba(99, 102, 241, 0.16);
 
+  /* Relances v1a — accent DÉDIÉ à l'acte de relance, distinct du teal
+     paiement ET de l'ambre avoir (§7 du prompt), lui aussi jamais un badge
+     de statut. Rose discret plutôt qu'un rouge d'alarme (--color-danger) :
+     une relance signale un retard, pas une erreur système — reste dans
+     l'esprit « calme » de la DA tout en restant lisible comme une alerte
+     douce. Famille de teinte encore inutilisée par les accents ci-dessus. */
+  --color-relance: #f43f5e;
+  --color-relance-soft: rgba(244, 63, 94, 0.16);
+
   --color-text-primary: #f1f5f9;
   --color-text-secondary: #94a3b8;
   --color-text-muted: #475569;

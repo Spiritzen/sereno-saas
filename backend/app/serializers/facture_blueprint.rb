@@ -73,5 +73,21 @@ class FactureBlueprint < Blueprinter::Base
     field :statut_encaissement_local do |facture|
       PaiementSyntheseService.new(facture: facture).call.statut_encaissement_local
     end
+
+    # Relances v1a — DÉRIVÉS par Facture#relancable? / #derniere_relance_at
+    # / #relances_count (append-only), jamais recalculés ici : le front
+    # affiche le bouton "Relancer" seulement si `relancable` est vrai, il ne
+    # réévalue aucune des 3 conditions.
+    field :relancable do |facture|
+      facture.relancable?
+    end
+
+    field :derniere_relance_at do |facture|
+      facture.derniere_relance_at&.iso8601
+    end
+
+    field :relances_count do |facture|
+      facture.relances_count
+    end
   end
 end

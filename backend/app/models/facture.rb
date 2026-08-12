@@ -130,6 +130,37 @@ class Facture < ApplicationRecord
     statut == "brouillon"
   end
 
+  # Relances v1a — UNIQUE source de vérité de l'éligibilité, réutilisée par
+  # Relance (validation de contenu), RelanceService (garde-fou avant envoi)
+  # et FactureBlueprint (champ `relancable` exposé au front, qui ne
+  # recalcule rien). Trois conditions, TOUTES requises :
+  #   1) statut de cycle de vie relançable (émise/transmise, jamais
+  #      brouillon/refusée/en_litige/encaissée/archivée/annulée) ;
+  #   2) échéance dépassée ;
+  #   3) reste à payer > 0, DÉRIVÉ par PaiementSyntheseService — jamais une
+  #      2e formule sur montant_paye (cf. SOCLE_GELE.md : cette colonne
+  #      reste figée à 0, elle n'est pas le cache du "payé" réel).
+  def relancable?
+    return false unless Relance::STATUTS_FACTURE_RELANCABLES.include?(statut)
+    return false if date_echeance.blank?
+    return false unless Date.current > date_echeance
+
+    PaiementSyntheseService.new(facture: self).call.reste_a_payer.positive?
+  end
+
+  # DÉRIVÉ du journal des relances (append-only) — jamais stocké sur
+  # Facture. `envoyees` exclut les tentatives en échec : une relance non
+  # délivrée n'a pas eu lieu du point de vue du client.
+  def derniere_relance_at
+    relances.envoyees.maximum(:envoyee_at)
+  end
+
+  # Compte TOUTES les tentatives (envoyées + échecs) : honnêteté produit,
+  # l'historique ne cache pas les échecs d'envoi.
+  def relances_count
+    relances.count
+  end
+
   # Strict : uniquement le statut exact "emise".
   # Les autres statuts post-émission sont gérés par non_brouillon?.
   def emise?

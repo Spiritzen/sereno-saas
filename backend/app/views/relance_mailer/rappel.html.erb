@@ -1,0 +1,24 @@
+<p>
+  Bonjour<%= @client&.raison_sociale ? " #{@client.raison_sociale}" : "" %>,
+</p>
+
+<p>
+  Nous n'avons pas encore reçu le règlement de la facture
+  <strong><%= @facture.numero %></strong>, dont l'échéance
+  (<%= @facture.date_echeance.strftime("%d/%m/%Y") %>) est dépassée.
+</p>
+
+<p>
+  Montant restant dû :
+  <strong><%= number_to_currency(@reste_a_payer, unit: "€", format: "%n %u") %></strong>
+</p>
+
+<p>
+  Merci de procéder au règlement dès que possible. Si ce message vous
+  parvient après un paiement déjà effectué, merci de ne pas en tenir compte.
+</p>
+
+<p>
+  Cordialement,<br>
+  <%= @facture.organisation.raison_sociale %>
+</p>

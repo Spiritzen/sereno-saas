@@ -59,6 +59,13 @@ resources :factures do
 
     resources :evenements_paiement, path: "evenements", only: [ :index ]
   end
+
+  # Relances v1a — NICHÉES sous factures, même discipline que paiements
+  # (décision Sébastien du 31/07/2026 reprise ici) : une relance n'a de sens
+  # qu'attachée à une facture précise. Un seul verbe pour l'instant (bouton
+  # manuel) — pas d'index/show/destroy : l'historique complet vit déjà sur
+  # la facture (derniere_relance_at/relances_count, cf. FactureBlueprint).
+  resources :relances, only: [ :create ]
 end
 
       # Organisation-scopée (pas liée à une facture précise) : badge B3.2.

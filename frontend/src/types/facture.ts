@@ -57,6 +57,12 @@ export type Facture = {
   // PaiementSyntheseService, arrondi au centime déjà fait par le backend).
   reste_a_payer?: Money;
   statut_encaissement_local?: StatutEncaissementLocal;
+  // Relances v1a — champs DÉRIVÉS exposés uniquement par la vue détaillée
+  // (GET /factures/:id). Le front n'a jamais à recalculer l'éligibilité :
+  // `relancable` fait foi (cf. Facture#relancable?, FactureBlueprint).
+  relancable?: boolean;
+  derniere_relance_at?: string | null;
+  relances_count?: number;
 };
 
 export type FactureInput = {

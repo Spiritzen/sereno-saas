@@ -37,6 +37,9 @@ backend/storage/**/*.xml
 # Docs / audits locaux
 /docs/
 
+# Docs / audits locaux — ignorés SAUF le registre de dettes (versionné)
+/docs/*
+!/docs/dettes-connues.md
+
 # Notes personnelles / prompts
-/docs/
 /audit_fix_files/

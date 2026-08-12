@@ -73,3 +73,11 @@ group :development, :test do
   gem "factory_bot_rails"
   gem "faker"
 end
+
+# Relances v1a — prévisu des mails en dev : le mail est RENDU dans un onglet
+# du navigateur, jamais délivré (cf. mode_livraison "letter_opener" enregistré
+# sur la Relance, honnêteté produit §2.6 du prompt). Dev uniquement,
+# jamais chargé en test (delivery_method y reste :test) ni en production.
+group :development do
+  gem "letter_opener"
+end
