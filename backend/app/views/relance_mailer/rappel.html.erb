@@ -13,6 +13,13 @@
   <strong><%= number_to_currency(@reste_a_payer, unit: "€", format: "%n %u") %></strong>
 </p>
 
+<% if @relance.niveau >= 3 %>
+<p>
+  Il s'agit de notre troisième relance concernant cette facture. Merci de
+  nous contacter rapidement afin de régulariser la situation.
+</p>
+<% end %>
+
 <p>
   Merci de procéder au règlement dès que possible. Si ce message vous
   parvient après un paiement déjà effectué, merci de ne pas en tenir compte.

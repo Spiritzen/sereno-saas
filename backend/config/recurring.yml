@@ -14,6 +14,10 @@ development:
     class: PaPollingScannerJob
     queue: default
     schedule: every minute
+  relance_scanner:
+    class: RelanceScannerJob
+    queue: default
+    schedule: at 8am every day
 
 production:
   clear_solid_queue_finished_jobs:
@@ -23,3 +27,7 @@ production:
     class: PaPollingScannerJob
     queue: default
     schedule: every minute
+  relance_scanner:
+    class: RelanceScannerJob
+    queue: default
+    schedule: at 8am every day
