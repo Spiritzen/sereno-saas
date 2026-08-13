@@ -22,7 +22,12 @@ class Relance < ApplicationRecord
   # "test" en environnement de test (ActionMailer::Base.deliveries, jamais
   # de réseau) — même liste que les valeurs réalistes de
   # config.action_mailer.delivery_method sur ce projet (cf. RelanceService).
-  MODES_LIVRAISON = %w[letter_opener smtp test].freeze
+  # "file" ajouté en v1b (planificateur) : RelanceEnvoiJob override la
+  # livraison en :file (Mail::FileDelivery, natif Rails) quand la config
+  # réelle est :letter_opener — un job de fond ne doit jamais tenter
+  # d'ouvrir un onglet navigateur (cf. §6 execution_relances_v1b). Reste une
+  # valeur RÉELLE de delivery_method, jamais une étiquette inventée.
+  MODES_LIVRAISON = %w[letter_opener smtp test file].freeze
 
   belongs_to :organisation
   belongs_to :facture

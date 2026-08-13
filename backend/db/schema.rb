@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_12_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_13_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -502,6 +502,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_12_100000) do
     t.string "statut", limit: 20, default: "planifiee", null: false
     t.datetime "updated_at", null: false
     t.uuid "utilisateur_id"
+    t.index ["facture_id", "niveau"], name: "index_relances_auto_unique_par_niveau", unique: true, where: "(((statut)::text = 'envoyee'::text) AND ((origine)::text = 'planifie'::text))"
     t.index ["facture_id", "niveau"], name: "index_relances_on_facture_and_niveau"
     t.index ["facture_id"], name: "index_relances_on_facture_id"
     t.index ["organisation_id", "facture_id"], name: "index_relances_on_org_and_facture"

@@ -194,4 +194,43 @@ RSpec.describe Relance, type: :model do
       expect(facture.relances.recentes.to_a).to eq([ recente, ancienne ])
     end
   end
+
+  # v1b (planificateur) — index_relances_auto_unique_par_niveau : filet
+  # d'idempotence DB, scopé AUTO uniquement (cf. §2 execution_relances_v1b).
+  describe "idempotence AUTO — index_relances_auto_unique_par_niveau" do
+    it "refuse une 2e relance AUTO 'envoyee' au même niveau pour la même facture" do
+      facture = create(:facture, :emise, date_echeance: 10.days.ago)
+      create(:relance, :planifiee,
+             facture: facture, organisation: facture.organisation,
+             niveau: 1, statut: "envoyee", envoyee_at: Time.current)
+
+      expect do
+        create(:relance, :planifiee,
+               facture: facture, organisation: facture.organisation,
+               niveau: 1, statut: "envoyee", envoyee_at: Time.current)
+      end.to raise_error(ActiveRecord::RecordNotUnique)
+    end
+
+    it "autorise un rejeu AUTO après un échec au même niveau (l'index ne couvre que 'envoyee')" do
+      facture = create(:facture, :emise, date_echeance: 10.days.ago)
+      create(:relance, :planifiee,
+             facture: facture, organisation: facture.organisation,
+             niveau: 1, statut: "echec", envoyee_at: nil, mode_livraison: nil)
+
+      expect do
+        create(:relance, :planifiee,
+               facture: facture, organisation: facture.organisation,
+               niveau: 1, statut: "envoyee", envoyee_at: Time.current)
+      end.not_to raise_error
+    end
+
+    it "autorise deux relances MANUELLES niveau 1 sur la même facture (l'humain re-clique, v1a inchangé)" do
+      facture = create(:facture, :emise, date_echeance: 1.day.ago)
+      create(:relance, facture: facture, organisation: facture.organisation, niveau: 1, statut: "envoyee")
+
+      expect do
+        create(:relance, facture: facture, organisation: facture.organisation, niveau: 1, statut: "envoyee")
+      end.not_to raise_error
+    end
+  end
 end
