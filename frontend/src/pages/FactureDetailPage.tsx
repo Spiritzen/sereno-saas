@@ -38,6 +38,7 @@ import { InvoiceEventHistory } from "../components/InvoiceEventHistory";
 import { InvoiceLifecycleTimeline } from "../components/InvoiceLifecycleTimeline";
 import { InvoicePaymentsSection } from "../components/InvoicePaymentsSection";
 import { InvoiceRelanceSection } from "../components/InvoiceRelanceSection";
+import { InvoiceShareSection } from "../components/InvoiceShareSection";
 import { InvoiceTransmissionSection } from "../components/InvoiceTransmissionSection";
 import type { Avoir } from "../types/avoir";
 import type { ConformiteResult } from "../types/conformite";
@@ -864,6 +865,10 @@ export function FactureDetailPage() {
           relancesCount={facture.relances_count}
           onFactureMutated={setFacture}
         />
+      )}
+
+      {!isLoading && facture && facture.statut !== "brouillon" && (
+        <InvoiceShareSection factureId={facture.id} />
       )}
 
       {!isLoading && facture && (

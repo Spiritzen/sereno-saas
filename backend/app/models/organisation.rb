@@ -49,6 +49,7 @@ class Organisation < ApplicationRecord
          dependent: :restrict_with_exception
   has_many :paiements, dependent: :restrict_with_exception
   has_many :relances, dependent: :restrict_with_exception
+  has_many :portail_facture_tokens, dependent: :restrict_with_exception
 
   validates :raison_sociale, presence: true
   validates :siret, presence: true, uniqueness: true, length: { is: 14 },

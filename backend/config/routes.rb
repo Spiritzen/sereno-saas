@@ -5,6 +5,17 @@ Rails.application.routes.draw do
     post "pa", to: "pa#recevoir"
   end
 
+  # Portail destinataire (MVP) — endpoint PUBLIC (aucune auth JWT), régi par
+  # la possession du token opaque, hors du namespace api/v1 authentifié :
+  # cf. Portail::FacturesController, même montage que Webhooks::PaController.
+  # ⚠️ L'URL ne porte QUE le token — jamais un id/facture_id (cf. §1
+  # execution_portail_destinataire_mvp.txt).
+  namespace :portail do
+    get "factures/:token", to: "factures#show"
+    get "factures/:token/pdf", to: "factures#pdf"
+    get "factures/:token/avoirs", to: "factures#avoirs"
+  end
+
   namespace :api do
     namespace :v1 do
       post "auth/login", to: "auth#login"
@@ -66,6 +77,13 @@ resources :factures do
   # manuel) — pas d'index/show/destroy : l'historique complet vit déjà sur
   # la facture (derniere_relance_at/relances_count, cf. FactureBlueprint).
   resources :relances, only: [ :create ]
+
+  # Portail destinataire (MVP) — endpoints OWNER (générer/révoquer le lien
+  # public). Le contrôleur PUBLIC qui sert la facture au tiers, lui, est
+  # HORS api/v1 (cf. namespace :portail plus bas, même montage que
+  # Webhooks::PaController).
+  post "lien_portail", to: "portail_facture_tokens#create", on: :member
+  delete "lien_portail", to: "portail_facture_tokens#destroy", on: :member
 end
 
       # Organisation-scopée (pas liée à une facture précise) : badge B3.2.
