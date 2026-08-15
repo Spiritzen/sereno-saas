@@ -45,11 +45,11 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 
 ---
 
-## ✅ Statut du projet — Juillet 2026
+## ✅ Statut du projet — Août 2026
 
-> Phase actuelle : **correction légale livrée (V1.2 avoirs complets)** — au-dessus de la couche transmission (V1.1), le cycle des **avoirs (notes de crédit)** est désormais opérationnel de bout en bout : émission conforme (Factur-X TypeCode **381** + référence **BT-25** à la facture corrigée), API, journal append-only, transmission via PA, gestion des lignes et frontend dédié. Dernier audit complet : **99,5/100 — GREEN, CAPITALISÉ** (30/07/2026, socle intact) : B4 a fermé la dette qui plafonnait juste en dessous. Trois des quatre niveaux de conformité (XSD, Schematron EN 16931, PDF/A-3b) sont re-prouvés en CI à chaque commit, sur facture **et** avoir ; le 4ᵉ (France CTC) reste hors CI faute de scénario public. Prochaine grande brique au choix : gestion des paiements.
+> Phase actuelle : **correction légale livrée (V1.2 avoirs complets)** — au-dessus de la couche transmission (V1.1), le cycle des **avoirs (notes de crédit)** est désormais opérationnel de bout en bout : émission conforme (Factur-X TypeCode **381** + référence **BT-25** à la facture corrigée), API, journal append-only, transmission via PA, gestion des lignes et frontend dédié. Dernier audit complet : **99,5/100 — GREEN, CAPITALISÉ** (30/07/2026, socle intact) : B4 a fermé la dette qui plafonnait juste en dessous. Trois des quatre niveaux de conformité (XSD, Schematron EN 16931, PDF/A-3b) sont re-prouvés en CI à chaque commit, sur facture **et** avoir ; le 4ᵉ (France CTC) reste hors CI faute de scénario public. Depuis, trois briques majeures ont été livrées **par-dessus ce socle** : le **suivi des paiements** (règlement local, reste à payer dérivé, distinct du « encaissée » réglementaire), le **cycle devis → facture** (conversion en facture conforme via le moteur d'émission gelé, indiscernable d'une facture manuelle), et le **harnais de tests frontend (Vitest + RTL) désormais en CI**. Le socle a été re-tagué **`v0.3.0-conformite-fr`** (9 chemins gelés, `facture_pdf_service` promu). Depuis, l'**automatisation des relances** a été livrée en deux temps — **v1a** (bouton « Relancer » manuel : envoi d'e-mail + journalisation append-only) puis **v1b** (planificateur automatique : job Solid Queue en *scan-and-send*, cadence J+7/15/30, arrêt au 3ᵉ palier, idempotence, envoi honnête sans navigateur en dev) — et un premier **portail destinataire (MVP)** : un **lien de partage par facture**, public et tokenisé (token opaque façon `Session`, l'URL ne porte jamais l'id → énumération impossible), en lecture seule (consultation + téléchargement du PDF Factur-X), révocable. Prochaines briques au choix : **exports FEC** (à cadrer côté mapping comptable) puis **e-reporting**, et plus tard un **espace client authentifié** multi-fournisseurs (distinct du portail MVP, cf. `docs/dettes-connues.md` n°35).
 
-Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé conforme**, et son socle légal est **gelé** (`tag v0.2.0-conformite-fr`) : la frontière exacte du gel est documentée et versionnée dans [`backend/SOCLE_GELE.md`](./backend/SOCLE_GELE.md). Toute la couche transmission (transmission sandbox, ingestion des statuts, polling, webhook signé, rate limiting) et la brique des avoirs ont été construites **par-dessus** ce socle, sans jamais le modifier. Voir [Conformité prouvée](#-conformité-prouvée).
+Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé conforme**, et son socle légal est **gelé** (`tag v0.3.0-conformite-fr`) : la frontière exacte du gel est documentée et versionnée dans [`backend/SOCLE_GELE.md`](./backend/SOCLE_GELE.md). Toute la couche transmission (transmission sandbox, ingestion des statuts, polling, webhook signé, rate limiting) et la brique des avoirs ont été construites **par-dessus** ce socle, sans jamais le modifier. Voir [Conformité prouvée](#-conformité-prouvée).
 
 | Couche | Statut | Détail |
 |--------|--------|--------|
@@ -85,10 +85,15 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | **Avoirs — frontend** | ✅ **Complet** | Création (montant à créditer par ligne), page détail, navigation croisée, DA ambre |
 | **Solde facture après avoirs** | ✅ **Complet** | Synthèse « reste dû » dérivée (TTC légal jamais modifié) |
 | Validateurs de conformité en CI (XSD + Schematron + PDF/A-3b) | ✅ **Complet** | Re-prouvés à chaque push, facture **et** avoir (standard + franchise) ; France CTC hors CI, aucun scénario public (dette n°24) |
-| Relances automatiques | ⏳ **V1.2** | Jobs Solid Queue + e-mails |
-| E-reporting (B2C / international) | ⏳ **V1.2** | Lots de transmission |
-| Tests frontend (Vitest) | ⏳ **V1.2** | Harnais de test des composants (dette connue) |
-| Devis → facture · Portail destinataire | ⏳ **V1.3** | Conversion, suivi côté client |
+| **Paiements — suivi local** | ✅ **Complet** | Règlements append-only, reste à payer dérivé, moyens UNTDID 4461, distinct du « encaissée » réglementaire (déclaration vendeur, v2) |
+| **Devis → facture** | ✅ **Complet** | Devis (numéro DEV à l'envoi, cycle brouillon→envoyé→accepté/refusé), conversion en facture conforme via le moteur gelé (rollback tout-ou-rien, idempotent) |
+| **Tests frontend (Vitest + RTL) en CI** | ✅ **Complet** | Harnais + tests, job `frontend` requis en CI (dettes n°9 + n°25 fermées) |
+| **Relances — manuel (v1a)** | ✅ **Complet** | Bouton « Relancer » : envoi d'e-mail + relance journalisée (append-only) |
+| **Relances — planificateur (v1b)** | ✅ **Complet** | Job Solid Queue *scan-and-send*, cadence J+7/15/30, arrêt au 3ᵉ palier, idempotence (index unique partiel), envoi honnête (`:file` en dev, sans navigateur) |
+| **Portail destinataire — lien de partage (MVP)** | ✅ **Complet** | Lien public par facture, token opaque façon `Session` (l'URL ne porte jamais l'id), lecture seule + PDF, révocable |
+| E-reporting (B2C / international) | ⏳ **V1.2+** | Lots de transmission |
+| Exports comptables (FEC) | ⏳ **V1.2+** | À cadrer (mapping de comptes, TVA débits/encaissements) |
+| Espace client authentifié (multi-fournisseurs) | ⏳ **V1.3** | Compte destinataire au-dessus des organisations (cf. dette n°35) |
 | Chorus Pro (B2G) · Abonnements SaaS | ⏳ **V1.4** | Adapter dédié · Plans Gratuit / Pro |
 | Déploiement production (Kamal 2) | ⏳ **V1.5** | VPS OVH/Hetzner + HTTPS + CI/CD |
 
@@ -112,7 +117,7 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 - **Isolation multi-tenant testée** — l'API du journal d'événements est prouvée étanche : une organisation ne peut jamais lire les événements d'une autre (test d'isolation → 404, aucune donnée exposée).
 - **Artefacts vendorés** — profil ICC sRGB et schémas officiels versionnés dans le dépôt, pour une image de production reproductible et indépendante de l'hôte.
 
-> Le socle de conformité est **gelé** (`tag v0.2.0-conformite-fr`) : aucune modification du moteur légal sans re-validation par les quatre niveaux ci-dessus (les trois premiers étant désormais rejoués automatiquement en CI).
+> Le socle de conformité est **gelé** (`tag v0.3.0-conformite-fr`) : aucune modification du moteur légal sans re-validation par les quatre niveaux ci-dessus (les trois premiers étant désormais rejoués automatiquement en CI).
 
 ---
 
@@ -144,8 +149,8 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | | Validation | veraPDF · XSD Factur-X 1.09 · Schematron EN 16931 · Mustang |
 | | Transmission | Plateforme Agréée (PA) via adapter |
 | | Secteur public | Chorus Pro (B2G) |
-| **Tests** | Backend | RSpec + FactoryBot + Faker (334+ examples) |
-| | Frontend | ESLint + `tsc` (build) — _Vitest prévu (dette connue, non encore installé)_ |
+| **Tests** | Backend | RSpec + FactoryBot + Faker (579+ examples) |
+| | Frontend | ESLint + `tsc` + **Vitest + Testing Library** — job `frontend` requis en CI |
 | **DevOps** | Conteneurs | Docker (multi-stage, Debian slim) |
 | | Déploiement | Kamal 2 |
 | | CI/CD | GitHub Actions |
@@ -194,8 +199,9 @@ Paiement        → PAIEMENT · RELANCE
 | V3 | Numérotation séquentielle + contrainte d'unicité par séquence |
 | V4 | Cycle de vie — `evenement_facture` (append-only) |
 | V5 | Transmission — PA, e-reporting, accusés |
-| V6 | Paiements + relances |
+| V6 | Paiements + relances (champs manuels, `origine`, index d'idempotence auto) |
 | V7 | Abonnement SaaS + index de performance |
+| V8 | Portail — `portail_facture_tokens` (lien de partage par facture) |
 
 ---
 
@@ -254,7 +260,7 @@ BROUILLON → ÉMISE → DÉPOSÉE (PA) → REÇUE → MISE À DISPOSITION
 | `COMPTABLE` | Lecture finance + exports comptables (FEC) |
 | `MEMBRE` | Création de devis et factures |
 
-> Un **portail destinataire** (V1.3) permet au CLIENT de consulter et suivre ses factures reçues.
+> Un premier **portail destinataire (MVP)** est livré : un **lien de partage par facture** (public, tokenisé, lecture seule + téléchargement du PDF, révocable). Un véritable **espace client authentifié** multi-fournisseurs (le destinataire se connecte et retrouve tous ses fournisseurs) reste à cadrer (V1.3, cf. `docs/dettes-connues.md` n°35).
 
 ---
 
@@ -266,13 +272,16 @@ backend/
 │
 ├── app/
 │   ├── controllers/api/v1/    Auth · Clients · Contacts · Produits · Devis
-│   │   │                      Factures · Avoirs · LignesAvoir
+│   │   │                      Factures · Avoirs · LignesAvoir · Relances
 │   │   │                      Transmissions · AvoirTransmissionsPa
 │   │   │                      EvenementsFacture · EvenementsAvoir · Dashboard
-│   │   └── webhooks/          PaController (endpoint public signé)
+│   │   │                      PortailFactureTokens (générer/révoquer un lien)
+│   │   ├── webhooks/          PaController (endpoint public signé)
+│   │   └── portail/           FacturesController (public tokenisé, hors JWT)
 │   │
 │   ├── models/                Modèles ActiveRecord (Facture, Avoir,
-│   │                          LigneAvoir, EvenementFacture, EvenementAvoir…)
+│   │                          LigneAvoir, EvenementFacture, EvenementAvoir,
+│   │                          Relance, PortailFactureToken…)
 │   │
 │   ├── services/
 │   │   ├── [SOCLE GELÉ]       FacturXXmlService · FacturXPackageService
@@ -283,24 +292,28 @@ backend/
 │   │   │                      AvoirEmissionService · AvoirXmlStorageService
 │   │   ├── [numérotation]     NumerotationService (générique facture/avoir)
 │   │   ├── [stockage]         FacturXStorageService · FacturePdfService
-│   │   └── [transmission]     TransmissionPaOrchestrationService (agnostique)
-│   │                          PaStatusIngestionService · PaStatusMapper
-│   │                          PaInboundNotificationResolver
-│   │                          PaWebhookSignatureVerifier
-│   │                          PaRequiresReviewCounter · PaPollingRelanceService
-│   │                          FactureStatusTransitionPolicy
+│   │   ├── [transmission]     TransmissionPaOrchestrationService (agnostique)
+│   │   │                      PaStatusIngestionService · PaStatusMapper
+│   │   │                      PaInboundNotificationResolver
+│   │   │                      PaWebhookSignatureVerifier
+│   │   │                      PaRequiresReviewCounter · PaPollingRelanceService
+│   │   │                      FactureStatusTransitionPolicy
+│   │   ├── [paiements]        PaiementSyntheseService (reste à payer dérivé)
+│   │   └── [relances]         RelanceService · RelanceCadenceService (cadence)
 │   │
 │   ├── serializers/           Blueprinter (Facture, Avoir, LigneAvoir,
-│   │                          EvenementAvoir…) — acteur sans email
+│   │                          EvenementAvoir, Relance, Portail*…) — sans email
+│   ├── mailers/               RelanceMailer (rappel de paiement, e-mail)
 │   ├── policies/              Pundit — une policy par ressource (rôle + tenant)
 │   ├── jobs/                  PaPollingScannerJob · PaPollTransmissionJob
+│   │                          RelanceScannerJob · RelanceEnvoiJob
 │   ├── adapters/pa/           BaseAdapter · <Provider>Adapter · ChorusProAdapter
 │   └── current.rb             ActiveSupport::CurrentAttributes (organisation…)
 │
 ├── config/
 │   ├── initializers/          cors · jwt · pundit · rack_attack (rate limiting)
 │   ├── facturx/               [SOCLE GELÉ] profil ICC sRGB
-│   └── routes.rb              namespace api/v1 + namespace webhooks
+│   └── routes.rb              namespace api/v1 · webhooks · portail (public)
 │
 ├── vendor/facturx/            [SOCLE GELÉ] XSD 1.09 · Schematron EN16931
 └── storage/<env>/             Archives PDF/A-3 + XML, cloisonnées par environnement
@@ -324,12 +337,15 @@ frontend/src/
 │                       transmissionPaApi
 │                       avoirsApi · lignesAvoirApi · evenementsAvoirApi
 │                       avoirTransmissionPaApi
+│                       relancesApi · portailApi · portailFactureTokensApi
 │
 ├── types/              auth · client · facture · devis · transmission · dashboard
 │                       avoir · ligneAvoir · evenementAvoir
+│                       relance · portail
 │
 ├── hooks/              useFactures · useClients · useDevis · useDashboard
 │                       useTransmissions · useConformite
+│                       useRelance · usePortailLien
 │
 ├── context/            AuthContext
 ├── lib/                schemas.ts (Zod) · formatters.ts (€, dates, SIRET)
@@ -339,6 +355,7 @@ frontend/src/
 │   ├── facture/        FactureForm · LigneFactureRow · ConformitePanel · TotauxBlock
 │   │                   InvoiceDetailHeader · InvoiceLifecycleTimeline
 │   │                   InvoiceEventHistory · InvoiceTransmissionSection
+│   │                   InvoiceRelanceSection · InvoiceShareSection
 │   ├── avoir/          CreditNoteLifecycleTimeline · CreditNoteEventHistory
 │   ├── modals/         ModalShell · ConfirmModal · LoginModal · RegisterModal
 │   └── layout/         Sidebar · TopBar · AppShell
@@ -349,11 +366,12 @@ frontend/src/
 │   ├── ClientsPage             "/app/clients"
 │   ├── FacturesPage            "/app/factures"
 │   ├── NewInvoicePage          "/app/factures/new"
-│   ├── FactureDetailPage       "/app/factures/:id"   (+ bloc « Avoirs » + reste dû)
+│   ├── FactureDetailPage       "/app/factures/:id"   (+ « Avoirs » + reste dû + Partage + Relance)
 │   ├── NewCreditNotePage       création d'un avoir depuis une facture émise
 │   ├── AvoirDetailPage         "/app/avoirs/:id"
 │   ├── DevisPage               "/app/devis"
-│   └── ParametresPage          "/app/parametres"
+│   ├── ParametresPage          "/app/parametres"
+│   └── PortalPage              "/portail/:token"   (public, hors session)
 │
 └── styles/             tokens.css (design tokens) · global.css
 ```
@@ -371,6 +389,8 @@ frontend/src/
 | Border | `rgba(255,255,255,0.06)` | Séparateurs |
 | Violet (marque) | `#7c3aed` | Identité Sereno, accents |
 | **Ambre (avoir)** | `--color-avoir` | **Type de document « avoir » (badge, accents)** |
+| **Teal (paiement)** | `--color-paiement` | **Règlement / reste à payer (suivi des paiements)** |
+| **Rose (relance)** | `--color-relance` | **Relances (manuel + auto) — distinct du rouge d'alerte** |
 | Vert (conformité) | `#10b981` | Statut conforme / succès |
 | Orange (attente) | `#f59e0b` | Statut en attente |
 | Rouge (retard) | `#ef4444` | Statut en retard / erreur |
@@ -442,15 +462,18 @@ Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »
 - [x] Validateurs officiels **en CI à chaque push** : XSD + Schematron EN 16931 (Mustang) + PDF/A-3b (veraPDF), facture **et** avoir (standard + franchise), auto-tests négatifs permanents — France CTC/BR-FR reste hors CI (aucun scénario public, dette n°24)
 
 ### ⏳ V1.2+ — Automatisation
-- [ ] Relances automatiques (jobs + e-mails)
+- [x] Relances — bouton manuel (v1a) : envoi d'e-mail + relance append-only — **livré**
+- [x] Relances — planificateur auto (v1b) : Solid Queue *scan-and-send* J+7/15/30, arrêt au 3ᵉ palier, idempotence, envoi honnête — **livré**
 - [ ] E-reporting B2C / international
-- [ ] Exports comptables (FEC)
-- [ ] Tests frontend (Vitest + Testing Library)
-- [ ] Gestion des paiements (« payé / reste à payer », distinct du dû après avoirs)
+- [ ] Exports comptables (FEC) — *à cadrer (mapping comptable)*
+- [x] Tests frontend (Vitest + Testing Library) — **en CI, job `frontend` requis (dettes n°9 + n°25 fermées)**
+- [x] Gestion des paiements (« payé / reste à payer », distinct du dû après avoirs) — **livré (suivi local, moyens 4461)**
 
 ### ⏳ V1.3 — Cycle commercial complet
-- [ ] Devis → conversion en facture
-- [ ] Portail destinataire
+- [x] Devis → conversion en facture — **livré (conversion via le moteur gelé, rollback tout-ou-rien)**
+- [x] Portail destinataire — lien de partage par facture (public tokenisé, lecture seule + PDF, révocable) — **livré (MVP)**
+- [ ] Espace client authentifié multi-fournisseurs (compte destinataire au-dessus des organisations — cf. dette n°35)
+- [ ] Fast-follow : injecter le lien du portail dans l'e-mail de relance
 
 ### ⏳ V1.4 — Secteur public & monétisation
 - [ ] Chorus Pro (B2G)
@@ -502,11 +525,11 @@ Org      : Studio Démo
 
 | Contrôle | Statut |
 |----------|--------|
-| Tests backend (RSpec) | ✅ verts — 334+ examples, 0 failure |
+| Tests backend (RSpec) | ✅ verts — **579 examples**, 0 failure |
 | Lint backend (RuboCop) | ✅ no offenses |
 | Audit dépendances (bundler-audit) | ✅ clean |
 | Analyse statique sécurité (Brakeman) | ✅ 0 erreur |
-| Lint + build frontend | ✅ verts (en local — **pas en CI**, dette n°25) |
+| Lint + build + **Vitest (50 tests)** frontend | ✅ verts — **en CI, job `frontend` requis** (dette n°25 fermée) |
 | PDF/A-3b (veraPDF) | ✅ 146/146 — **re-prouvé en CI** (facture + avoir) |
 | XML CII (XSD 1.09) | ✅ VALID — **re-prouvé en CI**, factures **et** avoirs (380/381) |
 | Schematron EN 16931 | ✅ 0 failed-assert — **re-prouvé en CI** (facture + avoir, standard + franchise) |
