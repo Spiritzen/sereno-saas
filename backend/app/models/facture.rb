@@ -96,6 +96,12 @@ class Facture < ApplicationRecord
 
   has_many :relances, dependent: :restrict_with_exception
 
+  # Portail destinataire (MVP) — cf. PortailFactureToken.
+  has_many :portail_facture_tokens,
+           class_name: "PortailFactureToken",
+           foreign_key: :facture_id,
+           dependent: :restrict_with_exception
+
   validates :type_document, presence: true, inclusion: { in: TYPES_DOCUMENT }
   validates :statut, presence: true, inclusion: { in: STATUTS }
   validates :format, presence: true, inclusion: { in: FORMATS }

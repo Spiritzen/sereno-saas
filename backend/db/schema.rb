@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_13_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_13_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -470,6 +470,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_13_100000) do
     t.check_constraint "type::text = ANY (ARRAY['pa'::character varying, 'chorus_pro'::character varying]::text[])", name: "check_plateformes_agreees_type"
   end
 
+  create_table "portail_facture_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "expire_at", null: false
+    t.uuid "facture_id", null: false
+    t.uuid "organisation_id", null: false
+    t.datetime "revoque_at"
+    t.string "token_hash", null: false
+    t.datetime "updated_at", null: false
+    t.index ["facture_id", "revoque_at"], name: "index_portail_facture_tokens_on_facture_and_revoque_at"
+    t.index ["facture_id"], name: "index_portail_facture_tokens_on_facture_id"
+    t.index ["organisation_id"], name: "index_portail_facture_tokens_on_organisation_id"
+    t.index ["token_hash"], name: "index_portail_facture_tokens_on_token_hash", unique: true
+  end
+
   create_table "produits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "actif", default: true, null: false
     t.datetime "created_at", null: false
@@ -771,6 +785,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_13_100000) do
   add_foreign_key "paiements", "factures"
   add_foreign_key "paiements", "organisations"
   add_foreign_key "plateformes_agreees", "organisations"
+  add_foreign_key "portail_facture_tokens", "factures"
+  add_foreign_key "portail_facture_tokens", "organisations"
   add_foreign_key "produits", "organisations"
   add_foreign_key "produits", "taux_tvas"
   add_foreign_key "relances", "factures"

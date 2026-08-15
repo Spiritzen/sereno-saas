@@ -13,6 +13,7 @@ import { NewCreditNotePage } from "./pages/NewCreditNotePage";
 import { NewDevisPage } from "./pages/NewDevisPage";
 import { NewInvoicePage } from "./pages/NewInvoicePage";
 import { ParametresPage } from "./pages/ParametresPage";
+import { PortalPage } from "./pages/PortalPage";
 
 export default function App() {
   return (
@@ -20,6 +21,11 @@ export default function App() {
       <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
 
       <Route path="/login" element={<LoginPage />} />
+
+      {/* Portail destinataire (MVP) — route PUBLIQUE, volontairement PAS
+          enveloppée dans ProtectedRoute : aucune session requise, le token
+          dans l'URL fait foi (cf. §5 execution_portail_destinataire_mvp.txt). */}
+      <Route path="/portail/:token" element={<PortalPage />} />
 
       <Route
         path="/app/dashboard"
