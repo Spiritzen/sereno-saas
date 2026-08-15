@@ -31,6 +31,13 @@ Rails.application.routes.draw do
     post "liens", to: "liens#create"
 
     delete "compte", to: "comptes#destroy"
+
+    # Étape B (16/08/2026) — API lecture seule des factures du destinataire.
+    # :id est TOUJOURS vérifié contre client_ids_revendiques dans le
+    # contrôleur, jamais fait confiance tel quel (§1 execution_espace_client_etape_b.txt).
+    get "factures", to: "factures#index"
+    get "factures/:id", to: "factures#show"
+    get "factures/:id/pdf", to: "factures#pdf"
   end
 
   namespace :api do
