@@ -16,6 +16,23 @@ Rails.application.routes.draw do
     get "factures/:token/avoirs", to: "factures#avoirs"
   end
 
+  # Espace client — Étape A (15/08/2026) — pile d'auth PARALLÈLE à l'app,
+  # hors du namespace api/v1 : cf. Destinataire::BaseController. AUCUNE
+  # route ici n'accepte de client_id/organisation_id — le rattachement passe
+  # UNIQUEMENT par un token de portail (§1 execution_espace_client_etape_a.txt).
+  namespace :destinataire do
+    post "inscription", to: "inscriptions#create"
+
+    post "connexion", to: "sessions#create"
+    delete "connexion", to: "sessions#destroy"
+
+    get "moi", to: "moi#show"
+
+    post "liens", to: "liens#create"
+
+    delete "compte", to: "comptes#destroy"
+  end
+
   namespace :api do
     namespace :v1 do
       post "auth/login", to: "auth#login"

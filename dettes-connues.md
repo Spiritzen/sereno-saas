@@ -29,6 +29,11 @@
 > depuis factures/avoirs/paiements, TVA comptabilisée à la facture (raffinement
 > « TVA sur encaissements » reporté), comptes par défaut en dur, étiquetage
 > d'honnêteté obligatoire (UI + API, jamais dans le fichier) : ajout des n°38 à n°42.
+> Mis à jour le 15/08/2026 après l'**espace client · Étape A** (fondation backend :
+> auth destinataire ENTIÈREMENT PARALLÈLE à l'auth app — Utilisateur/AuthTokenService/
+> Api::V1::BaseController/Session inchangés —, rattachement par revendication de lien
+> de portail UNIQUEMENT, jamais par e-mail, suppression de compte RGPD incluse) :
+> ajout des n°43 à n°45.
 > Socle : v0.3.0-conformite-fr. Frontière du socle : voir backend/SOCLE_GELE.md.
 
 - **Légende sévérité** : HAUTE > MOYENNE > BASSE > INFO > MINEURE
@@ -320,6 +325,29 @@
 - **Preuve** : `EcritureLet`/`DateLet` (lettrage) et `Montantdevise`/`Idevise` (multi-devise) sont laissés vides — notions absentes de Sereno, hors périmètre.
 - **Impact / pourquoi c'est une dette** : le FEC reste conforme au format (champs vides acceptés par la norme) mais n'exploite pas ces deux notions, absentes du modèle de données actuel.
 - **Quand la traiter** : le lettrage nécessiterait un concept de rapprochement comptable ; le multi-devise n'est aujourd'hui exercé nulle part (tout est EUR en pratique, cf. reco du 15/08/2026) — aucune des deux n'est un chantier ouvert.
+
+### Dettes — Espace client · Étape A (fondation backend + auth parallèle, exécution du 15/08/2026)
+
+### Dette n°43 — pas de rate-limiting sur connexion/inscription destinataire
+- **Sévérité** : BASSE (à poser avant la production)
+- **Statut** : NON RÉSOLUE
+- **Preuve** : `Destinataire::SessionsController#create` (connexion) et `Destinataire::InscriptionsController#create` n'ont pas de throttle `rack-attack` dédié — contrairement au webhook PA (dette n°R6, résolue) et à `Api::V1::AuthController#login` (déjà limité, `rate_limit to: 5, within: 1.minute`).
+- **Impact / pourquoi c'est une dette** : un endpoint de connexion/inscription public non throttlé est exposé au brute-force (mot de passe) et au bourrage d'inscriptions. Le mot de passe reste haché (bcrypt) — pas de risque de confidentialité immédiat, mais une porte ouverte au déni de service / brute-force en volume.
+- **Quand la traiter** : à poser avant la prod, via le patron `rack-attack` déjà en place (comme la dette portail n°33) — idéalement le même seuil que `Api::V1::AuthController#login` (5/minute).
+
+### Dette n°44 — RGPD partiel : suppression du compte livrée, export des données personnelles en attente
+- **Sévérité** : INFO (droit d'accès/portabilité, pas le droit à l'effacement — celui-ci est livré)
+- **Statut** : NON RÉSOLUE (fast-follow)
+- **Preuve** : `DELETE /destinataire/compte` (droit à l'effacement) est livré et testé (cascade sessions + liens). Aucun endpoint n'exporte les données personnelles du destinataire (droit d'accès/portabilité RGPD) — hors périmètre de l'Étape A.
+- **Impact / pourquoi c'est une dette** : un destinataire peut demander la portabilité de ses données (RGPD art. 20) sans mécanisme dédié aujourd'hui — traitement manuel possible en attendant (peu de comptes prévus à ce stade).
+- **Quand la traiter** : fast-follow, avant un volume significatif de comptes destinataires.
+
+### Dette n°45 — suggestion par e-mail (découverte multi-fournisseurs) — hors MVP
+- **Sévérité** : INFO (fonctionnalité non construite, choix de séquencement)
+- **Statut** : NON RÉSOLUE (fast-follow, décision Sébastien du 15/08/2026)
+- **Preuve** : le rattachement d'un compte à un `client` passe EXCLUSIVEMENT par la revendication d'un lien de portail actif (`DestinataireClientLink`, preuve = `PortailFactureToken.actif?`). Aucune correspondance automatique par `client.email` n'existe — délibérément.
+- **Impact / pourquoi c'est une dette** : un destinataire ayant plusieurs fournisseurs Sereno doit revendiquer CHAQUE lien individuellement (pas de découverte automatique) — MVP volontairement strict pour ne jamais risquer un octroi d'accès basé sur un champ non fiable (`client.email` n'est ni unique ni validé, cf. reco du 15/08/2026).
+- **Quand la traiter** : fast-follow, et TOUJOURS à confirmer par une preuve fraîche (ex. un nouveau lien de portail, ou une vérification d'e-mail) — jamais un octroi automatique silencieux, même en suggestion.
 
 ## Dettes résolues
 
