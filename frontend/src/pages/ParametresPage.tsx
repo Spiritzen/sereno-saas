@@ -1,4 +1,5 @@
 import { Building2, ShieldCheck, WalletCards } from "lucide-react";
+import { FecExportPanel } from "../components/FecExportPanel";
 
 export function ParametresPage() {
   return (
@@ -49,6 +50,8 @@ export function ParametresPage() {
           <strong>Plateforme Agréée</strong>
           <span>Future connexion PA, routage, suivi des transmissions.</span>
         </article>
+
+        <FecExportPanel />
       </div>
     </section>
   );

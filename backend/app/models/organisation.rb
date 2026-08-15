@@ -64,4 +64,11 @@ class Organisation < ApplicationRecord
   validates :regime_tva, inclusion: {
     in: %w[franchise reel_simplifie reel_normal]
   }
+
+  # Export FEC (MVP, 15/08/2026) — régime DÉCLARÉ, pour l'étiquette
+  # d'honnêteté uniquement : le MVP de FecExportService écrit TOUJOURS la
+  # TVA à la date de facture, quel que soit ce champ (cf. dette consignée :
+  # le traitement fin "TVA sur encaissements" reste à valider avec un
+  # expert-comptable). Pas d'UI pour le modifier dans ce MVP.
+  validates :fait_generateur_tva, presence: true, inclusion: { in: %w[debits encaissements] }
 end
