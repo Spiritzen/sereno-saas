@@ -25,6 +25,10 @@
 > (RelanceService génère désormais paresseusement un lien de partage à chaque envoi,
 > manuel ET auto — point d'injection unique, plusieurs liens actifs autorisés) : ajout
 > des n°36 et n°37.
+> Mis à jour le 15/08/2026 après l'**export FEC (MVP dérivé)** — écritures reconstituées
+> depuis factures/avoirs/paiements, TVA comptabilisée à la facture (raffinement
+> « TVA sur encaissements » reporté), comptes par défaut en dur, étiquetage
+> d'honnêteté obligatoire (UI + API, jamais dans le fichier) : ajout des n°38 à n°42.
 > Socle : v0.3.0-conformite-fr. Frontière du socle : voir backend/SOCLE_GELE.md.
 
 - **Légende sévérité** : HAUTE > MOYENNE > BASSE > INFO > MINEURE
@@ -279,6 +283,43 @@
 - **Preuve** : une relance crée un token sans révoquer les autres (choix assumé pour ne jamais tuer en silence un lien partagé à la main). Il n'existe pas encore de vue « liste des liens actifs » : le bouton owner « Révoquer » reste global (révoque TOUS les liens d'un coup), et l'action owner « Générer » révoque puis recrée (donc peut révoquer des liens issus de relances — action explicite de l'owner, pas silencieuse).
 - **Impact / pourquoi c'est une dette** : accumulation de liens actifs au fil des relances (un token de plus par envoi), sans risque de confidentialité nouveau (chaque token reste un secret indépendant de 128 caractères hex, révocable globalement par l'owner).
 - **Quand la traiter** : à affiner si un jour on veut cibler/lister les liens individuellement.
+
+### Dettes — Export FEC MVP (exécution du 15/08/2026)
+
+### Dette n°38 — FEC = écritures reconstituées, pas une comptabilité tenue
+- **Sévérité** : INFO (honnêteté produit, pas un bug)
+- **Statut** : NON RÉSOLUE (nature assumée de la fonctionnalité)
+- **Preuve** : le FEC est dérivé des factures/avoirs/paiements, étiqueté comme tel, à faire valider par un comptable.
+- **Impact / pourquoi c'est une dette** : Sereno ne tient pas de comptabilité en partie double — le fichier produit est une reconstitution, jamais une source comptable de vérité, tant qu'il n'a pas été validé par un expert-comptable.
+- **Quand la traiter** : à chaque usage — l'étiquette d'honnêteté (UI + en-tête API) le rappelle systématiquement, jamais dans le fichier .txt lui-même.
+
+### Dette n°39 — TVA du FEC comptabilisée à la facture, même pour une organisation déclarant « encaissements »
+- **Sévérité** : BASSE (traitement fiscal simplifié, assumé)
+- **Statut** : NON RÉSOLUE (raffinement reporté)
+- **Preuve** : la TVA du FEC est comptabilisée à la FACTURE (débits-style) même pour une orga déclarant « encaissements » : le traitement fin (compte d'attente « TVA sur encaissements à régulariser » + transfert) est reporté, à valider avec un expert-comptable avant implémentation.
+- **Impact / pourquoi c'est une dette** : pour une organisation réellement au régime « TVA sur les encaissements », le FEC MVP ne reflète pas exactement le fait générateur légal — d'où l'étiquette d'honnêteté qui précise le régime déclaré, et l'obligation de validation comptable avant tout usage fiscal.
+- **Quand la traiter** : avant d'utiliser le FEC pour une déclaration réelle d'une organisation « encaissements » — nécessite une validation métier avec un expert-comptable avant implémentation.
+
+### Dette n°40 — comptes par défaut en dur (411/707/44571/512/531)
+- **Sévérité** : BASSE
+- **Statut** : NON RÉSOLUE (fast-follow)
+- **Preuve** : `FecExportService` code en dur les numéros de compte (411/707/44571/512/531) — aucun plan comptable n'existe dans Sereno (confirmé par la reco du 15/08/2026).
+- **Impact / pourquoi c'est une dette** : une organisation avec un plan comptable personnalisé (numérotation différente) devra retraiter le fichier a posteriori. Personnalisation par organisation = fast-follow.
+- **Quand la traiter** : si un client a un besoin réel de comptes personnalisés — pas bloquant pour le MVP.
+
+### Dette n°41 — fait_generateur_tva ajouté mais non modifiable en UI
+- **Sévérité** : INFO
+- **Statut** : NON RÉSOLUE (fast-follow)
+- **Preuve** : `organisations.fait_generateur_tva` existe (défaut « encaissements ») mais n'a pas d'UI pour le changer — toutes les organisations restent au défaut. Le champ n'influence d'ailleurs pas encore les écritures produites (cf. dette n°39).
+- **Impact / pourquoi c'est une dette** : le champ ne sert aujourd'hui que l'étiquette d'honnêteté (affichage du régime déclaré) — exposer un réglage owner reste un fast-follow.
+- **Quand la traiter** : en même temps que le raffinement du traitement TVA sur encaissements (dette n°39), pour que le réglage ait un effet réel.
+
+### Dette n°42 — lettrage et multi-devise laissés vides dans le FEC
+- **Sévérité** : INFO
+- **Statut** : NON RÉSOLUE (hors périmètre)
+- **Preuve** : `EcritureLet`/`DateLet` (lettrage) et `Montantdevise`/`Idevise` (multi-devise) sont laissés vides — notions absentes de Sereno, hors périmètre.
+- **Impact / pourquoi c'est une dette** : le FEC reste conforme au format (champs vides acceptés par la norme) mais n'exploite pas ces deux notions, absentes du modèle de données actuel.
+- **Quand la traiter** : le lettrage nécessiterait un concept de rapprochement comptable ; le multi-devise n'est aujourd'hui exercé nulle part (tout est EUR en pratique, cf. reco du 15/08/2026) — aucune des deux n'est un chantier ouvert.
 
 ## Dettes résolues
 

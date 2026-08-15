@@ -29,4 +29,29 @@ RSpec.describe Organisation, type: :model do
       expect(organisation).not_to be_valid
     end
   end
+
+  # Export FEC (MVP, 15/08/2026) — porte le régime déclaré, N'INFLUENCE PAS
+  # encore les écritures produites (cf. FecExportService, toujours à la
+  # facture) : ce n'est qu'une donnée déclarative pour l'étiquette et une
+  # future version fine.
+  describe "fait_generateur_tva" do
+    it "vaut 'encaissements' par défaut" do
+      organisation = create(:organisation)
+
+      expect(organisation.fait_generateur_tva).to eq("encaissements")
+    end
+
+    it "accepte 'debits'" do
+      organisation = build(:organisation, fait_generateur_tva: "debits")
+
+      expect(organisation).to be_valid
+    end
+
+    it "refuse une valeur hors de la liste" do
+      organisation = build(:organisation, fait_generateur_tva: "autre_chose")
+
+      expect(organisation).not_to be_valid
+      expect(organisation.errors[:fait_generateur_tva]).to be_present
+    end
+  end
 end
