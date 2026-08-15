@@ -47,7 +47,7 @@ Les gros acteurs (Pennylane, Sellsy…) visent les PME équipées d'un cabinet c
 
 ## ✅ Statut du projet — Août 2026
 
-> Phase actuelle : **correction légale livrée (V1.2 avoirs complets)** — au-dessus de la couche transmission (V1.1), le cycle des **avoirs (notes de crédit)** est désormais opérationnel de bout en bout : émission conforme (Factur-X TypeCode **381** + référence **BT-25** à la facture corrigée), API, journal append-only, transmission via PA, gestion des lignes et frontend dédié. Dernier audit complet : **99,5/100 — GREEN, CAPITALISÉ** (30/07/2026, socle intact) : B4 a fermé la dette qui plafonnait juste en dessous. Trois des quatre niveaux de conformité (XSD, Schematron EN 16931, PDF/A-3b) sont re-prouvés en CI à chaque commit, sur facture **et** avoir ; le 4ᵉ (France CTC) reste hors CI faute de scénario public. Depuis, trois briques majeures ont été livrées **par-dessus ce socle** : le **suivi des paiements** (règlement local, reste à payer dérivé, distinct du « encaissée » réglementaire), le **cycle devis → facture** (conversion en facture conforme via le moteur d'émission gelé, indiscernable d'une facture manuelle), et le **harnais de tests frontend (Vitest + RTL) désormais en CI**. Le socle a été re-tagué **`v0.3.0-conformite-fr`** (9 chemins gelés, `facture_pdf_service` promu). Depuis, l'**automatisation des relances** a été livrée en deux temps — **v1a** (bouton « Relancer » manuel : envoi d'e-mail + journalisation append-only) puis **v1b** (planificateur automatique : job Solid Queue en *scan-and-send*, cadence J+7/15/30, arrêt au 3ᵉ palier, idempotence, envoi honnête sans navigateur en dev) — et un premier **portail destinataire (MVP)** : un **lien de partage par facture**, public et tokenisé (token opaque façon `Session`, l'URL ne porte jamais l'id → énumération impossible), en lecture seule (consultation + téléchargement du PDF Factur-X), révocable. Prochaines briques au choix : **exports FEC** (à cadrer côté mapping comptable) puis **e-reporting**, et plus tard un **espace client authentifié** multi-fournisseurs (distinct du portail MVP, cf. `docs/dettes-connues.md` n°35).
+> Phase actuelle : **correction légale livrée (V1.2 avoirs complets)** — au-dessus de la couche transmission (V1.1), le cycle des **avoirs (notes de crédit)** est désormais opérationnel de bout en bout : émission conforme (Factur-X TypeCode **381** + référence **BT-25** à la facture corrigée), API, journal append-only, transmission via PA, gestion des lignes et frontend dédié. Dernier audit complet : **99,5/100 — GREEN, CAPITALISÉ** (30/07/2026, socle intact) : B4 a fermé la dette qui plafonnait juste en dessous. Trois des quatre niveaux de conformité (XSD, Schematron EN 16931, PDF/A-3b) sont re-prouvés en CI à chaque commit, sur facture **et** avoir ; le 4ᵉ (France CTC) reste hors CI faute de scénario public. Depuis, trois briques majeures ont été livrées **par-dessus ce socle** : le **suivi des paiements** (règlement local, reste à payer dérivé, distinct du « encaissée » réglementaire), le **cycle devis → facture** (conversion en facture conforme via le moteur d'émission gelé, indiscernable d'une facture manuelle), et le **harnais de tests frontend (Vitest + RTL) désormais en CI**. Le socle a été re-tagué **`v0.3.0-conformite-fr`** (9 chemins gelés, `facture_pdf_service` promu). Depuis, l'**automatisation des relances** a été livrée en deux temps — **v1a** (bouton « Relancer » manuel : envoi d'e-mail + journalisation append-only) puis **v1b** (planificateur automatique : job Solid Queue en *scan-and-send*, cadence J+7/15/30, arrêt au 3ᵉ palier, idempotence, envoi honnête sans navigateur en dev) — et un premier **portail destinataire (MVP)** : un **lien de partage par facture**, public et tokenisé (token opaque façon `Session`, l'URL ne porte jamais l'id → énumération impossible), en lecture seule (consultation + téléchargement du PDF Factur-X), révocable — **et le lien de ce portail est désormais injecté dans l'e-mail de relance**. Un premier **export comptable FEC** est également livré : des écritures *reconstituées* et équilibrées depuis les factures/avoirs/paiements, TVA écrite à la facture, au format DGFiP strict, clairement étiquetées « à faire valider par un comptable ». Prochaine grande brique : l'**espace client authentifié** multi-fournisseurs — un *compte destinataire* au-dessus des organisations (cf. `dettes-connues.md` n°35) ; restent aussi l'**e-reporting** et le raffinement « TVA sur encaissements » du FEC.
 
 Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé conforme**, et son socle légal est **gelé** (`tag v0.3.0-conformite-fr`) : la frontière exacte du gel est documentée et versionnée dans [`backend/SOCLE_GELE.md`](./backend/SOCLE_GELE.md). Toute la couche transmission (transmission sandbox, ingestion des statuts, polling, webhook signé, rate limiting) et la brique des avoirs ont été construites **par-dessus** ce socle, sans jamais le modifier. Voir [Conformité prouvée](#-conformité-prouvée).
 
@@ -91,8 +91,9 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | **Relances — manuel (v1a)** | ✅ **Complet** | Bouton « Relancer » : envoi d'e-mail + relance journalisée (append-only) |
 | **Relances — planificateur (v1b)** | ✅ **Complet** | Job Solid Queue *scan-and-send*, cadence J+7/15/30, arrêt au 3ᵉ palier, idempotence (index unique partiel), envoi honnête (`:file` en dev, sans navigateur) |
 | **Portail destinataire — lien de partage (MVP)** | ✅ **Complet** | Lien public par facture, token opaque façon `Session` (l'URL ne porte jamais l'id), lecture seule + PDF, révocable |
+| **Lien du portail dans la relance** | ✅ **Complet** | URL validée (erreur claire en prod si mal configurée), plusieurs liens actifs possibles, dès le niveau 1 |
 | E-reporting (B2C / international) | ⏳ **V1.2+** | Lots de transmission |
-| Exports comptables (FEC) | ⏳ **V1.2+** | À cadrer (mapping de comptes, TVA débits/encaissements) |
+| **Export comptable FEC (MVP)** | ✅ **Complet** | Écritures dérivées équilibrées (ventes/avoirs/encaissements), TVA à la facture, format DGFiP, lecture seule, étiqueté « à valider par un comptable » |
 | Espace client authentifié (multi-fournisseurs) | ⏳ **V1.3** | Compte destinataire au-dessus des organisations (cf. dette n°35) |
 | Chorus Pro (B2G) · Abonnements SaaS | ⏳ **V1.4** | Adapter dédié · Plans Gratuit / Pro |
 | Déploiement production (Kamal 2) | ⏳ **V1.5** | VPS OVH/Hetzner + HTTPS + CI/CD |
@@ -149,7 +150,7 @@ Le moteur d'émission Factur-X (PDF/A-3 + XML CII) est **fonctionnel et prouvé 
 | | Validation | veraPDF · XSD Factur-X 1.09 · Schematron EN 16931 · Mustang |
 | | Transmission | Plateforme Agréée (PA) via adapter |
 | | Secteur public | Chorus Pro (B2G) |
-| **Tests** | Backend | RSpec + FactoryBot + Faker (579+ examples) |
+| **Tests** | Backend | RSpec + FactoryBot + Faker (619+ examples) |
 | | Frontend | ESLint + `tsc` + **Vitest + Testing Library** — job `frontend` requis en CI |
 | **DevOps** | Conteneurs | Docker (multi-stage, Debian slim) |
 | | Déploiement | Kamal 2 |
@@ -202,6 +203,7 @@ Paiement        → PAIEMENT · RELANCE
 | V6 | Paiements + relances (champs manuels, `origine`, index d'idempotence auto) |
 | V7 | Abonnement SaaS + index de performance |
 | V8 | Portail — `portail_facture_tokens` (lien de partage par facture) |
+| V9 | Régime TVA — champ `fait_generateur_tva` (déclaratif, pour l'export FEC) |
 
 ---
 
@@ -260,7 +262,7 @@ BROUILLON → ÉMISE → DÉPOSÉE (PA) → REÇUE → MISE À DISPOSITION
 | `COMPTABLE` | Lecture finance + exports comptables (FEC) |
 | `MEMBRE` | Création de devis et factures |
 
-> Un premier **portail destinataire (MVP)** est livré : un **lien de partage par facture** (public, tokenisé, lecture seule + téléchargement du PDF, révocable). Un véritable **espace client authentifié** multi-fournisseurs (le destinataire se connecte et retrouve tous ses fournisseurs) reste à cadrer (V1.3, cf. `docs/dettes-connues.md` n°35).
+> Un premier **portail destinataire (MVP)** est livré : un **lien de partage par facture** (public, tokenisé, lecture seule + téléchargement du PDF, révocable). Depuis, le lien de ce portail est **injecté dans l'e-mail de relance**. Un véritable **espace client authentifié** multi-fournisseurs (le destinataire se connecte et retrouve tous ses fournisseurs) reste à cadrer (V1.3, cf. `dettes-connues.md` n°35).
 
 ---
 
@@ -276,6 +278,7 @@ backend/
 │   │   │                      Transmissions · AvoirTransmissionsPa
 │   │   │                      EvenementsFacture · EvenementsAvoir · Dashboard
 │   │   │                      PortailFactureTokens (générer/révoquer un lien)
+│   │   │                      Exports (FEC — aperçu + téléchargement)
 │   │   ├── webhooks/          PaController (endpoint public signé)
 │   │   └── portail/           FacturesController (public tokenisé, hors JWT)
 │   │
@@ -299,7 +302,8 @@ backend/
 │   │   │                      PaRequiresReviewCounter · PaPollingRelanceService
 │   │   │                      FactureStatusTransitionPolicy
 │   │   ├── [paiements]        PaiementSyntheseService (reste à payer dérivé)
-│   │   └── [relances]         RelanceService · RelanceCadenceService (cadence)
+│   │   ├── [relances]         RelanceService · RelanceCadenceService (cadence)
+│   │   └── [export]           FecExportService (FEC dérivé, lecture seule)
 │   │
 │   ├── serializers/           Blueprinter (Facture, Avoir, LigneAvoir,
 │   │                          EvenementAvoir, Relance, Portail*…) — sans email
@@ -338,6 +342,7 @@ frontend/src/
 │                       avoirsApi · lignesAvoirApi · evenementsAvoirApi
 │                       avoirTransmissionPaApi
 │                       relancesApi · portailApi · portailFactureTokensApi
+│                       exportsApi (export FEC)
 │
 ├── types/              auth · client · facture · devis · transmission · dashboard
 │                       avoir · ligneAvoir · evenementAvoir
@@ -358,7 +363,8 @@ frontend/src/
 │   │                   InvoiceRelanceSection · InvoiceShareSection
 │   ├── avoir/          CreditNoteLifecycleTimeline · CreditNoteEventHistory
 │   ├── modals/         ModalShell · ConfirmModal · LoginModal · RegisterModal
-│   └── layout/         Sidebar · TopBar · AppShell
+│   ├── layout/         Sidebar · TopBar · AppShell
+│   └── export/         FecExportPanel (téléchargement FEC + étiquette honnêteté)
 │
 ├── pages/
 │   ├── HomePage                "/"
@@ -370,7 +376,7 @@ frontend/src/
 │   ├── NewCreditNotePage       création d'un avoir depuis une facture émise
 │   ├── AvoirDetailPage         "/app/avoirs/:id"
 │   ├── DevisPage               "/app/devis"
-│   ├── ParametresPage          "/app/parametres"
+│   ├── ParametresPage          "/app/parametres"   (+ export FEC)
 │   └── PortalPage              "/portail/:token"   (public, hors session)
 │
 └── styles/             tokens.css (design tokens) · global.css
@@ -465,15 +471,15 @@ Tant qu'un contrôle échoue, le bouton **« Émettre & transmettre via la PA »
 - [x] Relances — bouton manuel (v1a) : envoi d'e-mail + relance append-only — **livré**
 - [x] Relances — planificateur auto (v1b) : Solid Queue *scan-and-send* J+7/15/30, arrêt au 3ᵉ palier, idempotence, envoi honnête — **livré**
 - [ ] E-reporting B2C / international
-- [ ] Exports comptables (FEC) — *à cadrer (mapping comptable)*
+- [x] Export comptable FEC (MVP) — écritures dérivées équilibrées, TVA à la facture, format DGFiP, étiqueté « à valider par un comptable » — **livré**
 - [x] Tests frontend (Vitest + Testing Library) — **en CI, job `frontend` requis (dettes n°9 + n°25 fermées)**
 - [x] Gestion des paiements (« payé / reste à payer », distinct du dû après avoirs) — **livré (suivi local, moyens 4461)**
 
 ### ⏳ V1.3 — Cycle commercial complet
 - [x] Devis → conversion en facture — **livré (conversion via le moteur gelé, rollback tout-ou-rien)**
 - [x] Portail destinataire — lien de partage par facture (public tokenisé, lecture seule + PDF, révocable) — **livré (MVP)**
-- [ ] Espace client authentifié multi-fournisseurs (compte destinataire au-dessus des organisations — cf. dette n°35)
-- [ ] Fast-follow : injecter le lien du portail dans l'e-mail de relance
+- [ ] **Espace client authentifié multi-fournisseurs** (compte destinataire au-dessus des organisations — cf. dette n°35) — *prochaine cible*
+- [x] Lien du portail injecté dans l'e-mail de relance — **livré**
 
 ### ⏳ V1.4 — Secteur public & monétisation
 - [ ] Chorus Pro (B2G)
@@ -525,11 +531,11 @@ Org      : Studio Démo
 
 | Contrôle | Statut |
 |----------|--------|
-| Tests backend (RSpec) | ✅ verts — **579 examples**, 0 failure |
+| Tests backend (RSpec) | ✅ verts — **619 examples**, 0 failure |
 | Lint backend (RuboCop) | ✅ no offenses |
 | Audit dépendances (bundler-audit) | ✅ clean |
 | Analyse statique sécurité (Brakeman) | ✅ 0 erreur |
-| Lint + build + **Vitest (50 tests)** frontend | ✅ verts — **en CI, job `frontend` requis** (dette n°25 fermée) |
+| Lint + build + **Vitest (54 tests)** frontend | ✅ verts — **en CI, job `frontend` requis** (dette n°25 fermée) |
 | PDF/A-3b (veraPDF) | ✅ 146/146 — **re-prouvé en CI** (facture + avoir) |
 | XML CII (XSD 1.09) | ✅ VALID — **re-prouvé en CI**, factures **et** avoirs (380/381) |
 | Schematron EN 16931 | ✅ 0 failed-assert — **re-prouvé en CI** (facture + avoir, standard + franchise) |
