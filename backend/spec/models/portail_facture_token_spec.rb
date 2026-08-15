@@ -3,6 +3,85 @@
 require "rails_helper"
 
 RSpec.describe PortailFactureToken do
+  # Fast-follow 15/08/2026 — URL partagée, SEULE source de vérité (owner +
+  # relance). Isole FRONTEND_URL entre exemples : ni .env ni le processus de
+  # test ne la posent par défaut (vérifié), donc `after` suffit à nettoyer.
+  describe ".frontend_base_url" do
+    after { ENV.delete("FRONTEND_URL") }
+
+    context "hors production (dev/test)" do
+      it "utilise FRONTEND_URL si elle est posée" do
+        ENV["FRONTEND_URL"] = "http://localhost:4000"
+
+        expect(described_class.frontend_base_url).to eq("http://localhost:4000")
+      end
+
+      it "retombe sur http://localhost:5173 (défaut Vite) si FRONTEND_URL est absente" do
+        ENV.delete("FRONTEND_URL")
+
+        expect(described_class.frontend_base_url).to eq("http://localhost:5173")
+      end
+
+      it "retire un slash final (normalisation)" do
+        ENV["FRONTEND_URL"] = "http://localhost:4000/"
+
+        expect(described_class.frontend_base_url).to eq("http://localhost:4000")
+      end
+
+      it "lève Portail::UrlNonConfiguree si FRONTEND_URL est posée mais syntaxiquement invalide" do
+        ENV["FRONTEND_URL"] = "pas-une-url"
+
+        expect { described_class.frontend_base_url }.to raise_error(Portail::UrlNonConfiguree)
+      end
+    end
+
+    context "en production" do
+      before { allow(Rails.env).to receive(:production?).and_return(true) }
+
+      it "utilise FRONTEND_URL si elle est valide et en https" do
+        ENV["FRONTEND_URL"] = "https://app.sereno.fr"
+
+        expect(described_class.frontend_base_url).to eq("https://app.sereno.fr")
+      end
+
+      it "retire un slash final en production aussi" do
+        ENV["FRONTEND_URL"] = "https://app.sereno.fr/"
+
+        expect(described_class.frontend_base_url).to eq("https://app.sereno.fr")
+      end
+
+      it "lève une erreur EXPLICITE si FRONTEND_URL est absente — jamais le placeholder supprimé" do
+        ENV.delete("FRONTEND_URL")
+
+        expect { described_class.frontend_base_url }.to raise_error(
+          Portail::UrlNonConfiguree, /FRONTEND_URL manquante ou invalide en production/
+        )
+      end
+
+      it "lève une erreur si FRONTEND_URL n'est pas en https" do
+        ENV["FRONTEND_URL"] = "http://app.sereno.fr"
+
+        expect { described_class.frontend_base_url }.to raise_error(Portail::UrlNonConfiguree)
+      end
+
+      it "lève une erreur si FRONTEND_URL est syntaxiquement invalide" do
+        ENV["FRONTEND_URL"] = "pas-une-url"
+
+        expect { described_class.frontend_base_url }.to raise_error(Portail::UrlNonConfiguree)
+      end
+    end
+  end
+
+  describe ".url_publique" do
+    after { ENV.delete("FRONTEND_URL") }
+
+    it "concatène la base et le token brut sous /portail/ — aligné sur la route SPA" do
+      ENV["FRONTEND_URL"] = "http://localhost:4000"
+
+      expect(described_class.url_publique("abc123")).to eq("http://localhost:4000/portail/abc123")
+    end
+  end
+
   describe ".generer!" do
     it "crée un token et renvoie le BRUT une seule fois — jamais stocké tel quel" do
       facture = create(:facture, :emise, date_echeance: 1.day.ago)

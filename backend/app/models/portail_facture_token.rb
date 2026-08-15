@@ -67,10 +67,66 @@ class PortailFactureToken < ApplicationRecord
       candidat
     end
 
+    # SEULE source de vérité de la base d'URL du frontend (SPA) — le
+    # contrôleur owner (générer/révoquer) ET RelanceService (lien paresseux
+    # dans le mail de relance) l'appellent tous les deux, jamais une 2e
+    # formule ailleurs (fast-follow 15/08/2026, cf. reco_lien_portail_dans_relance).
+    #
+    # dev/test : ENV["FRONTEND_URL"] si posée, sinon "http://localhost:5173"
+    # (défaut Vite du projet, cf. config/initializers/cors.rb).
+    # PRODUCTION : ENV["FRONTEND_URL"] OBLIGATOIRE et VALIDE — plus aucun
+    # placeholder ("https://app.sereno.fr" supprimé). Absente, mal formée, ou
+    # non-https en prod → #{UrlNonConfiguree}, échec BRUYANT et actionnable
+    # au moment de construire un lien, plutôt qu'un lien cassé envoyé en
+    # silence à un client.
+    def frontend_base_url
+      brute = ENV["FRONTEND_URL"]
+
+      if Rails.env.production?
+        raise Portail::UrlNonConfiguree, MESSAGE_URL_MANQUANTE_PROD if brute.blank?
+
+        normaliser_et_valider!(brute, exiger_https: true, message_erreur: MESSAGE_URL_MANQUANTE_PROD)
+      else
+        normaliser_et_valider!(
+          brute.presence || "http://localhost:5173",
+          exiger_https: false,
+          message_erreur: "FRONTEND_URL invalide (#{brute.inspect}) : schéma http(s) et host requis"
+        )
+      end
+    end
+
+    # URL ABSOLUE complète du portail pour CE token brut — alignée sur la
+    # route SPA `/portail/:token` (frontend/src/App.tsx). Utilisée par le
+    # contrôleur owner ET RelanceService.
+    def url_publique(token_brut)
+      "#{frontend_base_url}/portail/#{token_brut}"
+    end
+
     private
+
+    MESSAGE_URL_MANQUANTE_PROD =
+      "FRONTEND_URL manquante ou invalide en production — configurez-la avant " \
+      "d'émettre des liens de portail / relances"
 
     def hasher(token_brut)
       Digest::SHA256.hexdigest(token_brut.to_s)
+    end
+
+    # Valide (schéma http(s) + host présents ; https strict si exigé) et
+    # NORMALISE (retire un éventuel slash final — cf. #url_publique qui
+    # concatène directement "/portail/...", jamais de double-slash).
+    def normaliser_et_valider!(url_brute, exiger_https:, message_erreur:)
+      uri = URI.parse(url_brute)
+
+      scheme_valide = %w[http https].include?(uri.scheme)
+      host_present = uri.host.present?
+      https_respecte = !exiger_https || uri.scheme == "https"
+
+      raise Portail::UrlNonConfiguree, message_erreur unless scheme_valide && host_present && https_respecte
+
+      url_brute.sub(%r{/+\z}, "")
+    rescue URI::InvalidURIError
+      raise Portail::UrlNonConfiguree, message_erreur
     end
   end
 

@@ -12,6 +12,15 @@
 # Api::V1::RelancesController appelle, sans rien connaître de v1b).
 # `utilisateur` devient optionnel : une relance AUTO n'a pas d'acteur humain
 # (RelanceEnvoiJob ne passe pas d'utilisateur).
+#
+# Fast-follow lien-portail (15/08/2026) : POINT D'INJECTION UNIQUE — c'est le
+# SEUL appelant de RelanceMailer.rappel (manuel via RelancesController, auto
+# via RelanceEnvoiJob), donc le SEUL endroit où générer le lien couvre les
+# deux chemins d'un coup. Génération PARESSEUSE (un token créé à CHAQUE envoi,
+# jamais avant) et JAMAIS de révocation ici (contrairement au chemin OWNER de
+# Api::V1::PortailFactureTokensController) : plusieurs liens actifs par
+# facture sont normaux et voulus — une relance ne doit jamais tuer en silence
+# un lien qu'un humain a partagé à la main.
 class RelanceService
   def initialize(organisation:, utilisateur: nil)
     @organisation = organisation
@@ -31,16 +40,29 @@ class RelanceService
     mode_livraison = mode_livraison_reel(origine)
 
     begin
-      RelanceMailer.rappel(relance, delivery_method: delivery_method_override(origine)).deliver_now
+      # Génération PARESSEUSE du lien, DANS le même bloc que l'envoi : si
+      # PortailFactureToken.url_publique lève (Portail::UrlNonConfiguree —
+      # FRONTEND_URL mal configurée en prod, cf. §1), c'est le MÊME
+      # traitement honnête qu'un échec d'envoi — "echec" journalisé, jamais
+      # un mail parti sans lien ni un plantage silencieux du job.
+      url_portail = url_portail_pour(facture)
+
+      RelanceMailer.rappel(
+        relance,
+        delivery_method: delivery_method_override(origine),
+        url_portail: url_portail
+      ).deliver_now
+
       relance.assign_attributes(
         statut: "envoyee",
         envoyee_at: Time.current,
         mode_livraison: mode_livraison
       )
     rescue StandardError
-      # Honnêteté produit (§2.6) : un échec de livraison est JOURNALISÉ tel
-      # quel, jamais maquillé en succès. envoyee_at reste nil (aucune
-      # livraison n'a eu lieu).
+      # Honnêteté produit (§2.6) : un échec — qu'il vienne de la livraison
+      # elle-même OU d'une URL de portail impossible à construire — est
+      # JOURNALISÉ tel quel, jamais maquillé en succès. envoyee_at reste nil
+      # (aucune livraison n'a eu lieu).
       relance.assign_attributes(statut: "echec", mode_livraison: mode_livraison)
     end
 
@@ -49,6 +71,17 @@ class RelanceService
   end
 
   private
+
+  # Génération PARESSEUSE (fast-follow 15/08/2026) : un token NEUF à CHAQUE
+  # envoi de relance, jamais réutilisé, jamais révoqué — ni les tokens d'une
+  # relance précédente, ni surtout celui que l'owner aurait généré et
+  # partagé à la main (Api::V1::PortailFactureTokensController, lui,
+  # révoque explicitement avant de régénérer ; ce chemin-ci ne le fait
+  # JAMAIS). Plusieurs liens actifs par facture sont donc normaux et voulus.
+  def url_portail_pour(facture)
+    resultat = PortailFactureToken.generer!(facture: facture)
+    PortailFactureToken.url_publique(resultat.brut)
+  end
 
   def construire(facture, origine:, niveau:, date_planifiee:)
     @organisation.relances.new(

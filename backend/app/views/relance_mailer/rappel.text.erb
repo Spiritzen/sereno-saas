@@ -4,6 +4,10 @@ Nous n'avons pas encore reçu le règlement de la facture <%= @facture.numero %>
 dont l'échéance (<%= @facture.date_echeance.strftime("%d/%m/%Y") %>) est dépassée.
 
 Montant restant dû : <%= number_to_currency(@reste_a_payer, unit: "€", format: "%n %u") %>
+<% if @url_portail.present? %>
+
+Consultez et téléchargez votre facture : <%= @url_portail %>
+<% end %>
 <% if @relance.niveau >= 3 %>
 
 Il s'agit de notre troisième relance concernant cette facture. Merci de nous

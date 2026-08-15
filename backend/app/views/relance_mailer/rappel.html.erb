@@ -13,6 +13,13 @@
   <strong><%= number_to_currency(@reste_a_payer, unit: "€", format: "%n %u") %></strong>
 </p>
 
+<% if @url_portail.present? %>
+<p>
+  Consultez et téléchargez votre facture :
+  <a href="<%= @url_portail %>"><%= @url_portail %></a>
+</p>
+<% end %>
+
 <% if @relance.niveau >= 3 %>
 <p>
   Il s'agit de notre troisième relance concernant cette facture. Merci de
