@@ -26,7 +26,7 @@ async function remplirEtSoumettre(user: ReturnType<typeof userEvent.setup>, {
   email = "nouveau@test.fr",
   motDePasse = "motdepasse123",
   confirmation = motDePasse,
-} = {}) {
+}: { email?: string; motDePasse?: string; confirmation?: string } = {}) {
   await user.type(screen.getByPlaceholderText("Votre email"), email);
   await user.type(screen.getByPlaceholderText("Choisissez un mot de passe"), motDePasse);
   await user.type(screen.getByPlaceholderText("Confirmez le mot de passe"), confirmation);
