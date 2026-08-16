@@ -122,6 +122,62 @@ RSpec.describe "Destinataire::Factures", type: :request do
     end
   end
 
+  # Correctif du 16/08/2026 — fix_espace_client_exclut_brouillons.txt : un
+  # brouillon (document interne, jamais émis) ne doit JAMAIS apparaître côté
+  # destinataire, même pour un client revendiqué. Même règle que
+  # FecExportService (`where.not(statut: "brouillon")`), posée sur le SCOPE
+  # DE BASE — protège liste, détail ET PDF d'un coup.
+  describe "exclusion des brouillons (correctif)" do
+    it "LISTE : un client avec des brouillons ET des factures émises ne renvoie QUE les émises" do
+      brouillon = create(:facture, organisation: organisation, client: client, date_echeance: 1.day.ago)
+      lier!(compte, client, facture) # un seul lien couvre tout le client, brouillon compris
+      authenticate_as(compte)
+
+      get "/destinataire/factures"
+
+      numeros = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      expect(numeros).to eq([ facture.numero ])
+      expect(numeros).not_to include(brouillon.numero) # nil de toute façon (jamais émis)
+    end
+
+    it "DÉTAIL : l'id d'un brouillon d'un client revendiqué -> 404 générique" do
+      brouillon = create(:facture, organisation: organisation, client: client, date_echeance: 1.day.ago)
+      lier!(compte, client, facture)
+      authenticate_as(compte)
+
+      get "/destinataire/factures/#{brouillon.id}"
+
+      expect(response).to have_http_status(:not_found)
+      expect(JSON.parse(response.body)["error"]).to eq("Ressource introuvable")
+    end
+
+    it "PDF : l'id d'un brouillon d'un client revendiqué -> 404 générique" do
+      brouillon = create(:facture, organisation: organisation, client: client, date_echeance: 1.day.ago)
+      lier!(compte, client, facture)
+      authenticate_as(compte)
+
+      get "/destinataire/factures/#{brouillon.id}/pdf"
+
+      expect(response).to have_http_status(:not_found)
+      expect(JSON.parse(response.body)["error"]).to eq("Ressource introuvable")
+    end
+
+    it "non-régression : les factures émises restent visibles avec leur reste-à-payer/statut" do
+      brouillon = create(:facture, organisation: organisation, client: client, date_echeance: 1.day.ago)
+      lier!(compte, client, facture)
+      authenticate_as(compte)
+
+      get "/destinataire/factures"
+
+      body = JSON.parse(response.body)
+      facture_json = body.first["factures"].first
+      expect(facture_json["numero"]).to eq(facture.numero)
+      expect(facture_json["statut_encaissement_local"]).to eq("non_payee")
+      expect(facture_json).to have_key("reste_a_payer")
+      expect(brouillon).to be_persisted # créé, juste absent de la réponse
+    end
+  end
+
   describe "GET /destinataire/factures — liste groupée" do
     it "groupe correctement par fournisseur (raison_sociale + logo_url minimal)" do
       lier!(compte, client, facture)

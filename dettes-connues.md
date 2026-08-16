@@ -34,6 +34,11 @@
 > Api::V1::BaseController/Session inchangés —, rattachement par revendication de lien
 > de portail UNIQUEMENT, jamais par e-mail, suppression de compte RGPD incluse) :
 > ajout des n°43 à n°45.
+> Mis à jour le 16/08/2026 après le correctif **espace client : exclusion des
+> brouillons** (le scope de base `Destinataire::FacturesController#factures_du_scope`
+> ne filtrait aucun statut — un destinataire pouvait voir un brouillon interne ;
+> corrigé en réutilisant `where.not(statut: "brouillon")`, déjà en place côté FEC/avoirs
+> destinataire) : ajout de la n°46 (N+1 observé sur la liste, consigné à part).
 > Socle : v0.3.0-conformite-fr. Frontière du socle : voir backend/SOCLE_GELE.md.
 
 - **Légende sévérité** : HAUTE > MOYENNE > BASSE > INFO > MINEURE
@@ -348,6 +353,13 @@
 - **Preuve** : le rattachement d'un compte à un `client` passe EXCLUSIVEMENT par la revendication d'un lien de portail actif (`DestinataireClientLink`, preuve = `PortailFactureToken.actif?`). Aucune correspondance automatique par `client.email` n'existe — délibérément.
 - **Impact / pourquoi c'est une dette** : un destinataire ayant plusieurs fournisseurs Sereno doit revendiquer CHAQUE lien individuellement (pas de découverte automatique) — MVP volontairement strict pour ne jamais risquer un octroi d'accès basé sur un champ non fiable (`client.email` n'est ni unique ni validé, cf. reco du 15/08/2026).
 - **Quand la traiter** : fast-follow, et TOUJOURS à confirmer par une preuve fraîche (ex. un nouveau lien de portail, ou une vérification d'e-mail) — jamais un octroi automatique silencieux, même en suggestion.
+
+### Dette n°46 — liste destinataire : N+1 sur la dérivation reste-à-payer, filtre statut en Ruby
+- **Sévérité** : BASSE (correct pour le volume MVP)
+- **Statut** : NON RÉSOLUE
+- **Preuve** : `Destinataire::FacturesController#index` (et `PortailFactureListeBlueprint`) appelle `PaiementSyntheseService.new(facture:).call` par facture (2 requêtes SUM — paiements confirmés + avoirs émis — par facture), et le filtre `statut` (`en_attente`/`payee`) s'applique en Ruby APRÈS chargement complet de la page, pas en SQL. Observé au test manuel de l'étape B : ≈50 requêtes pour une liste.
+- **Impact / pourquoi c'est une dette** : correct et sûr pour le volume MVP (peu de factures par client destinataire), mais ne passera pas à l'échelle si un client cumule beaucoup de factures — latence croissante linéairement avec le nombre de factures listées.
+- **Quand la traiter** : si un client destinataire cumule un volume significatif de factures — précalculer/agréger la synthèse de paiement en une requête (ex. sous-requête SQL ou vue matérialisée), ou paginer la liste pour borner le nombre de factures évaluées par page.
 
 ## Dettes résolues
 
