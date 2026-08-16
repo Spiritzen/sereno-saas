@@ -64,8 +64,19 @@ module Destinataire
 
     # SEULE source du périmètre visible (§1) — dérivée EXCLUSIVEMENT des
     # liens revendiqués. Aucun paramètre appelant n'entre jamais ici.
+    #
+    # ⚠️ Correctif (16/08/2026) : `where.not(statut: "brouillon")` — même
+    # règle déjà appliquée par FecExportService#factures_eligibles et par
+    # #avoirs_emis ci-dessous, jamais réinventée ici. Un brouillon est un
+    # document interne, jamais émis : le destinataire n'en a jamais eu
+    # connaissance, ni via un lien de portail (qui pointe une facture
+    # précise) ni autrement. Posé sur le SCOPE DE BASE : protège d'un coup
+    # la liste, le détail ET le PDF (un id de brouillon devient
+    # structurellement hors scope, 404 générique comme toute facture non
+    # revendiquée).
     def factures_du_scope
       Facture.where(client_id: Current.compte_destinataire.client_ids_revendiques)
+             .where.not(statut: "brouillon")
     end
 
     # Résolution PAR ID, mais TOUJOURS bornée au scope : un id hors périmètre
