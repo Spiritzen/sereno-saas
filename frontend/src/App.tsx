@@ -1,11 +1,16 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { ProtectedDestinataireRoute } from "./components/auth/ProtectedDestinataireRoute";
 import { AppShell } from "./components/layout/AppShell";
+import { DestinataireAuthProvider } from "./context/DestinataireAuthProvider";
 import { AvoirDetailPage } from "./pages/AvoirDetailPage";
 import { ClientsPage } from "./pages/ClientsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DevisDetailPage } from "./pages/DevisDetailPage";
 import { DevisPage } from "./pages/DevisPage";
+import { EspaceClientAccueilPage } from "./pages/EspaceClientAccueilPage";
+import { EspaceClientActivationPage } from "./pages/EspaceClientActivationPage";
+import { EspaceClientConnexionPage } from "./pages/EspaceClientConnexionPage";
 import { FactureDetailPage } from "./pages/FactureDetailPage";
 import { FacturesPage } from "./pages/FacturesPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -26,6 +31,30 @@ export default function App() {
           enveloppée dans ProtectedRoute : aucune session requise, le token
           dans l'URL fait foi (cf. §5 execution_portail_destinataire_mvp.txt). */}
       <Route path="/portail/:token" element={<PortalPage />} />
+
+      {/* Espace client (C1) — DestinataireAuthProvider n'enveloppe QUE ce
+          sous-arbre, jamais toute l'application (§2 execution_espace_client_c1.txt).
+          connexion/activer sont publiques ; l'index (placeholder) est gardé
+          par ProtectedDestinataireRoute, qui redirige vers connexion. */}
+      <Route
+        path="/espace-client"
+        element={
+          <DestinataireAuthProvider>
+            <Outlet />
+          </DestinataireAuthProvider>
+        }
+      >
+        <Route path="connexion" element={<EspaceClientConnexionPage />} />
+        <Route path="activer/:token" element={<EspaceClientActivationPage />} />
+        <Route
+          index
+          element={
+            <ProtectedDestinataireRoute>
+              <EspaceClientAccueilPage />
+            </ProtectedDestinataireRoute>
+          }
+        />
+      </Route>
 
       <Route
         path="/app/dashboard"
