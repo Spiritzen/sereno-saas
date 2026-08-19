@@ -1,45 +1,100 @@
-# Secrets
+# =============================================================================
+# SERENO — Fichiers locaux et sensibles
+# =============================================================================
+
+# Secrets et variables d'environnement
 .env
 .env.*
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+.envrc
+.direnv/
+
+# Clés privées et magasins de certificats
 *.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
 backend/config/master.key
 backend/config/credentials/*.key
 
-# Rails
+# Configurations locales pouvant contenir des jetons
+.npmrc
+.npmrc.*
+!.npmrc.example
+
+# =============================================================================
+# Backend — Rails
+# =============================================================================
+
+backend/.bundle/
 backend/log/*
+!backend/log/.keep
 backend/tmp/*
+!backend/tmp/.keep
 backend/storage/*
-backend/public/assets
-backend/public/packs
-backend/node_modules
-backend/vendor/bundle
+!backend/storage/.keep
+backend/public/assets/
+backend/public/packs/
+backend/node_modules/
+backend/vendor/bundle/
+backend/coverage/
+backend/.ruby-lsp/
 
-# Frontend
-frontend/node_modules
-frontend/dist
-frontend/.env
-frontend/.env.*
+# Bases locales, sauvegardes et exports techniques
+*.sqlite3
+*.sqlite3-*
+*.dump
+*.backup
+*.pgdump
+/backups/
+/dumps/
 
-# OS / IDE
+# =============================================================================
+# Frontend — React / Vite
+# =============================================================================
+
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/.vite/
+frontend/playwright-report/
+frontend/test-results/
+
+# =============================================================================
+# Atelier privé Sereno
+# =============================================================================
+
+# Archives locales : audits, rapports, prompts, captures et copies de travail.
+# Ce dossier constitue notre mémoire privée et ne doit jamais être versionné.
+/docs/
+
+# Correctifs, essais et fichiers temporaires locaux
+/audit_fix_files/
+
+# Configuration, mémoire et fichiers locaux de Claude Code
+.claude/
+
+# =============================================================================
+# Logs, caches et fichiers temporaires
+# =============================================================================
+
+*.log
+.nyc_output/
+*.swp
+*.swo
+*~
+
+# =============================================================================
+# Système et IDE
+# =============================================================================
+
 .DS_Store
 Thumbs.db
+Desktop.ini
 .vscode/*
 !.vscode/extensions.json
-.idea
-
-# Claude local files / audits temporaires
-.claude/
-audit*.txt
-
-backend/storage/factures/
-backend/storage/**/*.pdf
-backend/storage/**/*.xml
-# Docs / audits locaux
-/docs/
-
-# Docs / audits / prompts locaux (non versionnés)
-/docs/
-/audit_fix_files/
-
-# Notes personnelles / prompts
-/audit_fix_files/
+.idea/
