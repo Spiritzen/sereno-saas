@@ -2,7 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as destinataireApi from "../../api/destinataireApi";
-import { DESTINATAIRE_SESSION_MARKER_KEY } from "../../api/destinataireHttp";
+import {
+  DESTINATAIRE_SESSION_EXPIREE_EVENT,
+  DESTINATAIRE_SESSION_MARKER_KEY,
+} from "../../api/destinataireHttp";
 import { DestinataireAuthProvider } from "../../context/DestinataireAuthProvider";
 import { ProtectedDestinataireRoute } from "./ProtectedDestinataireRoute";
 
@@ -48,5 +51,23 @@ describe("ProtectedDestinataireRoute", () => {
     renderApp();
 
     expect(await screen.findByText("Contenu protégé")).toBeInTheDocument();
+  });
+
+  it("fix_espace_client_auth_deconnexion — un 401 en cours d'usage redirige, sans laisser le contenu protégé affiché", async () => {
+    window.localStorage.setItem(DESTINATAIRE_SESSION_MARKER_KEY, "true");
+    vi.mocked(destinataireApi.moi).mockResolvedValue({ email: "x@test.fr", fournisseurs_lies: 1 });
+
+    renderApp();
+
+    expect(await screen.findByText("Contenu protégé")).toBeInTheDocument();
+
+    // Simule l'intercepteur destinataireHttp réagissant à un 401 survenu sur
+    // un appel de données (ex. listerFactures), en cours d'usage — pas au
+    // montage. Avant le correctif, `compte` restait obsolète en mémoire et
+    // le garde continuait de rendre "Contenu protégé".
+    window.dispatchEvent(new Event(DESTINATAIRE_SESSION_EXPIREE_EVENT));
+
+    expect(await screen.findByText("Page connexion")).toBeInTheDocument();
+    expect(screen.queryByText("Contenu protégé")).not.toBeInTheDocument();
   });
 });

@@ -774,6 +774,18 @@ h1 {
   border-color: var(--color-border-strong);
 }
 
+/* execution_espace_client_sidebar_pagination_badge.txt §1 — décision
+   Sébastien : "en attente" en AMBRE (reste-à-payer > 0, contraste clair),
+   "payée" reste au teal par défaut de .badge-paiement ci-dessus. Réutilise
+   --color-avoir/--color-avoir-soft (token AMBRE déjà existant, cf. accent
+   AVOIR) — jamais une couleur en dur — via un modificateur, même patron que
+   .badge-paiement--annule juste au-dessus. */
+.badge-paiement--attente {
+  background: var(--color-avoir-soft);
+  color: var(--color-avoir);
+  border-color: rgba(217, 119, 6, 0.35);
+}
+
 /* =========================
    DEVIS — accent de type de document (v1.3 étage C)
    Distinct de .status, .badge-avoir ET .badge-paiement : un devis n'a aucune
