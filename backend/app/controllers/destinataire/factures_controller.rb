@@ -25,12 +25,20 @@ module Destinataire
 
     STATUTS_FILTRABLES = %w[en_attente payee].freeze
 
+    # execution_espace_client_sidebar_pagination_badge.txt §3 — pagination
+    # RÉELLE, dans le scope déjà isolé (jamais un simple masquage écran).
+    PAR_PAGE = 10
+
     def index
       factures = appliquer_recherche(factures_du_scope.includes(:client, :organisation))
+      factures = appliquer_filtre_fournisseur(factures)
       factures = factures.order(tri_sql).to_a
       factures = appliquer_filtre_statut(factures)
 
-      render json: grouper_par_fournisseur(factures), status: :ok
+      render json: {
+        groupes: grouper_par_fournisseur(paginer(factures)),
+        pagination: pagination_meta(factures.size)
+      }, status: :ok
     end
 
     def show
@@ -98,6 +106,17 @@ module Destinataire
       )
     end
 
+    # Bonus §2 (sidebar "Mes fournisseurs" -> clic filtrant) — reste borné
+    # par factures_du_scope, ne peut donc QUE rétrécir le résultat, jamais
+    # l'élargir : un fournisseur_id hors périmètre renvoie simplement une
+    # liste vide, jamais une fuite.
+    def appliquer_filtre_fournisseur(factures)
+      fournisseur_id = params[:fournisseur_id]
+      return factures if fournisseur_id.blank?
+
+      factures.where(organisation_id: fournisseur_id)
+    end
+
     # Filtre appliqué APRÈS chargement : le statut de paiement n'est pas une
     # colonne, il est DÉRIVÉ (PaiementSyntheseService, cf. §0-B) — jamais une
     # 2e formule SQL qui dupliquerait cette dérivation.
@@ -115,6 +134,34 @@ module Destinataire
     # interpolation du paramètre brut dans le SQL (aucune injection possible).
     def tri_sql
       TRIS_AUTORISES.fetch(params[:tri], TRIS_AUTORISES.fetch(TRI_DEFAUT))
+    end
+
+    # Pagination du résultat déjà FILTRÉ/TRIÉ (recherche + statut + tri
+    # s'appliquent avant, jamais après — §3) : la page 2 est la suite
+    # logique de la page 1 pour les MÊMES critères, jamais une re-pagination
+    # d'un jeu différent. Groupement par fournisseur appliqué APRÈS ce
+    # découpage (sur les 10 factures de la page), donc une page peut
+    # contenir des groupes partiels — assumé, cf. rapport.
+    def paginer(factures)
+      debut = (page_demandee - 1) * PAR_PAGE
+      factures.slice(debut, PAR_PAGE) || []
+    end
+
+    def pagination_meta(total)
+      {
+        page: page_demandee,
+        par_page: PAR_PAGE,
+        total: total,
+        total_pages: (total.to_f / PAR_PAGE).ceil
+      }
+    end
+
+    # `to_i` neutralise tout paramètre non numérique/malicieux (retombe sur
+    # 0, donc sur la page 1) — même discipline que la whitelist de tri,
+    # jamais d'interpolation ni de confiance aveugle dans l'entrée utilisateur.
+    def page_demandee
+      page = params[:page].to_i
+      page.positive? ? page : 1
     end
 
     def grouper_par_fournisseur(factures)

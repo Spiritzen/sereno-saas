@@ -33,7 +33,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
       get "/destinataire/factures"
 
       body = JSON.parse(response.body)
-      numeros = body.flat_map { |groupe| groupe["factures"].map { |f| f["numero"] } }
+      numeros = body["groupes"].flat_map { |groupe| groupe["factures"].map { |f| f["numero"] } }
       expect(numeros).to eq([ facture.numero ])
     end
 
@@ -80,11 +80,11 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       authenticate_as(compte)
       get "/destinataire/factures"
-      numeros_compte = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      numeros_compte = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
 
       authenticate_as(autre_compte)
       get "/destinataire/factures"
-      numeros_autre_compte = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      numeros_autre_compte = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
 
       expect(numeros_compte).to eq([ facture.numero ])
       expect(numeros_autre_compte).to eq([ autre_facture.numero ])
@@ -106,7 +106,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
       get "/destinataire/factures"
 
       body = JSON.parse(response.body)
-      noms_fournisseurs = body.map { |g| g["fournisseur"]["raison_sociale"] }
+      noms_fournisseurs = body["groupes"].map { |g| g["fournisseur"]["raison_sociale"] }
       expect(noms_fournisseurs).to contain_exactly("Fournisseur Un", "Fournisseur Deux")
     end
 
@@ -135,7 +135,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       get "/destinataire/factures"
 
-      numeros = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      numeros = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
       expect(numeros).to eq([ facture.numero ])
       expect(numeros).not_to include(brouillon.numero) # nil de toute façon (jamais émis)
     end
@@ -170,7 +170,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
       get "/destinataire/factures"
 
       body = JSON.parse(response.body)
-      facture_json = body.first["factures"].first
+      facture_json = body["groupes"].first["factures"].first
       expect(facture_json["numero"]).to eq(facture.numero)
       expect(facture_json["statut_encaissement_local"]).to eq("non_payee")
       expect(facture_json).to have_key("reste_a_payer")
@@ -185,7 +185,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       get "/destinataire/factures"
 
-      body = JSON.parse(response.body)
+      body = JSON.parse(response.body)["groupes"]
       expect(body.size).to eq(1)
       expect(body.first["fournisseur"]["raison_sociale"]).to eq("Fournisseur Un")
       expect(body.first["fournisseur"]).to have_key("logo_url")
@@ -201,7 +201,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       get "/destinataire/factures", params: { q: "1234" }
 
-      numeros = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      numeros = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
       expect(numeros).to eq([ "FAC-2026-1234" ])
     end
 
@@ -211,7 +211,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       get "/destinataire/factures", params: { q: "fournisseur un" }
 
-      numeros = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      numeros = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
       expect(numeros).to eq([ facture.numero ])
     end
 
@@ -221,7 +221,9 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       get "/destinataire/factures", params: { q: "ne-correspond-a-rien-xyz" }
 
-      expect(JSON.parse(response.body)).to eq([])
+      body = JSON.parse(response.body)
+      expect(body["groupes"]).to eq([])
+      expect(body["pagination"]["total"]).to eq(0)
     end
 
     it "filtre statut=payee ne renvoie que les factures soldées (reste_a_payer == 0)" do
@@ -233,7 +235,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       get "/destinataire/factures", params: { statut: "payee" }
 
-      numeros = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      numeros = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
       expect(numeros).to eq([ facture_payee.numero ])
     end
 
@@ -246,7 +248,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       get "/destinataire/factures", params: { statut: "en_attente" }
 
-      numeros = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      numeros = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
       expect(numeros).to eq([ facture.numero ])
     end
 
@@ -256,7 +258,7 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       get "/destinataire/factures", params: { statut: "valeur-inconnue" }
 
-      numeros = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      numeros = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
       expect(numeros).to eq([ facture.numero ])
     end
 
@@ -283,8 +285,146 @@ RSpec.describe "Destinataire::Factures", type: :request do
 
       get "/destinataire/factures", params: { tri: "montant_desc" }
 
-      numeros = JSON.parse(response.body).flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      numeros = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
       expect(numeros).to eq([ "GRANDE", "PETITE" ])
+    end
+
+    it "filtre `fournisseur_id` : ne renvoie que les factures de ce fournisseur, reste borné au scope" do
+      organisation_b = create(:organisation, raison_sociale: "Fournisseur Deux")
+      client_b = create(:client, organisation: organisation_b)
+      facture_b = create(:facture, :emise, organisation: organisation_b, client: client_b, date_echeance: 1.day.ago)
+
+      lier!(compte, client, facture)
+      lier!(compte, client_b, facture_b)
+      authenticate_as(compte)
+
+      get "/destinataire/factures", params: { fournisseur_id: organisation.id }
+
+      body = JSON.parse(response.body)["groupes"]
+      expect(body.size).to eq(1)
+      expect(body.first["fournisseur"]["raison_sociale"]).to eq("Fournisseur Un")
+    end
+
+    it "filtre `fournisseur_id` HORS scope -> liste vide (jamais une fuite)" do
+      autre_organisation = create(:organisation, raison_sociale: "Jamais revendiqué")
+      lier!(compte, client, facture)
+      authenticate_as(compte)
+
+      get "/destinataire/factures", params: { fournisseur_id: autre_organisation.id }
+
+      expect(JSON.parse(response.body)["groupes"]).to eq([])
+    end
+  end
+
+  describe "GET /destinataire/factures — pagination (10/page)" do
+    def creer_factures_emises!(nombre, prefixe:)
+      Array.new(nombre) do |index|
+        f = create(:facture, organisation: organisation, client: client, date_echeance: 1.day.ago)
+        f.update_columns(
+          statut: "emise",
+          numero: format("%s-%02d", prefixe, index),
+          date_emission: index.days.ago,
+          emise_at: index.days.ago
+        )
+        f
+      end
+    end
+
+    it "renvoie AU PLUS 10 factures par page, avec les métadonnées de pagination" do
+      factures = creer_factures_emises!(15, prefixe: "FAC")
+      lier!(compte, client, factures.first)
+      authenticate_as(compte)
+
+      get "/destinataire/factures"
+
+      body = JSON.parse(response.body)
+      numeros = body["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      expect(numeros.size).to eq(10)
+      expect(body["pagination"]).to eq(
+        "page" => 1, "par_page" => 10, "total" => 15, "total_pages" => 2
+      )
+    end
+
+    it "page=2 renvoie la SUITE (les 5 restantes), jamais un doublon de la page 1" do
+      factures = creer_factures_emises!(15, prefixe: "FAC")
+      lier!(compte, client, factures.first)
+      authenticate_as(compte)
+
+      get "/destinataire/factures", params: { page: 1 }
+      page1 = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
+
+      get "/destinataire/factures", params: { page: 2 }
+      body2 = JSON.parse(response.body)
+      page2 = body2["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
+
+      expect(page2.size).to eq(5)
+      expect(page1 & page2).to eq([]) # aucune intersection
+      expect(body2["pagination"]).to eq(
+        "page" => 2, "par_page" => 10, "total" => 15, "total_pages" => 2
+      )
+    end
+
+    it "une page au-delà du total -> liste vide, jamais une erreur" do
+      factures = creer_factures_emises!(3, prefixe: "FAC")
+      lier!(compte, client, factures.first)
+      authenticate_as(compte)
+
+      get "/destinataire/factures", params: { page: 99 }
+
+      body = JSON.parse(response.body)
+      expect(body["groupes"]).to eq([])
+      expect(body["pagination"]["page"]).to eq(99)
+      expect(body["pagination"]["total"]).to eq(3)
+    end
+
+    it "un `page` non numérique/négatif retombe sur la page 1, jamais une erreur" do
+      factures = creer_factures_emises!(3, prefixe: "FAC")
+      lier!(compte, client, factures.first)
+      authenticate_as(compte)
+
+      get "/destinataire/factures", params: { page: "'; DROP TABLE factures; --" }
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)["pagination"]["page"]).to eq(1)
+    end
+
+    it "isolation TIENT avec la pagination : jamais une facture d'un client non revendiqué sur aucune page" do
+      autre_client = create(:client, organisation: organisation)
+      facture_hors_scope = create(:facture, :emise, organisation: organisation, client: autre_client,
+                                   date_echeance: 1.day.ago, numero: "HORS-SCOPE")
+      factures = creer_factures_emises!(12, prefixe: "FAC")
+      lier!(compte, client, factures.first)
+      authenticate_as(compte)
+
+      get "/destinataire/factures", params: { page: 1 }
+      page1 = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      get "/destinataire/factures", params: { page: 2 }
+      page2 = JSON.parse(response.body)["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
+
+      expect(page1 + page2).not_to include("HORS-SCOPE")
+      expect(facture_hors_scope).to be_persisted
+    end
+
+    it "recherche + statut + pagination cohabitent : pagine le résultat déjà FILTRÉ" do
+      payees = Array.new(12) do |index|
+        f = create(:facture, :emise, organisation: organisation, client: client, date_echeance: 1.day.ago,
+                    numero: format("PAYEE-%02d", index))
+        create(:paiement, :confirme, organisation: organisation, facture: f, montant: f.total_ttc)
+        f
+      end
+      en_attente = create(:facture, :emise, organisation: organisation, client: client,
+                           date_echeance: 1.day.ago, numero: "EN-ATTENTE")
+      lier!(compte, client, payees.first)
+      authenticate_as(compte)
+
+      get "/destinataire/factures", params: { statut: "payee", page: 1 }
+
+      body = JSON.parse(response.body)
+      numeros = body["groupes"].flat_map { |g| g["factures"].map { |f| f["numero"] } }
+      expect(numeros.size).to eq(10)
+      expect(numeros).not_to include("EN-ATTENTE")
+      expect(body["pagination"]["total"]).to eq(12) # total du résultat FILTRÉ (12 payées), pas 13
+      expect(en_attente).to be_persisted
     end
   end
 

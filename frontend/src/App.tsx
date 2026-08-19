@@ -2,15 +2,19 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ProtectedDestinataireRoute } from "./components/auth/ProtectedDestinataireRoute";
 import { AppShell } from "./components/layout/AppShell";
+import { EspaceClientShell } from "./components/layout/EspaceClientShell";
 import { DestinataireAuthProvider } from "./context/DestinataireAuthProvider";
 import { AvoirDetailPage } from "./pages/AvoirDetailPage";
 import { ClientsPage } from "./pages/ClientsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DevisDetailPage } from "./pages/DevisDetailPage";
 import { DevisPage } from "./pages/DevisPage";
-import { EspaceClientAccueilPage } from "./pages/EspaceClientAccueilPage";
 import { EspaceClientActivationPage } from "./pages/EspaceClientActivationPage";
 import { EspaceClientConnexionPage } from "./pages/EspaceClientConnexionPage";
+import { EspaceClientFactureDetailPage } from "./pages/EspaceClientFactureDetailPage";
+import { EspaceClientFacturesPage } from "./pages/EspaceClientFacturesPage";
+import { EspaceClientFournisseursPage } from "./pages/EspaceClientFournisseursPage";
+import { EspaceClientParametresPage } from "./pages/EspaceClientParametresPage";
 import { FactureDetailPage } from "./pages/FactureDetailPage";
 import { FacturesPage } from "./pages/FacturesPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -32,10 +36,15 @@ export default function App() {
           dans l'URL fait foi (cf. §5 execution_portail_destinataire_mvp.txt). */}
       <Route path="/portail/:token" element={<PortalPage />} />
 
-      {/* Espace client (C1) — DestinataireAuthProvider n'enveloppe QUE ce
+      {/* Espace client — DestinataireAuthProvider n'enveloppe QUE ce
           sous-arbre, jamais toute l'application (§2 execution_espace_client_c1.txt).
-          connexion/activer sont publiques ; l'index (placeholder) est gardé
-          par ProtectedDestinataireRoute, qui redirige vers connexion. */}
+          connexion/activer sont publiques, elles gardent leur propre
+          .login-page/.login-card (jumeau de LoginPage.tsx) sans EspaceClientShell
+          (§fix_espace_client_structure_page.txt — pas de double cadre, pas de
+          bouton déconnexion avant authentification). Les écrans authentifiés
+          sont gardés par ProtectedDestinataireRoute puis enveloppés dans
+          EspaceClientShell (jumeau d'AppShell : conteneur centré + sidebar
+          dédiée, §execution_espace_client_sidebar_pagination_badge.txt). */}
       <Route
         path="/espace-client"
         element={
@@ -50,7 +59,39 @@ export default function App() {
           index
           element={
             <ProtectedDestinataireRoute>
-              <EspaceClientAccueilPage />
+              <EspaceClientShell>
+                <EspaceClientFacturesPage />
+              </EspaceClientShell>
+            </ProtectedDestinataireRoute>
+          }
+        />
+        <Route
+          path="factures/:id"
+          element={
+            <ProtectedDestinataireRoute>
+              <EspaceClientShell>
+                <EspaceClientFactureDetailPage />
+              </EspaceClientShell>
+            </ProtectedDestinataireRoute>
+          }
+        />
+        <Route
+          path="fournisseurs"
+          element={
+            <ProtectedDestinataireRoute>
+              <EspaceClientShell>
+                <EspaceClientFournisseursPage />
+              </EspaceClientShell>
+            </ProtectedDestinataireRoute>
+          }
+        />
+        <Route
+          path="parametres"
+          element={
+            <ProtectedDestinataireRoute>
+              <EspaceClientShell>
+                <EspaceClientParametresPage />
+              </EspaceClientShell>
             </ProtectedDestinataireRoute>
           }
         />

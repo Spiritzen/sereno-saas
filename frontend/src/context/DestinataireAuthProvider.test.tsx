@@ -2,7 +2,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as destinataireApi from "../api/destinataireApi";
-import { DESTINATAIRE_SESSION_MARKER_KEY } from "../api/destinataireHttp";
+import {
+  DESTINATAIRE_SESSION_EXPIREE_EVENT,
+  DESTINATAIRE_SESSION_MARKER_KEY,
+} from "../api/destinataireHttp";
 import { DestinataireAuthProvider } from "./DestinataireAuthProvider";
 import { useDestinataireAuth } from "./useDestinataireAuth";
 
@@ -68,6 +71,51 @@ describe("DestinataireAuthProvider", () => {
 
     await waitFor(() => expect(screen.getByTestId("authenticated").textContent).toBe("false"));
     expect(window.localStorage.getItem(DESTINATAIRE_SESSION_MARKER_KEY)).toBeNull();
+  });
+
+  it("fix_espace_client_auth_deconnexion — logout nettoie MÊME si le backend échoue (session déjà morte)", async () => {
+    const user = userEvent.setup();
+    vi.mocked(destinataireApi.connexion).mockResolvedValue({ email: "x@test.fr", fournisseurs_lies: 1 });
+    vi.mocked(destinataireApi.deconnexion).mockRejectedValue({
+      response: { status: 401, data: { error: "Authentification requise" } },
+      isAxiosError: true,
+    });
+
+    render(
+      <DestinataireAuthProvider>
+        <Sonde />
+      </DestinataireAuthProvider>,
+    );
+
+    await user.click(screen.getByText("Connexion"));
+    await waitFor(() => expect(screen.getByTestId("authenticated").textContent).toBe("true"));
+
+    await user.click(screen.getByText("Déconnexion"));
+
+    // Même si le DELETE backend a échoué (401), l'état local est nettoyé
+    // sans résidu — condition nécessaire pour pouvoir se reconnecter ensuite.
+    await waitFor(() => expect(screen.getByTestId("authenticated").textContent).toBe("false"));
+    expect(window.localStorage.getItem(DESTINATAIRE_SESSION_MARKER_KEY)).toBeNull();
+  });
+
+  it("fix_espace_client_auth_deconnexion — un 401 destinataire (n'importe où) invalide compte SANS rechargement", async () => {
+    const user = userEvent.setup();
+    vi.mocked(destinataireApi.connexion).mockResolvedValue({ email: "x@test.fr", fournisseurs_lies: 1 });
+
+    render(
+      <DestinataireAuthProvider>
+        <Sonde />
+      </DestinataireAuthProvider>,
+    );
+
+    await user.click(screen.getByText("Connexion"));
+    await waitFor(() => expect(screen.getByTestId("authenticated").textContent).toBe("true"));
+
+    // Simule l'intercepteur destinataireHttp réagissant à un 401 sur un
+    // appel quelconque (ex. listerFactures) — sans passer par logout().
+    window.dispatchEvent(new Event(DESTINATAIRE_SESSION_EXPIREE_EVENT));
+
+    await waitFor(() => expect(screen.getByTestId("authenticated").textContent).toBe("false"));
   });
 
   it("« qui suis-je » au montage SI le marqueur dédié est déjà présent", async () => {

@@ -38,6 +38,10 @@ Rails.application.routes.draw do
     get "factures", to: "factures#index"
     get "factures/:id", to: "factures#show"
     get "factures/:id/pdf", to: "factures#pdf"
+
+    # execution_espace_client_sidebar_pagination_badge.txt §2 — sidebar
+    # "Mes fournisseurs".
+    get "fournisseurs", to: "fournisseurs#index"
   end
 
   namespace :api do
