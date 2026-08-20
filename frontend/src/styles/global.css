@@ -720,8 +720,16 @@ h1 {
 }
 
 .section-title h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 18px;
   margin: 0;
+}
+
+.section-title h2 svg {
+  color: var(--color-brand-light);
+  flex-shrink: 0;
 }
 
 .section-title span {
@@ -3751,4 +3759,567 @@ h1 {
     gap: 10px;
   }
 }
+
+/* =========================================================================
+   D1 — DASHBOARD COCKPIT (prompt_claude_code_dashboard_d1_cockpit_final_sereno.txt)
+   Réutilise les tokens et primitives de surface existants (--surface-quiet-*,
+   --surface-content-*, --radius-*, .status, .state-card, .document-icon,
+   .deadline, .primary-btn/.secondary-btn) — aucune nouvelle valeur de
+   couleur/rayon/ombre inventée, seulement de nouvelles CLASSES structurelles
+   propres au cockpit.
+
+   D1.1 (prompt_claude_code_dashboard_d1_1_regulation_grille_etats_reseau.txt)
+   — PreflightBanner et DashboardKpiGrid rejoignent .dashboard-main-column
+   (déplacement JSX dans DashboardPage.tsx, cf. commentaire dans ce fichier) ;
+   leur ancien margin-bottom autonome a été retiré car .dashboard-main-column
+   applique déjà `gap: 18px` entre ses enfants — éviter le double espacement.
+   Aucune nouvelle classe ajoutée pour les états loading/error : réutilisation
+   stricte de .state-card / .state-card.error déjà existants.
+   ========================================================================= */
+
+/* ---- A. En-tête dashboard (salutation + CTA, séparé du bandeau §C) ---- */
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dashboard-header__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Date discrète (§4.A : "ne pas afficher la date comme eyebrow dominante") —
+   taille meta, pas eyebrow, jamais la première chose lue. */
+.dashboard-header__date {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta-size);
+}
+
+.dashboard-header__subtitle {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* ---- C. Bandeau "Pré-contrôles actifs" ---- */
+
+.preflight-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: var(--surface-content-radius);
+  border: 1px solid var(--surface-content-border);
+  background:
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.16), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.08), transparent 45%),
+    var(--surface-content-bg);
+}
+
+.preflight-banner__content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.preflight-banner__icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  background: rgba(124, 58, 237, 0.18);
+  color: var(--color-brand-light);
+}
+
+.preflight-banner__text strong {
+  display: block;
+  font-size: var(--text-subtitle-size);
+  font-weight: var(--text-subtitle-weight);
+}
+
+.preflight-banner__text span {
+  color: var(--color-text-secondary);
+  font-size: var(--text-aide-size);
+}
+
+/* ---- D. 4 cartes KPI ---- */
+
+.dashboard-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dashboard-kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--surface-quiet-radius);
+  border: 1px solid var(--surface-quiet-border);
+  background: var(--surface-quiet-bg);
+}
+
+.dashboard-kpi-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dashboard-kpi-card__label {
+  color: var(--color-text-secondary);
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+}
+
+.dashboard-kpi-card__icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+}
+
+.dashboard-kpi-card__icon--brand {
+  background: rgba(124, 58, 237, 0.16);
+  color: var(--color-brand-light);
+}
+
+.dashboard-kpi-card__icon--warning {
+  background: var(--color-warning-soft);
+  color: #fcd34d;
+}
+
+.dashboard-kpi-card__icon--danger {
+  background: var(--color-danger-soft);
+  color: #fca5a5;
+}
+
+.dashboard-kpi-card__icon--success {
+  background: var(--color-success-soft);
+  color: #86efac;
+}
+
+.dashboard-kpi-card__icon--neutral {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+}
+
+.dashboard-kpi-card__value {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+.dashboard-kpi-card__value--success {
+  color: #86efac;
+}
+
+.dashboard-kpi-card__value--danger {
+  color: #fca5a5;
+}
+
+.dashboard-kpi-card__meta {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-meta-size);
+}
+
+/* ---- B. Grille principale du cockpit (colonne principale + right rail) ---- */
+
+.dashboard-cockpit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.dashboard-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.dashboard-right-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* ---- E. Factures récentes (grande carte) ---- */
+
+.dashboard-invoices-card {
+  border: 1px solid var(--surface-content-border);
+  border-radius: var(--surface-content-radius);
+  background: var(--surface-content-bg);
+  padding: 18px;
+}
+
+.dashboard-invoices-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-invoice-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) 0.85fr 0.85fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 10px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  transition: background var(--motion-hover);
+}
+
+.dashboard-invoice-row:not(:first-child) {
+  border-top: 1px solid var(--color-border);
+}
+
+.dashboard-invoice-row:hover,
+.dashboard-invoice-row:focus-visible {
+  background: var(--color-bg-card-hover);
+}
+
+.dashboard-invoice-row__client {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.dashboard-invoice-row__client strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-invoice-row__client span {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-invoice-row__date {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.dashboard-invoice-row__amount {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.dashboard-invoice-row__end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboard-invoice-row__chevron {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.dashboard-invoices-card__footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+/* ---- F/G. Right rail : panneaux génériques (Échéances / À traiter) ---- */
+
+.dashboard-panel {
+  border: 1px solid var(--surface-content-border);
+  border-radius: var(--surface-content-radius);
+  background: var(--surface-content-bg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---- F. Mini-calendrier ---- */
+
+.dashboard-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard-calendar__label {
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.dashboard-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.dashboard-calendar__weekday {
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.dashboard-calendar__day {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.dashboard-calendar__day--muted {
+  color: var(--color-text-muted);
+  opacity: 0.45;
+}
+
+.dashboard-calendar__day--today {
+  background: var(--color-brand);
+  color: white;
+  font-weight: 800;
+}
+
+.dashboard-calendar__day-marker {
+  position: absolute;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-warning);
+}
+
+.dashboard-calendar__day-marker--danger {
+  background: var(--color-danger);
+}
+
+.dashboard-deadline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dashboard-deadline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  transition: background var(--motion-hover);
+}
+
+.dashboard-deadline-item:hover,
+.dashboard-deadline-item:focus-visible {
+  background: var(--color-bg-card-hover);
+}
+
+.dashboard-deadline-item__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--color-warning);
+}
+
+.dashboard-deadline-item__dot--danger {
+  background: var(--color-danger);
+}
+
+.dashboard-deadline-item__client {
+  min-width: 0;
+}
+
+.dashboard-deadline-item__client strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-deadline-item__client span {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.dashboard-deadline-item__amount {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.dashboard-deadline-item__amount strong {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-deadline-item__amount span {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+/* ---- G. "À traiter" ---- */
+
+.dashboard-attention-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard-attention-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  transition: background var(--motion-hover);
+}
+
+.dashboard-attention-item:hover,
+.dashboard-attention-item:focus-visible {
+  background: var(--color-bg-card-hover);
+}
+
+.dashboard-attention-item__count {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--color-warning-soft);
+  color: #fcd34d;
+  font-weight: 800;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ---- H. Actions rapides ---- */
+
+.dashboard-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dashboard-quick-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--surface-quiet-radius);
+  border: 1px solid var(--surface-quiet-border);
+  background: var(--surface-quiet-bg);
+  color: var(--color-text-primary);
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover);
+}
+
+.dashboard-quick-action:hover,
+.dashboard-quick-action:focus-visible {
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-border-strong);
+}
+
+.dashboard-quick-action__icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  background: rgba(124, 58, 237, 0.16);
+  color: var(--color-brand-light);
+}
+
+.dashboard-quick-action__label {
+  display: block;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.dashboard-quick-action__hint {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+/* ---- §7 Responsive (4 paliers explicites du prompt D1) ---- */
+
+@media (max-width: 1499px) {
+  .dashboard-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1099px) {
+  .dashboard-cockpit-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 699px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .preflight-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-invoice-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 6px;
+  }
+
+  .dashboard-invoice-row__date {
+    display: none;
+  }
+}
+
+/* prefers-reduced-motion : ce module n'utilise que des transitions de survol
+   déjà couvertes par --motion-hover (aucune animation continue introduite),
+   rien de plus à désactiver ici. */
 
