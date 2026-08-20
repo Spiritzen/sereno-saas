@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Outlet, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ProtectedDestinataireRoute } from "./components/auth/ProtectedDestinataireRoute";
 import { AppShell } from "./components/layout/AppShell";
@@ -23,11 +23,18 @@ import { NewDevisPage } from "./pages/NewDevisPage";
 import { NewInvoicePage } from "./pages/NewInvoicePage";
 import { ParametresPage } from "./pages/ParametresPage";
 import { PortalPage } from "./pages/PortalPage";
+import { PublicHomePage } from "./pages/PublicHomePage";
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
+      {/* R1 (prompt_claude_code_entree_publique_r1_landing.txt §3.4) — "/"
+          n'impose plus la connexion : un visiteur anonyme voit la landing
+          publique (PublicHomePage), un OWNER déjà authentifié est renvoyé
+          vers /app/dashboard PAR PublicHomePage elle-même (même patron que
+          LoginPage : `if (isAuthenticated) return <Navigate .../>`), jamais
+          par cette route. */}
+      <Route path="/" element={<PublicHomePage />} />
 
       <Route path="/login" element={<LoginPage />} />
 

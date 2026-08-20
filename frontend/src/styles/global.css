@@ -4323,3 +4323,744 @@ h1 {
    déjà couvertes par --motion-hover (aucune animation continue introduite),
    rien de plus à désactiver ici. */
 
+/* =========================================================================
+   R1 / R1.1 — ENTRÉE PUBLIQUE
+   (prompt_claude_code_entree_publique_r1_landing.txt puis
+   prompt_claude_code_entree_publique_r1_1_correction_humaine.txt)
+   PublicShell + PublicHomePage. Réutilise .sereno-app/.sereno-frame/.main/
+   .topbar/.hamburger-btn/.topbar-brand/.logo-title/.primary-btn/
+   .secondary-btn/.sr-only TELS QUELS (chrome géométrique et boutons déjà
+   génériques, sans logique d'authentification) — seules les classes
+   .public-* et .landing-* ci-dessous sont NOUVELLES, jamais .sidebar/
+   .nav-item/.topbar-actions (shell privé).
+
+   R1.1 remplace la composition "documentation froide" de R1 (petit panneau
+   à 3 lignes, 3 grilles de cartes clonées, sidebar/topbar sous-remplies) par
+   une scène produit dense et un rythme de page en 3 moments distincts —
+   cf. rapport R1.1 pour le diagnostic point par point. Un SEUL mouvement
+   d'entrée, très léger et non répété, est introduit sur la scène du hero
+   (§7 du prompt R1.1 l'autorise explicitement) ; il est désactivé sous
+   prefers-reduced-motion, cf. bloc dédié en fin de fichier.
+   ========================================================================= */
+
+/* ---- Sidebar publique (desktop) ---- */
+
+.public-sidebar {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  width: 248px;
+  border-right: 1px solid var(--color-border);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  background: rgba(10, 14, 26, 0.22);
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+}
+
+.public-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.public-sidebar__link {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  transition:
+    background var(--motion-hover),
+    color var(--motion-hover);
+}
+
+.public-sidebar__link:hover,
+.public-sidebar__link:focus-visible {
+  color: var(--color-text-primary);
+  background: rgba(124, 58, 237, 0.1);
+}
+
+/* R1.1 §6.2 — bloc de réassurance compact : occupe l'espace resté vide
+   sous la nav sans jamais simuler un calendrier ou un abonnement fictif.
+   Surface "quiet" déjà tokenisée, jamais une variante de carte inventée. */
+.public-sidebar__reassurance {
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--surface-quiet-radius);
+  border: 1px solid var(--surface-quiet-border);
+  background: var(--surface-quiet-bg);
+  margin-top: auto;
+}
+
+.public-sidebar__reassurance-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  background: rgba(124, 58, 237, 0.16);
+  color: var(--color-brand-light);
+}
+
+.public-sidebar__reassurance strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.public-sidebar__reassurance p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+/* R1.1 §6.2 — accès discret, jamais un profil fictif : texte seul, pas de
+   fond bouton plein (.primary-btn/.secondary-btn sont réservés aux actions
+   principales de la topbar/du hero). */
+.public-sidebar__login {
+  padding: 8px 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  transition: color var(--motion-hover);
+}
+
+.public-sidebar__login:hover,
+.public-sidebar__login:focus-visible {
+  color: var(--color-text-primary);
+}
+
+/* ---- Topbar publique ---- */
+
+.public-topbar {
+  min-height: 56px;
+  padding: 10px 22px;
+}
+
+/* R1.1 §6.3 — contexte discret à gauche, jamais une répétition du logo
+   (déjà porté par la sidebar). */
+.public-topbar__context {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.public-topbar__login {
+  margin-left: auto;
+}
+
+/* ---- Tiroir mobile (contenu, MobileNavDrawer réutilisé tel quel) ---- */
+
+.public-drawer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 8px;
+}
+
+.public-drawer__login {
+  align-self: stretch;
+  justify-content: center;
+}
+
+/* ---- Hero ---- */
+
+/* R1.1 §6.4 — composition asymétrique ~43/57 (texte/scène), la scène au
+   moins aussi importante que le texte (diagnostic R1 point 1 : "le regard
+   arrive sur une grande surface vide plutôt que sur une scène"). */
+.landing-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(340px, 1.2fr);
+  gap: 44px;
+  align-items: center;
+  min-height: min(620px, 78vh);
+  padding: 28px 0 48px;
+}
+
+.landing-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.landing-hero__eyebrow {
+  margin: 0;
+  color: var(--color-brand-light);
+  font-size: var(--text-eyebrow-size);
+  font-weight: var(--text-eyebrow-weight);
+  letter-spacing: var(--text-eyebrow-tracking);
+  text-transform: uppercase;
+}
+
+.landing-hero h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.landing-hero__intro {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.landing-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+/* R1.1 §6.4 — ligne de confiance : preuves courtes, pas des badges
+   marketing (texte + icône, jamais un fond de pilule saturé). */
+.landing-hero__trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-hero__trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.landing-hero__trust svg {
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+/* ---- R1.1 §7 — grande scène produit ---- */
+
+.landing-scene {
+  position: relative;
+  padding: 18px;
+}
+
+/* Halo violet maîtrisé + quelques points discrets, écho volontaire mais
+   sobre de la densité de docs/FinalSereno.png — jamais un dégradé qui
+   concurrence le contenu. */
+.landing-scene::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(124, 58, 237, 0.16), transparent 55%),
+    radial-gradient(circle at 85% 75%, rgba(245, 158, 11, 0.07), transparent 45%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing-scene__card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid var(--surface-content-border);
+  border-radius: var(--surface-content-radius);
+  background: var(--surface-elevated-bg);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px);
+  padding: 22px;
+}
+
+.landing-scene__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.landing-scene__kicker {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.landing-scene__doc {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.landing-scene__steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.landing-scene__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.landing-scene__step-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-muted);
+}
+
+.landing-scene__step.is-done .landing-scene__step-icon {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.landing-scene__step.is-done {
+  color: var(--color-text-secondary);
+}
+
+.landing-scene__step.is-current .landing-scene__step-icon {
+  background: rgba(124, 58, 237, 0.22);
+  color: var(--color-brand-light);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.16);
+}
+
+.landing-scene__step.is-current {
+  color: var(--color-text-primary);
+}
+
+.landing-scene__step-arrow {
+  color: var(--color-border-strong);
+  flex-shrink: 0;
+}
+
+.landing-scene__status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.landing-scene__status-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--color-warning);
+}
+
+.landing-scene__status strong {
+  display: block;
+  font-size: 14px;
+}
+
+.landing-scene__status span {
+  color: var(--color-text-secondary);
+  font-size: 12.5px;
+}
+
+.landing-scene__checks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-scene__checks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.landing-scene__checks li.is-done svg {
+  color: var(--color-success);
+}
+
+.landing-scene__checks li.is-pending svg {
+  color: var(--color-warning);
+}
+
+.landing-scene__float {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--surface-content-border);
+  background: var(--surface-elevated-bg);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.landing-scene__float--a {
+  top: 4px;
+  right: -6px;
+  padding: 7px 12px;
+}
+
+.landing-scene__float--a svg {
+  color: var(--color-brand-light);
+}
+
+.landing-scene__float--b {
+  bottom: 8px;
+  left: -10px;
+  width: 36px;
+  height: 36px;
+  justify-content: center;
+  color: var(--color-success);
+}
+
+/* ---- Sections génériques ---- */
+
+.landing-section {
+  padding: 40px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.landing-section__heading {
+  max-width: 60ch;
+  margin-bottom: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.landing-section__eyebrow {
+  margin: 0;
+  color: var(--color-brand-light);
+  font-size: var(--text-eyebrow-size);
+  font-weight: var(--text-eyebrow-weight);
+  letter-spacing: var(--text-eyebrow-tracking);
+  text-transform: uppercase;
+}
+
+.landing-section__heading h2 {
+  margin: 0;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+  letter-spacing: var(--text-title-tracking);
+}
+
+.landing-section__intro {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ---- R1.1 §8.1 — "Comment ça marche" : un chemin, jamais 4 cartes ---- */
+
+.landing-path {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.landing-path__step {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--surface-quiet-radius);
+  border: 1px solid var(--surface-quiet-border);
+  background: var(--surface-quiet-bg);
+}
+
+.landing-path__step strong {
+  font-size: 14.5px;
+}
+
+.landing-path__step p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.landing-path__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  background: rgba(124, 58, 237, 0.16);
+  color: var(--color-brand-light);
+}
+
+.landing-path__arrow {
+  align-self: center;
+  color: var(--color-border-strong);
+  flex-shrink: 0;
+}
+
+/* ---- R1.1 §8.2 — "Pourquoi Sereno" : un bloc majeur + deux preuves ---- */
+
+.landing-benefits {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.landing-benefits__major {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  padding: 26px;
+  border-radius: var(--surface-content-radius);
+  border: 1px solid var(--surface-content-border);
+  background:
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.14), transparent 60%),
+    var(--surface-content-bg);
+}
+
+.landing-benefits__major h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.landing-benefits__major p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14.5px;
+  max-width: 34ch;
+}
+
+.landing-benefits__minor {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---- Cartes compactes réutilisables ---- */
+
+.landing-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border-radius: var(--surface-quiet-radius);
+  border: 1px solid var(--surface-quiet-border);
+  background: var(--surface-quiet-bg);
+}
+
+.landing-card--compact {
+  flex: 1;
+  gap: 6px;
+  padding: 16px 18px;
+}
+
+.landing-card__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  background: rgba(124, 58, 237, 0.16);
+  color: var(--color-brand-light);
+}
+
+.landing-card__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.landing-card__text {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ---- R1.1 §8.3 — "Vos données" : scène de confiance fusionnée ---- */
+
+.landing-trust {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 32px;
+  align-items: center;
+  padding: 26px;
+  border-radius: var(--surface-content-radius);
+  border: 1px solid var(--surface-content-border);
+  background: var(--surface-content-bg);
+}
+
+.landing-trust__intro h2 {
+  margin: 6px 0 10px;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+}
+
+.landing-trust__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-trust__list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* ---- Fin de page ---- */
+
+.landing-cta-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 0 24px;
+  text-align: center;
+  border-top: 1px solid var(--color-border);
+}
+
+.landing-cta-footer h2 {
+  margin: 0;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+}
+
+/* ---- Mouvement d'entrée, unique et très léger (§7 du prompt R1.1) ---- */
+
+@keyframes landing-scene-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.landing-scene__card {
+  animation: landing-scene-rise 480ms ease-out both;
+}
+
+.landing-scene__float {
+  animation: landing-scene-rise 480ms ease-out 120ms both;
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 1099px) {
+  .landing-hero {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .landing-benefits {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .landing-benefits__minor {
+    flex-direction: row;
+  }
+
+  .landing-trust {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .public-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 699px) {
+  .landing-hero h1 {
+    font-size: 30px;
+  }
+
+  .landing-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .landing-path {
+    flex-direction: column;
+  }
+
+  .landing-path__arrow {
+    display: none;
+  }
+
+  .landing-benefits__minor {
+    flex-direction: column;
+  }
+
+  .landing-scene__steps {
+    flex-wrap: wrap;
+  }
+
+  .landing-scene__step-arrow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-scene__card,
+  .landing-scene__float {
+    animation: none;
+  }
+}
+
