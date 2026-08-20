@@ -3,25 +3,43 @@ import { describe, expect, it } from "vitest";
 import { SerenoLogo } from "./SerenoLogo";
 
 describe("SerenoLogo", () => {
-  it("se rend avec un rôle accessible", () => {
+  it("porte toujours le nom accessible Sereno", () => {
     render(<SerenoLogo />);
 
     expect(screen.getByRole("img", { name: "Sereno" })).toBeInTheDocument();
   });
 
-  it("deux instances sur la même page n'ont jamais le même id de dégradé (useId)", () => {
-    render(
+  it("utilise l’asset vectoriel partagé et respecte ses props", () => {
+    const { container } = render(
+      <SerenoLogo size={44} className="logo-test" />,
+    );
+
+    const logo = screen.getByRole("img", { name: "Sereno" });
+
+    expect(logo).toHaveAttribute("src", "/sereno-mark.svg");
+    expect(logo).toHaveAttribute("width", "44");
+    expect(logo).toHaveAttribute("height", "44");
+    expect(logo).toHaveClass("logo-test");
+    expect(logo).toHaveAttribute("draggable", "false");
+    expect(container.querySelector("svg")).not.toBeInTheDocument();
+  });
+
+  it("plusieurs instances partagent la même source", () => {
+    const { container } = render(
       <>
         <SerenoLogo />
         <SerenoLogo />
       </>,
     );
 
-    const [first, second] = screen.getAllByRole("img", { name: "Sereno" });
-    const gradientIdOf = (svg: Element) => svg.querySelector("linearGradient")?.id;
+    const logos = screen.getAllByRole("img", { name: "Sereno" });
 
-    expect(gradientIdOf(first)).toBeTruthy();
-    expect(gradientIdOf(second)).toBeTruthy();
-    expect(gradientIdOf(first)).not.toBe(gradientIdOf(second));
+    expect(logos).toHaveLength(2);
+    expect(
+      logos.every(
+        (logo) => logo.getAttribute("src") === "/sereno-mark.svg",
+      ),
+    ).toBe(true);
+    expect(container.querySelector("defs")).not.toBeInTheDocument();
   });
 });
