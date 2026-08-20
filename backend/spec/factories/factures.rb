@@ -1,6 +1,34 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
+  # T0 (prompt_claude_code_fix_factory_factures_numero_unique.txt) — séquence
+  # FactoryBot monotone et déterministe, jamais un tirage aléatoire dans un
+  # espace fini. Avant ce correctif, les traits :emise/:deposee ci-dessous
+  # tiraient `rand(1000..9999)` : avec assez de créations dans un même
+  # processus de test (ex. 12 factures :emise pour une même organisation dans
+  # backend/spec/requests/destinataire/factures_spec.rb), une collision
+  # devenait plausible et déclenchait PG::UniqueViolation sur l'index partiel
+  # index_factures_unique_numero_by_org (organisation_id, numero), observé
+  # une fois en CI puis disparu à la relance sans changement de code —
+  # signature classique d'un défaut probabiliste, pas d'une régression
+  # fonctionnelle. `generate(:numero_facture_test)` est un compteur GLOBAL au
+  # processus : deux appels quelconques, même organisation ou non, ne
+  # produisent jamais la même valeur — plus fort que ce que l'index
+  # PostgreSQL exige (unique par organisation), donc sans risque de collision
+  # résiduel. Format conservé (FAC-AAAA-NNNN) pour rester cohérent avec le
+  # format déjà produit par la génération réelle (cf.
+  # app/models/numerotation.rb), même si rien ne l'exige strictement ici
+  # (numero n'a aucune contrainte de format côté modèle).
+  #
+  # Déclarée ICI, au niveau racine de FactoryBot.define — PAS à l'intérieur
+  # de `factory :facture do` : une sequence déclarée dans un bloc factory
+  # devient un attribut implicite de cette factory (FactoryBot essaie alors
+  # d'appeler `facture.numero_facture_test =`, qui n'existe pas -> erreur).
+  # Constaté à l'exécution pendant ce sprint, corrigé en la remontant ici.
+  sequence(:numero_facture_test) do |n|
+    "FAC-#{Date.current.year}-#{n.to_s.rjust(4, '0')}"
+  end
+
   factory :facture do
     organisation
     client { association(:client, organisation: organisation) }
@@ -36,7 +64,7 @@ FactoryBot.define do
 
         facture.reload
 
-        numero = "FAC-#{Date.current.year}-#{format('%04d', rand(1000..9999))}"
+        numero = generate(:numero_facture_test)
 
         facture.update_columns(
           numero: numero,
@@ -59,7 +87,7 @@ FactoryBot.define do
 
         facture.reload
 
-        numero = "FAC-#{Date.current.year}-#{format('%04d', rand(1000..9999))}"
+        numero = generate(:numero_facture_test)
 
         facture.update_columns(
           numero: numero,
