@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="sereno-mark-title sereno-mark-desc">
+  <title id="sereno-mark-title">Sereno</title>
+  <desc id="sereno-mark-desc">Quatre rubans violets entrelacés autour d’un centre lumineux.</desc>
+
+  <defs>
+    <linearGradient id="sereno-petal-n" x1="22" y1="7" x2="39" y2="31" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B06CFF"/>
+      <stop offset="0.52" stop-color="#8B3DFF"/>
+      <stop offset="1" stop-color="#6422D9"/>
+    </linearGradient>
+    <linearGradient id="sereno-petal-e" x1="57" y1="22" x2="33" y2="39" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#984BFF"/>
+      <stop offset="0.5" stop-color="#7C2DFF"/>
+      <stop offset="1" stop-color="#4F1BB9"/>
+    </linearGradient>
+    <linearGradient id="sereno-petal-s" x1="42" y1="57" x2="25" y2="33" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7A28E8"/>
+      <stop offset="0.48" stop-color="#8D36FF"/>
+      <stop offset="1" stop-color="#5520C2"/>
+    </linearGradient>
+    <linearGradient id="sereno-petal-w" x1="7" y1="42" x2="31" y2="25" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6A25D7"/>
+      <stop offset="0.5" stop-color="#8534F6"/>
+      <stop offset="1" stop-color="#B362FF"/>
+    </linearGradient>
+    <radialGradient id="sereno-core" cx="50%" cy="50%" r="55%">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.2" stop-color="#F1DDFF"/>
+      <stop offset="0.55" stop-color="#C58AFF"/>
+      <stop offset="1" stop-color="#7C2DFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <path fill="url(#sereno-petal-n)" d="M32 32c-5-2-8-6-8-11v-4c0-3 1-5 3-7l5-7.5 8.5 8.5c2.8 2.8 2.8 6.1 0 8.9L35 26.5C33 28.5 32 30 32 32Z"/>
+  <path fill="url(#sereno-petal-e)" d="M32 32c-5-2-8-6-8-11v-4c0-3 1-5 3-7l5-7.5 8.5 8.5c2.8 2.8 2.8 6.1 0 8.9L35 26.5C33 28.5 32 30 32 32Z" transform="rotate(90 32 32)"/>
+  <path fill="url(#sereno-petal-s)" d="M32 32c-5-2-8-6-8-11v-4c0-3 1-5 3-7l5-7.5 8.5 8.5c2.8 2.8 2.8 6.1 0 8.9L35 26.5C33 28.5 32 30 32 32Z" transform="rotate(180 32 32)"/>
+  <path fill="url(#sereno-petal-w)" d="M32 32c-5-2-8-6-8-11v-4c0-3 1-5 3-7l5-7.5 8.5 8.5c2.8 2.8 2.8 6.1 0 8.9L35 26.5C33 28.5 32 30 32 32Z" transform="rotate(270 32 32)"/>
+
+  <circle cx="32" cy="32" r="6.6" fill="url(#sereno-core)"/>
+  <path fill="#F8EDFF" d="M32 28.1c.6 2.1 1.8 3.3 3.9 3.9-2.1.6-3.3 1.8-3.9 3.9-.6-2.1-1.8-3.3-3.9-3.9 2.1-.6 3.3-1.8 3.9-3.9Z" opacity=".94"/>
+</svg>
