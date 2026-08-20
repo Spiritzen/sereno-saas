@@ -39,6 +39,10 @@
 > ne filtrait aucun statut — un destinataire pouvait voir un brouillon interne ;
 > corrigé en réutilisant `where.not(statut: "brouillon")`, déjà en place côté FEC/avoirs
 > destinataire) : ajout de la n°46 (N+1 observé sur la liste, consigné à part).
+> Mis à jour le 19/08/2026 après le micro-sprint **rate limiting du portail public**
+> (throttle Rack::Attack dédié, `"portail/factures/ip"`, 60 req/60 s par IP, compteur
+> PARTAGÉ entre les 3 routes show/pdf/avoirs, sur le modèle exact du throttle webhook
+> PA déjà en place) : la dette n°33 passe RÉSOLUE.
 > Socle : v0.3.0-conformite-fr. Frontière du socle : voir backend/SOCLE_GELE.md.
 
 - **Légende sévérité** : HAUTE > MOYENNE > BASSE > INFO > MINEURE
@@ -257,13 +261,6 @@
 - **Impact / pourquoi c'est une dette** : un rare doublon de relance possible sur crash. Toléré pour du recouvrement ; on n'a délibérément pas posé de 2-phase commit / outbox pour v1b.
 - **Quand la traiter** : dette assumée. Ré-évaluer si un doublon devient gênant (clé d'idempotence / pattern outbox).
 
-### Dette n°33 — pas de rate-limiting sur la résolution publique du token portail
-- **Sévérité** : BASSE (à poser avant la production)
-- **Statut** : NON RÉSOLUE
-- **Preuve** : `Portail::FacturesController` (public, hors JWT) n'a pas de throttle Rack::Attack dédié, contrairement au webhook PA (cf. dette n°R6).
-- **Impact / pourquoi c'est une dette** : ZÉRO risque de confidentialité (token de 64 octets → brute-force impraticable), mais un endpoint public non authentifié reste exposé au déni de service.
-- **Quand la traiter** : fast-follow avant la prod (V1.5), en réutilisant le pattern `rack-attack` déjà en place pour le webhook PA (throttle par IP).
-
 ### Dette n°34 — token du portail présent dans les logs d'accès
 - **Sévérité** : INFO
 - **Statut** : NON RÉSOLUE
@@ -362,6 +359,13 @@
 - **Quand la traiter** : si un client destinataire cumule un volume significatif de factures — précalculer/agréger la synthèse de paiement en une requête (ex. sous-requête SQL ou vue matérialisée), ou paginer la liste pour borner le nombre de factures évaluées par page.
 
 ## Dettes résolues
+
+### Dette n°33 — pas de rate-limiting sur la résolution publique du token portail
+- **Sévérité** : (résolue — était BASSE)
+- **Statut** : RÉSOLUE — micro-sprint dédié, 19/08/2026 (branche `fix/rate-limit-portail-public`)
+- **Preuve** : `backend/config/initializers/rack_attack.rb` déclare un second throttle Rack::Attack, `"portail/factures/ip"` (60 requêtes / 60 secondes / par adresse IP, `req.ip`), en plus du throttle webhook PA déjà en place — le fichier documente désormais honnêtement les DEUX surfaces publiques protégées. Le throttle couvre les **3 routes publiques du portail de factures** avec un **compteur PARTAGÉ** (une seule clé, un seul throttle) : `GET /portail/factures/:token`, `GET /portail/factures/:token/pdf`, `GET /portail/factures/:token/avoirs` — filtrées par un motif de chemin précis (`\A/portail/factures/[^/]+(?:/(?:pdf|avoirs))?\z`) qui protège aussi les tokens invalides (aucune contrainte de format hexadécimal). Un appelant ne peut donc pas contourner le seuil en alternant show/pdf/avoirs. La 61e requête reçoit **429**, le JSON sobre déjà en place `{ "error" => "rate_limited" }` (responder commun, non dupliqué), et un en-tête `Retry-After`. Le token n'est jamais lu/décodé dans le middleware (aucun accès base) : seule l'IP discrimine. Preuve permanente : `backend/spec/requests/portail/rate_limit_spec.rb` (3 exemples) — T-RATE-LIMIT (60 requêtes alternant les 3 chemins avec un token inconnu passent en 404 applicatif normal, la 61e en 429 avec `Retry-After`), T-RATE-LIMIT-ISOLATION-IP (une IP B fraîche n'est jamais affectée par la saturation d'une IP A), T-AUTRES-ROUTES (une route API authentifiée hors portail n'est jamais throttlée par cette règle, même au-delà de 60 requêtes/minute). Preuve négative effectuée : le throttle neutralisé temporairement fait échouer les 2 exemples qui affirment le 429 (jamais T-AUTRES-ROUTES, cohérent), restauré immédiatement, suite repassée au vert — le test détecte réellement l'absence de protection.
+- **Impact / pourquoi c'était une dette** : un endpoint public non authentifié restait exposé au déni de service (aucun risque de confidentialité — token de 64 octets, brute-force impraticable — mais un trou de filet disponibilité). Fermée avant tout déploiement en production.
+- **Quand ça a été traité** : micro-sprint dédié du 19/08/2026, sur le modèle exact du throttle webhook PA (R6) déjà en place — même store (`Rails.cache`), même responder, même discipline de test (`freeze_time`, IP de documentation RFC 5737/5738).
 
 ### Dette n°10 — validateurs de conformité non automatisés en CI
 - **Sévérité** : (résolue pour son périmètre — était MOYENNE)
