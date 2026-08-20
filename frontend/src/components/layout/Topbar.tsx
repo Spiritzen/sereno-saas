@@ -1,64 +1,39 @@
-import { LogOut } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/useAuth";
-import {
-  getUserFullName,
-  getUserInitials,
-  getUserRoleLabel,
-} from "../../utils/userDisplay";
+import { Menu } from "lucide-react";
 
-export function Topbar() {
-  const navigate = useNavigate();
-  const { utilisateur, organisation, logout } = useAuth();
+type TopbarProps = {
+  // Le hamburger n'existe QUE sous le breakpoint mobile (masqué au-dessus
+  // via CSS, cf. .hamburger-btn dans global.css) ; l'état du tiroir
+  // (ouvert/fermé) vit dans AppShell (qui rend aussi le MobileNavDrawer),
+  // pas ici — Topbar se contente de déclencher l'ouverture.
+  onOpenMobileNav: () => void;
+  isMobileNavOpen: boolean;
+  drawerId: string;
+};
 
-  const initials = getUserInitials(utilisateur);
-  const fullName = getUserFullName(utilisateur);
-  const roleLabel = getUserRoleLabel(utilisateur);
-
-  async function handleLogout() {
-    try {
-      await logout();
-    } finally {
-      navigate("/login", { replace: true });
-    }
-  }
-
+// Correction B (§5 prompt_claude_code_dashboard_d0_1_alignement_shell.txt) —
+// UNE SEULE identité utilisateur : le profil (nom/rôle/avatar) et la
+// déconnexion, précédemment dupliqués ici en plus du pied de Sidebar, ont
+// été RETIRÉS. Sur desktop, cette Topbar ne porte donc plus rien de visible
+// (le hamburger lui-même est déjà masqué au-dessus de 900px) : elle est
+// masquée visuellement au-delà de ce seuil (`.topbar--app`, cf. global.css)
+// pour ne jamais décaler le contenu principal avec une grande barre vide —
+// elle reste le SEUL support du header mobile. Le profil et la déconnexion
+// restent atteignables sur mobile via le tiroir (Sidebar forceExpanded,
+// rendue dans le MobileNavDrawer par AppShell.tsx) : rien n'est perdu,
+// seulement plus jamais dupliqué.
+export function Topbar({ onOpenMobileNav, isMobileNavOpen, drawerId }: TopbarProps) {
   return (
-    <header className="topbar">
-      <div className="topbar-brand">
-        <Link to="/app/dashboard" className="brand-mark" aria-label="Sereno">
-          S
-        </Link>
-
-        <div className="logo-title">
-          <strong>Sereno</strong>
-          <span>
-            {organisation?.raison_sociale ??
-              "Facturation électronique conforme"}
-          </span>
-        </div>
-      </div>
-
-      <div className="topbar-actions">
-        <div className="user-chip">
-          <span className="avatar">{initials}</span>
-
-          <div className="user-meta">
-            <strong>{fullName}</strong>
-            <span>{roleLabel}</span>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          className="logout-btn"
-          onClick={handleLogout}
-          aria-label="Se déconnecter"
-          title="Se déconnecter"
-        >
-          <LogOut size={16} />
-        </button>
-      </div>
+    <header className="topbar topbar--app">
+      <button
+        type="button"
+        className="hamburger-btn"
+        onClick={onOpenMobileNav}
+        aria-label="Ouvrir le menu"
+        aria-expanded={isMobileNavOpen}
+        aria-controls={drawerId}
+      >
+        <Menu size={20} />
+      </button>
     </header>
   );
 }

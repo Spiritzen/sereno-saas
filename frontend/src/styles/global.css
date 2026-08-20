@@ -39,33 +39,57 @@ a {
   text-decoration: none;
 }
 
+/* D0.1 (§4 prompt_claude_code_dashboard_d0_1_alignement_shell.txt) —
+   « cadre extérieur presque plein écran, avec une marge légère » : 24px
+   ramené à 12px, valeur RÉUTILISÉE (déjà la marge mobile existante, cf.
+   l'ancien override sous 900px, désormais unifiée à tous les paliers plutôt
+   que dupliquée) — pas de nouveau token de marge à inventer, tokens.css
+   n'en définit aucun. */
 .sereno-app {
   min-height: 100vh;
-  padding: 24px;
+  padding: 12px;
 }
 
 /* Pas d'`overflow` ici (hidden/auto/scroll) : ça casserait `position: sticky`
    pour tout descendant (le cycle de vie sticky compact, entre autres), même
    quand cette boîte ne clippe rien visuellement — l'arrondi des coins est
-   assuré par .topbar/.sidebar directement plutôt que par ce conteneur. */
+   assuré par .topbar/.sidebar/.main directement plutôt que par ce
+   conteneur. */
+/* D0.1 §4 — GRILLE UNIQUE (Correction A) : Sidebar/Topbar/main sont des
+   ENFANTS DIRECTS de cette grille (2 colonnes), plus de .sereno-body
+   intermédiaire formant un second shell dans le premier (cf. AppShell.tsx/
+   EspaceClientShell.tsx). Colonne 1 : largeur de la sidebar (auto,
+   76px/220px selon son propre état). Colonne 2 (minmax(0,1fr)) : topbar +
+   contenu. La sidebar (grid-row: 1 / -1, posée sur .sidebar) traverse les
+   deux lignes — elle part donc du haut du cadre, comme FinalSereno.
+   border-radius : --radius-xl (28px) jugé trop massif à cette échelle
+   presque plein écran (§4 "réduire si nécessaire un rayon extérieur
+   actuellement trop massif") — ramené à --radius-lg (20px), token existant,
+   pas une valeur inventée. */
 .sereno-frame {
-  width: min(1180px, 100%);
-  min-height: calc(100vh - 48px);
-  margin: 0 auto;
+  width: 100%;
+  min-height: calc(100vh - 24px);
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   background: rgba(16, 20, 31, 0.72);
   box-shadow: var(--shadow-card);
   backdrop-filter: blur(22px);
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 /* =========================
    TOPBAR
 ========================= */
 
+/* D0.1 §4 — appartient désormais SEULEMENT à la colonne principale (grid
+   column 2, row 1) : le coin haut-GAUCHE du cadre est maintenant le rôle de
+   .sidebar (qui part du haut), jamais le sien — seul le coin haut-droit
+   reste à sa charge. */
 .topbar {
+  grid-column: 2;
+  grid-row: 1;
   min-height: 68px;
   padding: 13px 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.075);
@@ -73,8 +97,19 @@ a {
   align-items: center;
   justify-content: space-between;
   background: rgba(16, 20, 31, 0.58);
-  border-top-left-radius: var(--radius-xl);
-  border-top-right-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-lg);
+}
+
+/* Correction B (§5) — sur desktop, la Topbar de l'APP ne porte plus rien de
+   visible (profil/déconnexion retirés, cf. Topbar.tsx ; le hamburger est
+   déjà masqué au-dessus de ce seuil) : masquée plutôt que laissée vide, pour
+   ne jamais décaler .main vers le bas. Modificateur scopé à l'app
+   (`.topbar--app`) : la Topbar de l'espace client garde un contenu réel
+   (compte + déconnexion, jamais dupliqué ailleurs) et reste visible. */
+@media (min-width: 901px) {
+  .topbar--app {
+    display: none;
+  }
 }
 
 .topbar-brand {
@@ -116,6 +151,53 @@ a {
   gap: 12px;
 }
 
+/* D0 execution_dashboard_d0_squelette.txt §3 — correctif navigation mobile :
+   masqué par défaut, affiché UNIQUEMENT sous le breakpoint mobile (cf.
+   @media (max-width: 900px) plus bas, même seuil que la disparition de
+   .sidebar). Taille/forme alignées sur .logout-btn (34px, cercle) — même
+   vocabulaire de bouton icône déjà établi. */
+/* Reprise D0 (§6.6 prompt de reprise) — 44px, pas 34px comme .logout-btn/
+   .avatar : c'est un contrôle EXCLUSIVEMENT tactile (visible sous 900px
+   uniquement), là où la cible de 40-44px compte vraiment ; les icônes
+   desktop existantes (souris, précision fine) restent à leur taille établie. */
+.hamburger-btn {
+  display: none;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.hamburger-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+  background: rgba(124, 58, 237, 0.18);
+}
+
+/* Utilitaire générique (titre accessible du tiroir mobile, cf.
+   MobileNavDrawer.tsx) — masque visuellement sans retirer du flux
+   d'accessibilité, patron standard, aucune variante DA. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* .pa-pill — badge de réassurance générique ("Espace sécurisé", "Workflow
    sécurisé"), réutilisé par LoginPage et NewInvoicePage. Distinct de l'usage
    qu'en faisait la Topbar ("PA connectée", non branché à un état réel,
@@ -146,30 +228,27 @@ a {
 }
 
 /* =========================
-   BODY LAYOUT
-========================= */
-
-.sereno-body {
-  min-height: 0;
-  display: grid;
-  grid-template-columns: auto 1fr;
-}
-
-/* =========================
    SIDEBAR
 ========================= */
 
-/* Sticky : la colonne de nav reste visible quand .main défile (aucun
-   ancêtre — .sereno-frame/.sereno-body — ne pose d'`overflow`, cf. le
-   commentaire sur .sereno-frame plus haut, donc `position: sticky` s'ancre
-   correctement sur le scroll de la fenêtre). `align-self: start` retire
-   l'étirement par défaut de la grille (.sereno-body a `display: grid` sans
-   `align-items`, donc stretch) : sans ça, la boîte de la sidebar égalerait
-   la hauteur de .main et resterait "collée" du haut jusqu'au bas de TOUT le
-   contenu, ce qui fonctionne aussi mais rend `max-height` inopérant pour le
-   repli ci-dessous. `top: 24px` reprend exactement le padding de
-   .sereno-app : aucun saut visuel entre position normale et position figée. */
+/* D0.1 §4 (Correction A) — Sidebar en grid-row: 1 / -1, colonne 1 de
+   .sereno-frame : couvre TOUTES les lignes de la grille (topbar + contenu),
+   donc part du haut du cadre et le traverse entièrement, comme FinalSereno.
+   Sticky : la colonne de nav reste visible quand la page défile (aucun
+   ancêtre — .sereno-frame — ne pose d'`overflow`, cf. le commentaire sur
+   .sereno-frame plus haut, donc `position: sticky` s'ancre correctement sur
+   le scroll de la fenêtre). `align-self: start` retire l'étirement par
+   défaut de la grille : sans ça, la boîte de la sidebar égalerait la
+   hauteur totale de sa zone (topbar+contenu) et resterait "collée" du haut
+   jusqu'au bas de TOUT le contenu, ce qui fonctionne aussi mais rend
+   `max-height` inopérant pour le repli ci-dessous. `top`/`max-height`
+   reprennent exactement le padding de .sereno-app (12px) : aucun saut
+   visuel entre position normale et position figée. Coins haut ET bas
+   arrondis (--radius-lg) : elle porte désormais les DEUX coins gauches du
+   cadre, plus seulement le bas. */
 .sidebar {
+  grid-column: 1;
+  grid-row: 1 / -1;
   width: 76px;
   border-right: 1px solid var(--color-border);
   padding: 18px 12px;
@@ -179,22 +258,28 @@ a {
   gap: 16px;
   transition: width 180ms ease;
   background: rgba(10, 14, 26, 0.22);
-  border-bottom-left-radius: var(--radius-xl);
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
   position: sticky;
-  top: 24px;
+  top: 12px;
   align-self: start;
-  max-height: calc(100vh - 48px);
+  max-height: calc(100vh - 24px);
 }
 
 .sidebar.expanded {
   width: 220px;
 }
 
-/* Celestial Quiet Command V2 — zone A « Identité » retirée de la Sidebar
-   (redondance avec la Topbar, qui reste la source unique de la marque
-   "Sereno" — seule surface garantie visible en mobile, la sidebar étant
-   masquée en dessous de 900px). Voir .sidebar-toggle ci-dessous, désormais
-   premier élément de la colonne. */
+/* D0 execution_dashboard_d0_squelette.txt §2 — zone A « Identité » RÉINTRODUITE
+   (elle avait été retirée en Celestial V2 pour redondance avec la Topbar,
+   seule surface alors garantie visible en mobile — cf. l'historique gardé
+   ci-dessous à titre de mémoire). Décision explicite de ce sprint : la
+   sidebar cockpit porte sa propre identité (logo + marque), y compris
+   pendant que la Topbar la porte aussi — redondance temporaire assumée,
+   signalée au rapport, à trancher plus tard (retrait éventuel côté Topbar).
+   Utilise `.topbar-brand`/`.logo-title`, déjà établis, sans nouvelle classe :
+   le texte disparaît en repli via un rendu conditionnel React (Sidebar.tsx),
+   pas une règle CSS de plus. */
 .sidebar-toggle {
   flex-shrink: 0;
   height: 42px;
@@ -228,6 +313,10 @@ a {
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+  /* D0 §2 — absorbe l'espace disponible pour pousser .sidebar-footer
+     (profil + déconnexion, réintroduit ce sprint) tout en bas de la
+     colonne, sans wrapper de positionnement supplémentaire. */
+  flex: 1;
 }
 
 .nav-item {
@@ -318,20 +407,45 @@ a {
   }
 }
 
-/* Celestial Quiet Command V2 — zone D « Utilisateur » retirée de la Sidebar
-   (redondance avec la chip utilisateur déjà présente dans la Topbar, qui
-   reste la source unique — même logique que le retrait de la zone A
-   « Identité »). Zone C « État/Plan » restait déjà volontairement absente
-   (aucune donnée d'abonnement/plan réelle). La colonne se limite désormais
-   au toggle et à la navigation. */
+/* D0 execution_dashboard_d0_squelette.txt §2 — zone D « Utilisateur »
+   RÉINTRODUITE (même logique que la zone A « Identité » ci-dessus :
+   redondance temporaire assumée avec la Topbar, signalée au rapport).
+   Réutilise `.user-chip`/`.user-meta`/`.logout-btn`, déjà établis par la
+   Topbar — aucune nouvelle classe pour le contenu, seulement l'agencement
+   (`.sidebar-footer` ci-dessous, colonne en repli / ligne en déployé, la
+   sidebar étant trop étroite repliée pour poser deux cercles de 34px côte à
+   côte). Zone C « État/Plan » reste volontairement ABSENTE — le modèle
+   Abonnement existe en base mais n'est exposé par aucune API aujourd'hui
+   (donnée non disponible, décision différée, cf. rapport D0). */
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar.expanded .sidebar-footer {
+  flex-direction: row;
+  justify-content: space-between;
+}
 
 /* =========================
    MAIN CONTENT
 ========================= */
 
+/* D0.1 §4 — colonne principale (grid column 2, row 2). Coin haut-droit
+   arrondi appliqué ICI AUSSI (redondant avec .topbar quand celle-ci est
+   visible — inoffensif, ce coin est alors couvert par la topbar) : quand la
+   Topbar de l'app est masquée sur desktop (Correction B), .main devient le
+   seul élément touchant ce coin, qui doit donc être arrondi. Coin bas-droit
+   toujours à sa charge (inchangé). */
 .main {
+  grid-column: 2;
+  grid-row: 2;
   min-width: 0;
   padding: 30px 22px 22px;
+  border-top-right-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
 }
 
 .eyebrow {
@@ -440,10 +554,15 @@ h1 {
     var(--surface-content-bg);
 }
 
+/* D0 execution_dashboard_d0_squelette.txt §4 — polish DA du shell : un peu
+   plus de respiration entre la date/le "Bonjour"/le statut réel, sans
+   nouveau composant ni nouvelle donnée. Le reste du bloc (h1, .eyebrow,
+   .command-strip__meta) était déjà entièrement porté par les tokens
+   existants — rien d'autre à retoucher ici. */
 .command-strip__intro {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .command-strip__meta {
@@ -909,14 +1028,14 @@ h1 {
 ========================= */
 
 @media (max-width: 900px) {
-  .sereno-app {
-    padding: 12px;
-  }
-
-  .sereno-frame {
-    grid-template-rows: auto 1fr;
-  }
-
+  /* .sereno-app{padding:12px} et .sereno-frame{grid-template-rows} retirés
+     d'ici (D0.1) : ce sont désormais les valeurs par DÉFAUT à tous les
+     paliers, plus besoin de les redéclarer sous ce seuil. La colonne 1
+     (sidebar) se réduit d'elle-même à 0 sous ce seuil : `.sidebar{display:
+     none}` ci-dessous la retire entièrement du calcul de la grille (un
+     élément display:none ne réserve aucun espace), .topbar/.main
+     (grid-column: 2) occupent alors naturellement toute la largeur —
+     aucune redéclaration de grid-template-columns nécessaire ici. */
   .topbar {
     align-items: flex-start;
     gap: 16px;
@@ -928,12 +1047,18 @@ h1 {
     justify-content: space-between;
   }
 
-  .sereno-body {
-    grid-template-columns: 1fr;
-  }
-
+  /* D0 execution_dashboard_d0_squelette.txt §3 — la sidebar EN LIGNE
+     disparaît toujours sous ce seuil (pas de place pour une colonne fixe),
+     mais désormais COMPENSÉE par .hamburger-btn + MobileNavDrawer (portail,
+     tiroir off-canvas reprenant le contenu de la sidebar) : avant ce
+     correctif, cette règle laissait la navigation totalement inaccessible
+     en mobile (bug confirmé, sans remplaçant). */
   .sidebar {
     display: none;
+  }
+
+  .hamburger-btn {
+    display: inline-flex;
   }
 
   .main {
@@ -2646,6 +2771,13 @@ h1 {
   .invoice-lifecycle__exception {
     transition: none;
   }
+
+  /* Reprise D0 (§6.5 prompt de reprise) — tiroir mobile : apparition
+     instantanée, aucun glissement/fondu. */
+  .modal-shell.mobile-nav-drawer-backdrop,
+  .mobile-nav-drawer-panel {
+    animation: none;
+  }
 }
 
 .invoice-lifecycle__label {
@@ -3387,6 +3519,94 @@ h1 {
   gap: 18px;
   overflow: hidden;
   outline: none;
+}
+
+/* D0 execution_dashboard_d0_squelette.txt §3 — MobileNavDrawer.tsx : habille
+   ModalShell (portail/piège de focus/Échap/scroll-lock déjà construits, cf.
+   ConfirmModal) en tiroir off-canvas ancré à gauche, plutôt qu'en boîte
+   centrée. Surcharge ciblée de .modal-shell/.modal-shell__surface via des
+   classes ADDITIONNELLES (jamais une réécriture du composant partagé). */
+.modal-shell.mobile-nav-drawer-backdrop {
+  justify-items: start;
+  align-items: stretch;
+  padding: 0;
+  /* Reprise D0 (§6.5 prompt de reprise) — entrée en fondu, une seule fois à
+     l'ouverture (jamais continue) ; désactivée sous prefers-reduced-motion,
+     cf. le bloc @media dédié plus bas dans ce fichier. */
+  animation: mobile-nav-drawer-fade-in var(--motion-panel);
+}
+
+.mobile-nav-drawer-panel {
+  width: min(280px, 85vw);
+  max-width: none;
+  height: 100%;
+  max-height: 100%;
+  background: var(--surface-elevated-bg);
+  border-right: 1px solid var(--surface-elevated-border);
+  box-shadow: var(--shadow-card);
+  gap: 0;
+  overflow-y: auto;
+  position: relative;
+  /* Glissement depuis la gauche, une seule fois à l'ouverture. */
+  animation: mobile-nav-drawer-slide-in var(--motion-panel);
+}
+
+@keyframes mobile-nav-drawer-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes mobile-nav-drawer-slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+/* La sidebar reprise dans le tiroir garde SA propre largeur fixe
+   (76px/220px, cf. .sidebar/.sidebar.expanded) — ici elle doit occuper tout
+   le panneau plutôt que sa largeur desktop, d'où cette seule surcharge
+   scopée à ce contexte. */
+.mobile-nav-drawer-panel .sidebar {
+  width: 100%;
+  border-right: 0;
+  border-bottom-left-radius: 0;
+  position: static;
+  max-height: none;
+}
+
+/* 44px : même raison que .hamburger-btn ci-dessus (contrôle tactile exclusif). */
+.mobile-nav-drawer__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-strong);
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.mobile-nav-drawer__close:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 901px) {
+  /* Garde défensive : si le tiroir restait ouvert (état React) pendant un
+     redimensionnement au-delà du seuil mobile, il ne doit jamais recouvrir
+     le desktop — le bouton qui l'ouvre est de toute façon masqué au-dessus
+     de ce seuil (.hamburger-btn). */
+  .mobile-nav-drawer-backdrop {
+    display: none !important;
+  }
 }
 
 .modal-shell__header {

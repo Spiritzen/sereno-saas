@@ -28,24 +28,37 @@ const menuItems = [
   },
 ];
 
-export function EspaceClientSidebar() {
+type EspaceClientSidebarProps = {
+  // D0 §3 execution_dashboard_d0_squelette.txt — utilisé par le drawer
+  // mobile (MobileNavDrawer, via EspaceClientShell) : nav complète (icônes +
+  // libellés) affichée d'office dans le tiroir, chevron masqué (rien à
+  // replier dans un panneau déjà dimensionné pour le contenu déployé). Ne
+  // change RIEN au comportement desktop existant (toujours replié par
+  // défaut hors drawer, cf. commentaire ci-dessous, inchangé).
+  forceExpanded?: boolean;
+};
+
+export function EspaceClientSidebar({ forceExpanded = false }: EspaceClientSidebarProps) {
   // Pas de persistance (localStorage) : Sidebar.tsx (app) n'en a pas non
   // plus aujourd'hui (useState(false) nu) — cohérent avec l'existant plutôt
   // qu'une invention. Si une persistance est ajoutée un jour ici, elle devra
   // utiliser une clé PRÉFIXÉE "sereno.destinataire." (jamais celle de l'app).
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpandedState, setIsExpandedState] = useState(false);
+  const isExpanded = forceExpanded || isExpandedState;
 
   return (
     <aside className={`sidebar ${isExpanded ? "expanded" : ""}`}>
-      <button
-        type="button"
-        className="sidebar-toggle"
-        onClick={() => setIsExpanded((current) => !current)}
-        aria-label={isExpanded ? "Réduire le menu" : "Développer le menu"}
-      >
-        {isExpanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-        {isExpanded && <span>Réduire</span>}
-      </button>
+      {!forceExpanded && (
+        <button
+          type="button"
+          className="sidebar-toggle"
+          onClick={() => setIsExpandedState((current) => !current)}
+          aria-label={isExpanded ? "Réduire le menu" : "Développer le menu"}
+        >
+          {isExpanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+          {isExpanded && <span>Réduire</span>}
+        </button>
+      )}
 
       <nav className="sidebar-nav" aria-label="Navigation espace client">
         {menuItems.map((item) => {
