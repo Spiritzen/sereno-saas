@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as authApi from "../api/authApi";
@@ -75,33 +76,48 @@ describe("PublicHomePage — visiteur anonyme", () => {
     expect(screen.queryByText(/Propriétaire/i)).not.toBeInTheDocument();
   });
 
-  it("R1.1 §6.4 — le hero ne porte qu'UN seul couple d'actions (primaire + secondaire)", () => {
+  it("R3 §11 — le hero ne porte qu'UN seul couple d'actions (« Créer mon espace » + « Se connecter »)", () => {
     renderLanding();
 
     const hero = document.getElementById("accueil") as HTMLElement;
-    const actionsContainer = within(hero).getByRole("link", { name: "Voir comment ça marche" })
+    const actionsContainer = within(hero).getByRole("link", { name: "Créer mon espace" })
       .parentElement as HTMLElement;
-    const links = within(actionsContainer).getAllByRole("link");
 
-    expect(links).toHaveLength(2);
-    expect(links[0]).toHaveTextContent("Voir comment ça marche");
-    expect(links[0]).toHaveAttribute("href", "#comment-ca-marche");
-    expect(links[1]).toHaveTextContent("Se connecter");
-    expect(links[1]).toHaveAttribute("href", "/login");
+    const links = within(actionsContainer).getAllByRole("link");
+    const buttons = within(actionsContainer).getAllByRole("button");
+
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveTextContent("Créer mon espace");
+    expect(links[0]).toHaveAttribute("href", "/inscription");
+
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]).toHaveTextContent("Se connecter");
   });
 
-  it("« Se connecter » (hero, fin de page) et « Connexion » (topbar) mènent tous à /login", () => {
+  it("R3 §15 — le CTA « Créer mon espace » (hero + pied de page) mène vers /inscription", () => {
     renderLanding();
 
-    const seConnecterLinks = screen.getAllByRole("link", { name: "Se connecter" });
-    expect(seConnecterLinks.length).toBeGreaterThanOrEqual(1);
+    const inscriptionLinks = screen.getAllByRole("link", { name: "Créer mon espace" });
+    expect(inscriptionLinks.length).toBeGreaterThanOrEqual(2); // hero + pied de page
 
-    for (const link of seConnecterLinks) {
-      expect(link).toHaveAttribute("href", "/login");
+    for (const link of inscriptionLinks) {
+      expect(link).toHaveAttribute("href", "/inscription");
     }
+  });
 
-    const topbarLink = screen.getByRole("link", { name: "Connexion" });
-    expect(topbarLink).toHaveAttribute("href", "/login");
+  it("R3 §15 — « Se connecter » (hero) et « Connexion » (topbar) ouvrent la modale de connexion, jamais /login", async () => {
+    const user = userEvent.setup();
+    renderLanding();
+
+    expect(screen.queryByRole("link", { name: "Se connecter" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Connexion" })).not.toBeInTheDocument();
+
+    const hero = document.getElementById("accueil") as HTMLElement;
+    await user.click(within(hero).getByRole("button", { name: "Se connecter" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Connexion" });
+    expect(dialog).toBeInTheDocument();
+    expect(screen.queryByText("Page de connexion")).not.toBeInTheDocument();
   });
 
   it("R1.1 §6.3 — la topbar ne duplique jamais « Découvrir Sereno »", () => {

@@ -1,37 +1,21 @@
 import { ShieldCheck } from "lucide-react";
-import { useState, type FormEventHandler } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { getApiErrorMessage } from "../api/http";
+import { LoginForm } from "../components/auth/LoginForm";
 import { useAuth } from "../context/useAuth";
 
+// R3 (prompt_claude_code_inscription_owner_frontend_r3.txt §10) — le
+// formulaire lui-même (champs/validation/soumission/erreur) vit désormais
+// dans LoginForm, partagé avec AuthModal. Cette page ne fournit plus que son
+// habillage (page dédiée + navigation) — comportement inchangé pour un
+// visiteur : `/login` reste une route publique fonctionnelle de secours et
+// de deep-link, un OWNER déjà connecté est toujours renvoyé au cockpit.
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
     return <Navigate to="/app/dashboard" replace />;
   }
-
-  const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
-
-    setError(null);
-    setIsSubmitting(true);
-
-    try {
-      await login({ email, password });
-      navigate("/app/dashboard");
-    } catch (loginError) {
-      setError(getApiErrorMessage(loginError));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <main className="login-page">
@@ -56,35 +40,7 @@ export function LoginPage() {
           </p>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <label>
-            Email
-            <input
-              type="email"
-              value={email}
-              autoComplete="email"
-              placeholder="Votre email"
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </label>
-
-          <label>
-            Mot de passe
-            <input
-              type="password"
-              value={password}
-              autoComplete="current-password"
-              placeholder="Votre mot de passe"
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </label>
-
-          {error && <p className="login-error">{error}</p>}
-
-          <button className="primary-btn" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Connexion..." : "Se connecter"}
-          </button>
-        </form>
+        <LoginForm onSuccess={() => navigate("/app/dashboard")} />
       </section>
     </main>
   );

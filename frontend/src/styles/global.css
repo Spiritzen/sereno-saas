@@ -2449,8 +2449,279 @@ h1 {
 }
 
 /* =========================
+   INSCRIPTION OWNER (R3)
+========================= */
+
+/* R3 (prompt_claude_code_inscription_owner_frontend_r3.txt §12) — contenu
+   central confortable dans PublicShell.main, ni carte minuscule perdue ni
+   pleine largeur. Même famille de mesures que .factures-page (gap 18px). */
+.inscription-page {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.inscription-page h1 {
+  margin: 4px 0 0;
+  color: var(--color-text-primary);
+  font-size: 32px;
+  letter-spacing: -0.04em;
+}
+
+.inscription-page__intro {
+  margin: 0;
+  color: var(--color-text-secondary);
+  max-width: 520px;
+}
+
+.inscription-steps {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.inscription-steps__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--surface-quiet-bg);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.inscription-steps__number {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.inscription-steps__item.is-current {
+  border-color: rgba(124, 58, 237, 0.4);
+  color: var(--color-text-primary);
+}
+
+.inscription-steps__item.is-current .inscription-steps__number {
+  background: linear-gradient(135deg, var(--color-brand), var(--color-brand-light));
+  color: #ffffff;
+}
+
+.inscription-steps__item.is-done {
+  color: var(--color-text-secondary);
+}
+
+.inscription-steps__item.is-done .inscription-steps__number {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.inscription-form {
+  border: 1px solid var(--surface-content-border);
+  border-radius: var(--surface-content-radius);
+  background: var(--surface-content-bg);
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inscription-form h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.inscription-form h2:focus-visible {
+  outline: none;
+}
+
+.inscription-form__intro {
+  margin: -12px 0 0;
+  color: var(--color-text-secondary);
+}
+
+.inscription-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.inscription-form-grid label,
+.inscription-field-static {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.inscription-form-grid input,
+.inscription-form-grid select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--color-text-primary);
+  padding: 0 14px;
+  outline: none;
+}
+
+.inscription-form-grid input:focus,
+.inscription-form-grid select:focus {
+  border-color: rgba(124, 58, 237, 0.65);
+}
+
+.inscription-form-grid input[aria-invalid="true"],
+.inscription-form-grid select[aria-invalid="true"] {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.inscription-form-wide {
+  grid-column: 1 / -1;
+}
+
+.inscription-field-static__value {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text-muted);
+  padding: 0 14px;
+  font-weight: 500;
+}
+
+.field-error {
+  color: #fca5a5;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.field-help {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.inscription-summary {
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.inscription-summary > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.inscription-summary dt {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.inscription-summary dd {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  text-align: right;
+}
+
+.inscription-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.inscription-confirmation {
+  border: 1px solid var(--surface-content-border);
+  border-radius: var(--surface-content-radius);
+  background: var(--surface-content-bg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.inscription-confirmation h1 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 28px;
+}
+
+.inscription-confirmation p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  max-width: 480px;
+}
+
+@media (max-width: 720px) {
+  .inscription-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inscription-actions {
+    flex-direction: column-reverse;
+  }
+
+  .inscription-actions button {
+    width: 100%;
+  }
+}
+
+/* =========================
    CUSTOM CONFIRMATION MODAL
 ========================= */
+
+/* R3 (prompt_claude_code_inscription_owner_frontend_r3.txt §10) — modale de
+   connexion : même famille visuelle que .login-card (surface "elevated"),
+   simplement contenue dans ModalShell plutôt que dans .login-page. Aucune
+   nouvelle mécanique de modale, seul l'habillage de surface est déclaré ici. */
+.auth-modal {
+  --modal-shell-max-width: 440px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  background: rgba(16, 20, 31, 0.97);
+  box-shadow: var(--shadow-card);
+  padding: 28px;
+}
+
+.auth-modal .login-brand {
+  margin-bottom: 0;
+}
+
+.auth-modal .login-copy {
+  margin-bottom: 0;
+}
+
+.auth-modal .login-copy h2 {
+  margin-top: 18px;
+  font-size: 28px;
+  color: var(--color-text-primary);
+  letter-spacing: -0.03em;
+}
 
 .confirmation-modal {
   --modal-shell-max-width: 460px;
@@ -4427,11 +4698,40 @@ h1 {
 /* R1.1 §6.2 — accès discret, jamais un profil fictif : texte seul, pas de
    fond bouton plein (.primary-btn/.secondary-btn sont réservés aux actions
    principales de la topbar/du hero). */
+/* R3 (prompt_claude_code_inscription_owner_frontend_r3.txt §11) — CTA
+   d'inscription, distinct du lien texte discret "Se connecter" ci-dessous :
+   une seule paire (principal/secondaire), jamais une liste d'actions
+   concurrentes. */
+.public-sidebar__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(124, 58, 237, 0.14);
+  color: var(--color-brand-light);
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid rgba(124, 58, 237, 0.24);
+  transition:
+    background var(--motion-hover),
+    color var(--motion-hover);
+}
+
+.public-sidebar__cta:hover,
+.public-sidebar__cta:focus-visible {
+  background: rgba(124, 58, 237, 0.22);
+  color: #ffffff;
+}
+
 .public-sidebar__login {
+  width: 100%;
   padding: 8px 12px;
   color: var(--color-text-secondary);
   font-size: 13px;
   font-weight: 700;
+  text-align: center;
+  background: transparent;
   transition: color var(--motion-hover);
 }
 

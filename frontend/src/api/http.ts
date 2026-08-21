@@ -51,11 +51,15 @@ http.interceptors.response.use(
 
 export function getApiErrorMessage(error: unknown) {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as
+    if (!error.response) {
+      return "Impossible de joindre le serveur. Réessayez.";
+    }
+
+    const data = error.response.data as
       | { error?: string; message?: string }
       | undefined;
 
-    return data?.error ?? data?.message ?? `Erreur API ${error.response?.status}`;
+    return data?.error ?? data?.message ?? `Erreur API ${error.response.status}`;
   }
 
   if (error instanceof Error) {

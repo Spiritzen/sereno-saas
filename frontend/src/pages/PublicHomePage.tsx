@@ -12,8 +12,9 @@ import {
   Send,
   ShieldCheck,
 } from "lucide-react";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { AuthModal } from "../components/auth/AuthModal";
 import { PublicShell } from "../components/layout/PublicShell";
 import { useAuth } from "../context/useAuth";
 
@@ -55,13 +56,23 @@ const VOS_DONNEES_PREUVES = [
 // visuels distincts (§8).
 export function PublicHomePage() {
   const { isAuthenticated } = useAuth();
+  // R3 (§10/§11) — instance INDÉPENDANTE de celle de PublicShell : cette
+  // page INSTANCIE PublicShell (donc en est l'ancêtre, jamais un
+  // descendant), elle ne peut structurellement pas partager la modale
+  // interne de PublicShell via un contexte (React ne remonte jamais un
+  // contexte vers un ancêtre — cf. commentaire détaillé dans
+  // PublicShell.tsx). Même composant AuthModal, même comportement, état
+  // séparé : aucune divergence de comportement pour l'utilisateur, qui ne
+  // voit jamais les deux instances à la fois.
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   if (isAuthenticated) {
     return <Navigate to="/app/dashboard" replace />;
   }
 
   return (
-    <PublicShell>
+    <>
+      <PublicShell>
       <section className="landing-hero" id="accueil">
         <div className="landing-hero__content">
           <p className="landing-hero__eyebrow">Votre facturation, sans le brouillard</p>
@@ -72,12 +83,12 @@ export function PublicHomePage() {
           </p>
 
           <div className="landing-hero__actions">
-            <a href="#comment-ca-marche" className="primary-btn">
-              Voir comment ça marche
-            </a>
-            <Link to="/login" className="secondary-btn">
-              Se connecter
+            <Link to="/inscription" className="primary-btn">
+              Créer mon espace
             </Link>
+            <button type="button" className="secondary-btn" onClick={() => setIsAuthModalOpen(true)}>
+              Se connecter
+            </button>
           </div>
 
           <ul className="landing-hero__trust">
@@ -260,10 +271,13 @@ export function PublicHomePage() {
 
       <section className="landing-cta-footer">
         <h2>Prêt à retrouver une facturation plus claire ?</h2>
-        <Link to="/login" className="primary-btn">
-          Se connecter
+        <Link to="/inscription" className="primary-btn">
+          Créer mon espace
         </Link>
       </section>
-    </PublicShell>
+      </PublicShell>
+
+      <AuthModal open={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+    </>
   );
 }
