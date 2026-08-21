@@ -6,10 +6,32 @@ class Api::V1::BaseController < ApplicationController
   rescue_from Pundit::NotAuthorizedError, with: :render_forbidden
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
 
+  # R2.1 (revue corrective inscription OWNER, §6) — sans ce rescue_from, un
+  # payload structurellement mal formé (racine `inscription` absente, ou
+  # `params.require(...)` manquant plus généralement) fait remonter
+  # ActionController::ParameterMissing NON intercepté. Sans handler dédié,
+  # Rails le mappe bien en 400 par défaut, MAIS le CORPS de la réponse reste
+  # la page HTML de debug interactive dès que `consider_all_requests_local`
+  # est vrai (development ET test, cf. config/environments/*.rb) — un vrai
+  # constat de la revue, vérifié empiriquement AVANT ce correctif (page
+  # "Action Controller: Exception caught", backtrace complet). Placé ici
+  # (BaseController, socle de TOUS les contrôleurs api/v1, y compris le
+  # nouvel InscriptionsController PUBLIC) car c'est le lieu canonique déjà
+  # utilisé par les deux rescue_from existants ci-dessus — jamais un nouveau
+  # fichier, jamais une portée plus large que api/v1.
+  rescue_from ActionController::ParameterMissing, with: :render_requete_invalide
+
   private
 
   def render_forbidden
   render json: { error: "Accès refusé" }, status: :forbidden
+  end
+
+  # Message STATIQUE, jamais exception.message (qui embarque le nom du
+  # paramètre interne manquant, ex. "param is missing or the value is
+  # empty: inscription") — aucune fuite de structure interne.
+  def render_requete_invalide
+    render json: { error: "Requête invalide" }, status: :bad_request
   end
 
   def authenticate_request!

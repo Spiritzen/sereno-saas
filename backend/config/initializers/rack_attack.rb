@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-# Rate limiting ciblé de DEUX surfaces publiques (aucune auth JWT) :
+# Rate limiting ciblé de QUATRE surfaces publiques (aucune auth JWT) :
 #   1) webhook PA entrant (POST /webhooks/pa) — R6.
 #   2) portail public de factures (GET /portail/factures/:token[/pdf|/avoirs])
 #      — dette n°33.
+#   3) connexion destinataire (POST /destinataire/connexion) — dette n°43.
+#   4) inscription destinataire (POST /destinataire/inscription) — dette n°43.
 # Chaque throttle ne matche QUE sa propre surface : le bloc discriminateur
 # retourne nil (donc aucun throttle appliqué, cf.
 # Rack::Attack::Throttle#matched_by?) pour toute autre route, y compris
@@ -44,6 +46,22 @@ end
 # seule l'IP.
 Rack::Attack.throttle("portail/factures/ip", limit: 60, period: 60) do |req|
   req.ip if req.get? && req.path.match?(%r{\A/portail/factures/[^/]+(?:/(?:pdf|avoirs))?\z})
+end
+
+# Dette n°43 — connexion/inscription destinataire. Seuil identique à
+# Api::V1::AuthController#login (5/minute, cf. recommandation explicite de
+# la dette). Discriminateur IP UNIQUEMENT (jamais l'e-mail) : à ce niveau
+# middleware, le corps JSON n'est pas encore parsé par le contrôleur — le
+# lire ici risquerait de consommer le corps avant lui (même principe que le
+# commentaire "raw body sacré" ci-dessus pour le webhook PA). Chaque route a
+# son PROPRE throttle (clé distincte) : saturer la connexion ne throttle
+# jamais l'inscription, et réciproquement.
+Rack::Attack.throttle("destinataire/connexion/ip", limit: 5, period: 60) do |req|
+  req.ip if req.post? && req.path == "/destinataire/connexion"
+end
+
+Rack::Attack.throttle("destinataire/inscription/ip", limit: 5, period: 60) do |req|
+  req.ip if req.post? && req.path == "/destinataire/inscription"
 end
 
 # Réponse 429 sobre : aucun détail sur le seuil exact ni sur l'état interne
