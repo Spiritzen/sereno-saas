@@ -43,6 +43,14 @@
 > (throttle Rack::Attack dédié, `"portail/factures/ip"`, 60 req/60 s par IP, compteur
 > PARTAGÉ entre les 3 routes show/pdf/avoirs, sur le modèle exact du throttle webhook
 > PA déjà en place) : la dette n°33 passe RÉSOLUE.
+> Mis à jour le 20/08/2026 après le micro-sprint **inscription OWNER backend (R2)**
+> (`POST /api/v1/inscription` : Organisation + premier Utilisateur owner créés
+> atomiquement via `InscriptionOwnerService`, e-mail normalisé et son unicité
+> garantie à deux niveaux — Rails ET index PostgreSQL fonctionnel —, rate limiting
+> natif Rails 8 sur l'endpoint, aucun frontend touché) : la dette n°43 passe
+> RÉSOLUE (throttles Rack::Attack ajoutés pour connexion ET inscription
+> destinataire, même occasion) ; ajout de la n°48 (inscription OWNER sans
+> vérification d'e-mail, bloquante avant ouverture publique large).
 > Socle : v0.3.0-conformite-fr. Frontière du socle : voir backend/SOCLE_GELE.md.
 
 - **Légende sévérité** : HAUTE > MOYENNE > BASSE > INFO > MINEURE
@@ -330,13 +338,6 @@
 
 ### Dettes — Espace client · Étape A (fondation backend + auth parallèle, exécution du 15/08/2026)
 
-### Dette n°43 — pas de rate-limiting sur connexion/inscription destinataire
-- **Sévérité** : BASSE (à poser avant la production)
-- **Statut** : NON RÉSOLUE
-- **Preuve** : `Destinataire::SessionsController#create` (connexion) et `Destinataire::InscriptionsController#create` n'ont pas de throttle `rack-attack` dédié — contrairement au webhook PA (dette n°R6, résolue) et à `Api::V1::AuthController#login` (déjà limité, `rate_limit to: 5, within: 1.minute`).
-- **Impact / pourquoi c'est une dette** : un endpoint de connexion/inscription public non throttlé est exposé au brute-force (mot de passe) et au bourrage d'inscriptions. Le mot de passe reste haché (bcrypt) — pas de risque de confidentialité immédiat, mais une porte ouverte au déni de service / brute-force en volume.
-- **Quand la traiter** : à poser avant la prod, via le patron `rack-attack` déjà en place (comme la dette portail n°33) — idéalement le même seuil que `Api::V1::AuthController#login` (5/minute).
-
 ### Dette n°44 — RGPD partiel : suppression du compte livrée, export des données personnelles en attente
 - **Sévérité** : INFO (droit d'accès/portabilité, pas le droit à l'effacement — celui-ci est livré)
 - **Statut** : NON RÉSOLUE (fast-follow)
@@ -358,7 +359,21 @@
 - **Impact / pourquoi c'est une dette** : correct et sûr pour le volume MVP (peu de factures par client destinataire), mais ne passera pas à l'échelle si un client cumule beaucoup de factures — latence croissante linéairement avec le nombre de factures listées.
 - **Quand la traiter** : si un client destinataire cumule un volume significatif de factures — précalculer/agréger la synthèse de paiement en une requête (ex. sous-requête SQL ou vue matérialisée), ou paginer la liste pour borner le nombre de factures évaluées par page.
 
+### Dette n°48 — inscription OWNER sans vérification d'e-mail
+- **Sévérité** : MOYENNE (BLOQUANTE avant ouverture publique large — non bloquante en bêta fermée)
+- **Statut** : NON RÉSOLUE
+- **Preuve** : `POST /api/v1/inscription` (`Api::V1::InscriptionsController` / `InscriptionOwnerService`, micro-sprint R2 du 20/08/2026) crée l'Organisation et l'Utilisateur OWNER de façon atomique et rate-limitée, mais n'envoie et ne vérifie AUCUN e-mail de confirmation — c'est explicitement HORS PÉRIMÈTRE de ce sprint (aucun mailer, aucune vérification d'e-mail, décision assumée du prompt d'exécution). L'e-mail est normalisé (strip+downcase) et son unicité garantie (Rails + index PostgreSQL fonctionnel), mais rien ne prouve que le titulaire du compte possède réellement la boîte e-mail déclarée.
+- **Impact / pourquoi c'est une dette** : à volume de bêta fermée (comptes créés/contrôlés manuellement ou par des utilisateurs de confiance), le risque est faible. À ouverture publique large, un tiers pourrait créer un compte OWNER avec l'e-mail d'un autre (usurpation d'identité déclarative, pas d'accès à un compte tiers) sans confirmation — impact sur la crédibilité des communications transactionnelles futures (factures, relances) envoyées depuis ce compte.
+- **Quand la traiter** : avant toute ouverture publique large du parcours d'inscription OWNER (le futur sprint frontend R3 ne doit pas être interprété comme une autorisation d'ouverture publique tant que cette dette reste ouverte) — ajouter un mailer de confirmation + un état `email_verifie` sur `Utilisateur`, dans un micro-sprint dédié.
+
 ## Dettes résolues
+
+### Dette n°43 — pas de rate-limiting sur connexion/inscription destinataire
+- **Sévérité** : (résolue — était BASSE)
+- **Statut** : RÉSOLUE — micro-sprint R2 dédié (inscription OWNER backend), 20/08/2026 (branche `feat/auth-owner-registration-backend`)
+- **Preuve** : `backend/config/initializers/rack_attack.rb` déclare deux nouveaux throttles Rack::Attack, sur le même patron exact que le throttle portail (dette n°33) et le webhook PA : `"destinataire/connexion/ip"` et `"destinataire/inscription/ip"` (5 requêtes / 60 secondes / par adresse IP, `req.ip`, un COMPTEUR DISTINCT par route — saturer la connexion ne throttle jamais l'inscription et réciproquement). Seuil aligné sur `Api::V1::AuthController#login` (5/minute), conformément à la recommandation de la dette elle-même. Discriminateur IP UNIQUEMENT (jamais l'e-mail) : au niveau middleware, le corps JSON n'est pas encore parsé par le contrôleur — le lire ici risquerait de le consommer avant lui (même principe que le webhook PA, "le raw body est sacré"). La 6e requête reçoit **429**, le JSON sobre commun `{ "error" => "rate_limited" }` (responder déjà en place, non dupliqué), et un en-tête `Retry-After`. Preuve permanente : `backend/spec/requests/destinataire/rate_limit_spec.rb` (6 exemples) — T-RATE-LIMIT connexion et T-RATE-LIMIT inscription (5 requêtes en réponse applicative normale, la 6e en 429 avec `Retry-After`), T-RATE-LIMIT-COMPTEURS-DISTINCTS (saturer la connexion ne throttle pas l'inscription sur la même IP), T-RATE-LIMIT-ISOLATION-IP (une IP B fraîche n'est jamais affectée par la saturation d'une IP A), T-AUTRES-ROUTES ×2 (une route Destinataire authentifiée et l'inscription OWNER `api/v1/inscription` ne sont jamais throttlées par cette règle, même au-delà de 5 requêtes/minute sur la même IP). Non-régression : `spec/requests/destinataire/sessions_spec.rb`, `spec/requests/destinataire/inscriptions_spec.rb` et `spec/requests/portail/rate_limit_spec.rb` (throttle portail préexistant) rejoués intégralement verts après la modification de `rack_attack.rb`.
+- **Impact / pourquoi c'était une dette** : un endpoint de connexion/inscription public non throttlé restait exposé au brute-force (mot de passe) et au bourrage d'inscriptions. Le mot de passe restait haché (bcrypt) — pas de risque de confidentialité, mais une porte ouverte au déni de service / brute-force en volume.
+- **Quand ça a été traité** : micro-sprint R2 dédié du 20/08/2026 (inscription OWNER backend), fermée à l'occasion de la pose du rate-limiting sur le nouvel endpoint `POST /api/v1/inscription` — sur le patron `rack-attack` déjà en place pour le portail (dette n°33), sans jamais toucher aux contrôleurs Destinataire.
 
 ### Dette n°33 — pas de rate-limiting sur la résolution publique du token portail
 - **Sévérité** : (résolue — était BASSE)

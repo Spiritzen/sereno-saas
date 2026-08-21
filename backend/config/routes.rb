@@ -51,6 +51,13 @@ Rails.application.routes.draw do
       get "auth/me", to: "auth#me"
       delete "auth/logout", to: "auth#logout"
 
+      # R2 (prompt_claude_code_inscription_owner_backend_r2.txt) — inscription
+      # OWNER (Organisation + premier Utilisateur, role owner). PUBLIQUE par
+      # conception (cf. Api::V1::InscriptionsController), seule nouvelle
+      # surface publique de ce sprint — toutes les autres routes api/v1
+      # restent protégées exactement comme avant.
+      post "inscription", to: "inscriptions#create"
+
       resources :clients do
         patch :archive, on: :member
         resources :contacts, only: [ :index, :create ]
