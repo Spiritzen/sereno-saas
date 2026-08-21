@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as authApi from "../api/authApi";
 import type { LoginInput, Organisation, Utilisateur } from "../types/auth";
 import { AuthContext, type AuthContextValue } from "./AuthContext";
@@ -47,23 +47,58 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
   }, []);
 
-  async function handleLogin(input: LoginInput): Promise<void> {
-    const payload = await authApi.login(input);
-
+  // R3 (§9) — primitive d'hydratation UNIQUE : pose le marqueur local, PUIS
+  // appelle me() pour hydrater Utilisateur + Organisation depuis les cookies
+  // HttpOnly déjà posés par le backend (login OU inscription). Si me()
+  // échoue (cookies absents/invalides — cas attendu de
+  // session_active:false), nettoie le marqueur et rétablit un état anonyme
+  // honnête plutôt que de laisser croire à une authentification. Ne lève
+  // jamais : retourne un booléen, l'appelant décide de la suite.
+  const completeAuthentication = useCallback(async (): Promise<boolean> => {
     window.localStorage.setItem(SESSION_MARKER_KEY, "true");
 
-    setUtilisateur(payload.utilisateur);
-    setOrganisation(payload.organisation);
-  }
+    try {
+      const payload = await authApi.me();
 
-  async function handleLogout(): Promise<void> {
+      setUtilisateur(payload.utilisateur);
+      setOrganisation(payload.organisation);
+
+      return true;
+    } catch {
+      window.localStorage.removeItem(SESSION_MARKER_KEY);
+      setUtilisateur(null);
+      setOrganisation(null);
+
+      return false;
+    }
+  }, []);
+
+  const handleLogin = useCallback(
+    async (input: LoginInput): Promise<void> => {
+      await authApi.login(input);
+
+      // Converge vers la MÊME primitive que l'inscription (§9) — jamais deux
+      // logiques d'hydratation divergentes. Un login qui vient de réussir mais
+      // dont l'hydratation échoue est un état inattendu (pas le cas
+      // session_active:false, documenté et honnête, propre à l'inscription) :
+      // signalé par une erreur explicite plutôt que silencieusement ignoré.
+      const hydrated = await completeAuthentication();
+
+      if (!hydrated) {
+        throw new Error("Connexion réussie mais session introuvable. Réessayez.");
+      }
+    },
+    [completeAuthentication],
+  );
+
+  const handleLogout = useCallback(async (): Promise<void> => {
     await authApi.logout();
 
     window.localStorage.removeItem(SESSION_MARKER_KEY);
 
     setUtilisateur(null);
     setOrganisation(null);
-  }
+  }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -73,8 +108,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading,
       login: handleLogin,
       logout: handleLogout,
+      completeAuthentication,
     }),
-    [utilisateur, organisation, isLoading],
+    [utilisateur, organisation, isLoading, handleLogin, handleLogout, completeAuthentication],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

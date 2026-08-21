@@ -17,6 +17,7 @@ import { EspaceClientFournisseursPage } from "./pages/EspaceClientFournisseursPa
 import { EspaceClientParametresPage } from "./pages/EspaceClientParametresPage";
 import { FactureDetailPage } from "./pages/FactureDetailPage";
 import { FacturesPage } from "./pages/FacturesPage";
+import { InscriptionPage } from "./pages/InscriptionPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NewCreditNotePage } from "./pages/NewCreditNotePage";
 import { NewDevisPage } from "./pages/NewDevisPage";
@@ -37,6 +38,13 @@ export default function App() {
       <Route path="/" element={<PublicHomePage />} />
 
       <Route path="/login" element={<LoginPage />} />
+
+      {/* R3 (prompt_claude_code_inscription_owner_frontend_r3.txt §3.2) —
+          route publique dédiée, JAMAIS une modale (trop de champs) : crée
+          Organisation + OWNER via POST /api/v1/inscription (backend R2/
+          R2.1). Un OWNER déjà authentifié rejoint le cockpit (même patron
+          que /login). */}
+      <Route path="/inscription" element={<InscriptionPage />} />
 
       {/* Portail destinataire (MVP) — route PUBLIQUE, volontairement PAS
           enveloppée dans ProtectedRoute : aucune session requise, le token
